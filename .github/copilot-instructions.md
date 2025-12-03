@@ -27,18 +27,21 @@ pnpm dev          # Start all dev servers
 pnpm build        # Build all packages
 pnpm lint         # Lint all workspaces
 pnpm test         # Run all tests
+pnpm typecheck    # TypeScript type checking (no emit)
 
 # Frontend-specific (cd frontend first)
 pnpm dev          # Astro dev server on :4321
 pnpm test         # Vitest unit tests
 pnpm test:e2e     # Playwright E2E tests (auto-starts dev server)
 pnpm check        # TypeScript + Astro check
+pnpm typecheck    # TypeScript type checking (no emit)
 
 # Backend-specific (cd backend first)
 pnpm dev          # Fastify server with tsx watch on :3000
 pnpm build        # Compile TypeScript to dist/
 pnpm start        # Run compiled server from dist/
 pnpm test         # Vitest unit tests
+pnpm typecheck    # TypeScript type checking (no emit)
 ```
 
 ### Testing Strategy
