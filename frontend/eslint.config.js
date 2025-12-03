@@ -1,6 +1,7 @@
 import vitestPlugin from '@vitest/eslint-plugin'
 import astroPlugin from 'eslint-plugin-astro'
 import codegen from 'eslint-plugin-codegen'
+import drizzlePlugin from 'eslint-plugin-drizzle'
 import importPlugin from 'eslint-plugin-import'
 import jsdoc from 'eslint-plugin-jsdoc'
 import jsxA11yPlugin from 'eslint-plugin-jsx-a11y'
@@ -21,6 +22,7 @@ export default [
     plugins: {
       vitest: vitestPlugin,
       codegen,
+      drizzle: drizzlePlugin,
       import: importPlugin,
       jsdoc,
       security,
@@ -102,6 +104,26 @@ export default [
     },
     rules: {
       ...playwrightPlugin.configs['flat/recommended'].rules,
+    },
+  },
+  {
+    files: ['src/db/**/*.{ts,tsx}'],
+    plugins: {
+      drizzle: drizzlePlugin,
+    },
+    rules: {
+      'drizzle/enforce-delete-with-where': [
+        'error',
+        {
+          drizzleObjectName: ['db'],
+        },
+      ],
+      'drizzle/enforce-update-with-where': [
+        'error',
+        {
+          drizzleObjectName: ['db'],
+        },
+      ],
     },
   },
 ]
