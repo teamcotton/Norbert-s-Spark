@@ -1,5 +1,5 @@
+import { Box, Button, Card, CardContent, Typography } from '@mui/material'
 import { useState } from 'react'
-import { Button, Card, CardContent, Typography, Box } from '@mui/material'
 
 export default function SampleComponent() {
   const [count, setCount] = useState(0)
