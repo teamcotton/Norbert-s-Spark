@@ -1,9 +1,13 @@
+import vitestPlugin from '@vitest/eslint-plugin'
 import astroPlugin from 'eslint-plugin-astro'
 import codegen from 'eslint-plugin-codegen'
 import importPlugin from 'eslint-plugin-import'
+import jsdoc from 'eslint-plugin-jsdoc'
 import jsxA11yPlugin from 'eslint-plugin-jsx-a11y'
+import playwrightPlugin from 'eslint-plugin-playwright'
 import reactPlugin from 'eslint-plugin-react'
 import reactHooksPlugin from 'eslint-plugin-react-hooks'
+import security from 'eslint-plugin-security'
 import simpleImportSort from 'eslint-plugin-simple-import-sort'
 import sortDestructureKeys from 'eslint-plugin-sort-destructure-keys'
 import tseslint from 'typescript-eslint'
@@ -15,8 +19,11 @@ export default [
   {
     // Register plugins globally for all files
     plugins: {
+      vitest: vitestPlugin,
       codegen,
       import: importPlugin,
+      jsdoc,
+      security,
       'simple-import-sort': simpleImportSort,
       'sort-destructure-keys': sortDestructureKeys,
     },
@@ -77,6 +84,24 @@ export default [
       react: {
         version: 'detect',
       },
+    },
+  },
+  {
+    files: ['**/*.test.ts', '**/*.test.tsx', '**/*.spec.ts', '**/*.spec.tsx'],
+    plugins: {
+      vitest: vitestPlugin,
+    },
+    rules: {
+      ...vitestPlugin.configs.recommended.rules,
+    },
+  },
+  {
+    files: ['e2e/**/*.{ts,js}'],
+    plugins: {
+      playwright: playwrightPlugin,
+    },
+    rules: {
+      ...playwrightPlugin.configs['flat/recommended'].rules,
     },
   },
 ]
