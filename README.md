@@ -6,16 +6,16 @@ A modern full-stack monorepo built with PNPM and Turborepo.
 
 This project is a monorepo with the following structure:
 
-- **frontend**: Astro framework with React and Material UI
-- **backend**: Backend services (to be implemented)
+- **frontend**: Next.js framework with React 19 and Material UI
+- **backend**: Fastify TypeScript API server
 - **supabase**: Self-hosted Supabase with Docker for PostgreSQL support
 
 ## Tech Stack
 
 ### Frontend
 
-- **Framework**: [Astro](https://astro.build/) with React
-- **UI Library**: [Material UI](https://mui.com/)
+- **Framework**: [Next.js 16](https://nextjs.org/) with React 19
+- **UI Library**: [Material UI 7](https://mui.com/) with Emotion
 - **AI Integration**: [@ai-sdk/google](https://www.npmjs.com/package/@ai-sdk/google) and [ai](https://www.npmjs.com/package/ai)
 - **Database ORM**: [Drizzle](https://orm.drizzle.team/)
 - **Code Quality**: ESLint, Prettier
@@ -96,11 +96,11 @@ pnpm build
 
 ## Frontend Development
 
-The frontend is built with Astro and React. Key features:
+The frontend is built with Next.js and React 19. Key features:
 
-- **Static Site Generation**: Astro provides excellent performance
-- **React Components**: Use React for interactive components
-- **Material UI**: Pre-built UI components
+- **App Router**: Next.js 16's powerful routing system
+- **Server & Client Components**: Optimal performance with RSC
+- **Material UI**: Pre-built UI components with dark theme
 - **AI Integration**: Ready for AI-powered features
 - **Database**: Drizzle ORM for type-safe database queries
 
@@ -120,16 +120,15 @@ pnpm test:e2e
 
 ```
 level-2-gym/
-├── frontend/           # Astro + React frontend
+├── frontend/           # Next.js + React frontend
 │   ├── src/
-│   │   ├── pages/     # Astro pages
+│   │   ├── app/       # Next.js App Router
 │   │   ├── components/# React components
-│   │   ├── layouts/   # Astro layouts
 │   │   ├── db/        # Drizzle schema and client
 │   │   └── test/      # Test utilities
 │   ├── e2e/           # Playwright E2E tests
 │   └── public/        # Static assets
-├── backend/           # Backend services
+├── backend/           # Fastify TypeScript API
 │   └── src/
 ├── supabase/          # Supabase Docker setup
 ├── turbo.json         # Turborepo configuration

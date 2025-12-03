@@ -1,5 +1,5 @@
+import nextPlugin from '@next/eslint-plugin-next'
 import vitestPlugin from '@vitest/eslint-plugin'
-import astroPlugin from 'eslint-plugin-astro'
 import codegen from 'eslint-plugin-codegen'
 import drizzlePlugin from 'eslint-plugin-drizzle'
 import importPlugin from 'eslint-plugin-import'
@@ -20,6 +20,7 @@ export default [
   {
     // Register plugins globally for all files
     plugins: {
+      '@next/next': nextPlugin,
       vitest: vitestPlugin,
       codegen,
       drizzle: drizzlePlugin,
@@ -34,12 +35,13 @@ export default [
   reactPlugin.configs.flat.recommended,
   reactPlugin.configs.flat['jsx-runtime'],
   jsxA11yPlugin.flatConfigs.recommended,
-  ...astroPlugin.configs.recommended,
   {
-    files: ['**/*.astro'],
+    files: ['**/*.{js,jsx,ts,tsx}'],
     rules: {
-      'react/no-unknown-property': 'off',
-      'react/jsx-key': 'off',
+      '@next/next/no-html-link-for-pages': 'error',
+      '@next/next/no-img-element': 'warn',
+      '@next/next/no-sync-scripts': 'error',
+      '@next/next/no-duplicate-head': 'error',
     },
   },
   {

@@ -3,9 +3,9 @@ import postgres from 'postgres'
 
 import * as schema from './schema'
 
-// Use import.meta.env for Astro environment variables
+// Use Next.js environment variables
 const connectionString =
-  import.meta.env?.DATABASE_URL ?? 'postgresql://postgres:postgres@localhost:5432/postgres'
+  process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@localhost:5432/postgres'
 
 const client = postgres(connectionString)
 export const db = drizzle(client, { schema })
