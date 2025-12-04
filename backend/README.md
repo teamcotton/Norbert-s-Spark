@@ -173,7 +173,7 @@ Tests use Fastify's built-in testing utilities (`app.inject()`) for route testin
 
 Copy `.env.example` to `.env` and configure:
 
-````env
+```env
 # PostgreSQL Configuration
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
@@ -185,13 +185,15 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:5432/level2gym
 # Server Configuration
 USE_HTTPS=true  # Enable HTTPS in development
 # PORT=3000     # Optional: Change server port
+```
+
 ### Port 3000 already in use
 
 The backend runs on port 3000 by default. Change it by setting the `PORT` environment variable in `.env`:
 
 ```env
 PORT=3001
-````
+```
 
 ### HTTPS certificate issues
 
