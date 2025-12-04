@@ -33,7 +33,6 @@ CREATE TRIGGER set_updated_at
   EXECUTE FUNCTION app.set_updated_at();
 
 -- Create indexes for common queries
-CREATE INDEX IF NOT EXISTS idx_sample_table_email ON app.sample_table(email);
 CREATE INDEX IF NOT EXISTS idx_sample_table_created_at ON app.sample_table(created_at DESC);
 
 -- Output confirmation

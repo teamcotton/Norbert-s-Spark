@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # PostgreSQL Docker Best Practices Verification Script
 
 echo "==================================="
@@ -71,7 +72,7 @@ echo ""
 
 # Check network configuration
 echo "8. Docker Network:"
-docker network inspect backend_level2gym-network --format '{{json .IPAM.Config}}' | python3 -m json.tool
+docker network inspect $(docker compose ps -q postgres | xargs docker inspect --format='{{range $net,$v := .NetworkSettings.Networks}}{{$net}}{{end}}')
 echo ""
 
 # Check volumes

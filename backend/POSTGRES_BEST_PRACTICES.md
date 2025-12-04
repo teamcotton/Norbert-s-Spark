@@ -82,7 +82,7 @@ Volume mapping:
 
 ```yaml
 volumes:
-  - ./postgres-config/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+  - ./postgres-config/postgresql.conf:/etc/postgresql.conf:ro
   - postgres_wal:/var/lib/postgresql/wal_archive
 ```
 
@@ -253,7 +253,6 @@ LIMIT 10;
 
 - PostgreSQL credentials
 - Initialization arguments
-- Logging configuration
 
 ## Usage
 
