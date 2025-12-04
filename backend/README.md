@@ -73,15 +73,6 @@ This project follows API-first development:
 
 See [API_FIRST_WORKFLOW.md](API_FIRST_WORKFLOW.md) for complete guide.
 
-Start the development server:
-
-```bash
-cd backend
-pnpm dev
-```
-
-The server will run on http://localhost:3000 with hot reloading via `tsx watch`.
-
 #### HTTPS in Development
 
 To enable HTTPS in development:
@@ -233,12 +224,6 @@ When using HTTPS in development, browsers will show a security warning because t
 - **Chrome/Edge**: Click "Advanced" → "Proceed to localhost (unsafe)"
 - **Firefox**: Click "Advanced" → "Accept the Risk and Continue"
 - **Safari**: Click "Show Details" → "visit this website"
-
-### Database connection issues
-
-### Port 3000 already in use
-
-The backend runs on port 3000 by default. If you need to change it, update `src/index.ts`.
 
 ### Database connection issues
 
