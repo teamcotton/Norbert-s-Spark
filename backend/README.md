@@ -1,18 +1,20 @@
 # Backend - Fastify API Server
 
-A TypeScript-based Fastify API server with integrated PostgreSQL database.
+A TypeScript-based Fastify API server with integrated PostgreSQL database, following hexagonal architecture and API-first development principles.
 
 ## Tech Stack
 
-- **Framework**: [Fastify](https://fastify.dev/)
-- **Language**: TypeScript
+- **Framework**: [Fastify](https://fastify.dev/) with OpenAPI/Swagger
+- **Language**: TypeScript (strict mode)
 - **Database**: PostgreSQL 18.1 (via Docker)
 - **Testing**: Vitest
+- **API Design**: OpenAPI 3.1 + Spectral linting
+- **Architecture**: Hexagonal (Ports and Adapters)
 
 ## Prerequisites
 
-- Node.js >= 18
-- PNPM >= 8
+- Node.js >= 22
+- PNPM >= 10
 - Docker and Docker Compose
 
 ## Getting Started
@@ -49,6 +51,27 @@ docker compose ps
 ```
 
 ### 3. Development
+
+Start the development server:
+
+```bash
+pnpm dev
+```
+
+The server will start on `http://localhost:3000` (or `https://localhost:3000` if HTTPS is enabled).
+
+**API Documentation**: Visit `http://localhost:3000/docs` for interactive Swagger UI.
+
+### 4. API-First Workflow
+
+This project follows API-first development:
+
+1. **Design API** in `openapi.yaml`
+2. **Validate** with Spectral: `pnpm run api:lint`
+3. **Review** at `http://localhost:3000/docs`
+4. **Implement** following the spec
+
+See [API_FIRST_WORKFLOW.md](API_FIRST_WORKFLOW.md) for complete guide.
 
 Start the development server:
 

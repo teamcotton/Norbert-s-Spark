@@ -1,9 +1,41 @@
 import Fastify, { FastifyInstance, FastifyServerOptions } from 'fastify'
+import swagger from '@fastify/swagger'
+import swaggerUI from '@fastify/swagger-ui'
+import { readFileSync } from 'fs'
+import { join } from 'path'
+import { fileURLToPath } from 'url'
+import { dirname } from 'path'
+import { parse } from 'yaml'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 export function buildApp(options?: FastifyServerOptions): FastifyInstance {
   const fastify = Fastify({
     logger: true,
     ...options,
+  })
+
+  // Load OpenAPI specification
+  const openapiPath = join(__dirname, '..', 'openapi.yaml')
+  const openapiSpec = parse(readFileSync(openapiPath, 'utf8'))
+
+  // Register Swagger
+  fastify.register(swagger, {
+    mode: 'static',
+    specification: {
+      document: openapiSpec,
+    },
+  })
+
+  // Register Swagger UI
+  fastify.register(swaggerUI, {
+    routePrefix: '/docs',
+    uiConfig: {
+      docExpansion: 'list',
+      deepLinking: true,
+    },
+    staticCSP: true,
   })
 
   // Declare routes
