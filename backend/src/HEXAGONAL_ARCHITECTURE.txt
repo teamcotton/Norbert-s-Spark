@@ -1,0 +1,89 @@
+HEXAGONAL ARCHITECTURE OVERVIEW (Ports and Adapters Pattern)
+
+The hexagonal architecture (also known as ports and adapters) organizes code
+to isolate the core business logic from external concerns. This makes the
+application more maintainable, testable, and adaptable to change.
+
+CORE PRINCIPLES:
+
+1. Dependency Rule: Dependencies point inward toward the domain
+   Infrastructure → Adapters → Application → Domain
+   
+2. Ports: Interfaces that define how the application communicates
+   - Primary/Driving Ports: How external world uses our application (use cases)
+   - Secondary/Driven Ports: How our application uses external world (repositories)
+
+3. Adapters: Concrete implementations of ports
+   - Primary/Driving Adapters: HTTP controllers, CLI, GraphQL (inbound)
+   - Secondary/Driven Adapters: Database repos, external APIs (outbound)
+
+DIRECTORY STRUCTURE:
+
+backend/src/
+├── domain/              # Core business logic (center of hexagon)
+│   ├── entities/        # Business objects with identity
+│   ├── value-objects/   # Immutable domain concepts
+│   ├── services/        # Domain services
+│   └── events/          # Domain events
+│
+├── application/         # Use cases and orchestration
+│   ├── use-cases/       # Application-specific business rules
+│   ├── ports/           # Interface definitions (contracts)
+│   └── dtos/            # Data transfer objects
+│
+├── adapters/            # Implementations of ports
+│   ├── primary/         # Inbound adapters (HTTP, CLI, etc.)
+│   │   └── http/        # Fastify controllers
+│   └── secondary/       # Outbound adapters (DB, external services)
+│       ├── repositories/
+│       ├── services/
+│       └── external/
+│
+├── infrastructure/      # Technical implementation details
+│   ├── database/        # Drizzle ORM, migrations
+│   ├── http/            # Fastify setup, middleware
+│   ├── config/          # Environment configuration
+│   ├── security/        # Auth, encryption
+│   └── di/              # Dependency injection
+│
+└── shared/              # Common utilities across layers
+    ├── types/
+    ├── utils/
+    ├── constants/
+    ├── exceptions/
+    └── guards/
+
+BENEFITS:
+
+✓ Testability: Domain and application can be tested without infrastructure
+✓ Flexibility: Easy to swap databases, frameworks, or external services
+✓ Maintainability: Clear separation of concerns
+✓ Independence: Domain logic doesn't depend on frameworks or tools
+✓ Replaceability: Adapters can be replaced without changing core logic
+
+DEPENDENCY FLOW:
+
+External Request → Primary Adapter (HTTP Controller)
+                → Application Use Case
+                → Domain Entity/Service
+                → Secondary Port Interface (Repository)
+                → Secondary Adapter (PostgreSQL Repository)
+                → Database
+
+TESTING STRATEGY:
+
+- Domain: Unit tests (pure functions, no mocks needed)
+- Application: Unit tests with mocked ports
+- Adapters: Integration tests with real infrastructure
+- End-to-End: Full request-response cycle tests
+
+MIGRATION GUIDE:
+
+1. Move existing entities to domain/entities/
+2. Extract business logic from controllers to domain/services/
+3. Create use cases in application/use-cases/
+4. Define port interfaces in application/ports/
+5. Move controllers to adapters/primary/http/
+6. Move repository implementations to adapters/secondary/repositories/
+7. Keep infrastructure setup in infrastructure/
+8. Wire everything together in infrastructure/di/container.ts
