@@ -1,5 +1,6 @@
 import nextPlugin from '@next/eslint-plugin-next'
 import vitestPlugin from '@vitest/eslint-plugin'
+import type { Linter } from 'eslint'
 import codegen from 'eslint-plugin-codegen'
 import drizzlePlugin from 'eslint-plugin-drizzle'
 import importPlugin from 'eslint-plugin-import'
@@ -15,7 +16,7 @@ import tseslint from 'typescript-eslint'
 
 import rootConfig from '../eslint.config.js'
 
-export default [
+const config: Linter.Config[] = [
   ...rootConfig,
   {
     // Register plugins globally for all files
@@ -129,3 +130,5 @@ export default [
     },
   },
 ]
+
+export default config

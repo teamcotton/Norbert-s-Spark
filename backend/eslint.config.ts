@@ -1,10 +1,12 @@
+import type { Linter } from 'eslint'
+
 import tseslint from '@typescript-eslint/eslint-plugin'
 import tsParser from '@typescript-eslint/parser'
 import vitestPlugin from '@vitest/eslint-plugin'
 
 import rootConfig from '../eslint.config.js'
 
-export default [
+const config: Linter.Config[] = [
   ...rootConfig,
   {
     plugins: {
@@ -28,3 +30,5 @@ export default [
     },
   },
 ]
+
+export default config

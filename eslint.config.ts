@@ -1,3 +1,5 @@
+import type { Linter } from 'eslint'
+
 import js from '@eslint/js'
 import tseslint from '@typescript-eslint/eslint-plugin'
 import tsParser from '@typescript-eslint/parser'
@@ -8,12 +10,12 @@ import security from 'eslint-plugin-security'
 import simpleImportSort from 'eslint-plugin-simple-import-sort'
 import sortDestructureKeys from 'eslint-plugin-sort-destructure-keys'
 
-export default [
+const config: Linter.Config[] = [
   js.configs.recommended,
   {
     plugins: {
-      '@typescript-eslint': tseslint,
-      codegen,
+      '@typescript-eslint': tseslint as any,
+      codegen: codegen as any,
       import: importPlugin,
       jsdoc,
       security,
@@ -60,6 +62,15 @@ export default [
     },
   },
   {
-    ignores: ['**/node_modules/', '**/dist/', '**/.next/', '**/coverage/', '**/build/'],
+    ignores: [
+      '**/node_modules/',
+      '**/dist/',
+      '**/.next/',
+      '**/coverage/',
+      '**/build/',
+      '**/frontend/next-env.d.ts',
+    ],
   },
 ]
+
+export default config

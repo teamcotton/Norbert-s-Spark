@@ -249,9 +249,9 @@ Client configured in `frontend/src/db/index.ts` using `import.meta.env.DATABASE_
 - **App**: `backend/src/app.ts` - Fastify app factory (exported for testing)
 - **Tests**: `backend/test/*.test.ts` - Vitest unit tests
 - **Prettier**: 100 char line length, single quotes, 2 space tabs, trailing commas (ES5), LF endings, **no semicolons**
-- **ESLint 9**: Unified flat config at root `eslint.config.js` (ESM) extended by frontend and backend
-  - Frontend: TypeScript, React, Next.js, accessibility plugins (see `frontend/eslint.config.js`)
-  - Backend: Basic ESLint rules for Node.js (see `backend/eslint.config.js`)
+- **ESLint 9**: Unified flat config at root `eslint.config.ts` (TypeScript) extended by frontend and backend
+  - Frontend: TypeScript, React, Next.js, accessibility plugins (see `frontend/eslint.config.ts`)
+  - Backend: Basic ESLint rules for Node.js (see `backend/eslint.config.ts`)
   - Uses new flat config format (not legacy `.eslintrc.*`)
 - React imports not required (`'react/react-in-jsx-scope': 'off'`)
 - Unused vars prefixed with `_` allowed (`argsIgnorePattern: '^_'`)
@@ -313,7 +313,7 @@ Defined in `turbo.json`:
 4. **Next.js env vars** - Use `process.env`, not `import.meta.env`
 5. **Client components** - Must add `'use client'` directive for hooks, state, or event handlers
 6. **Playwright needs dev server** - Config auto-starts it, but tests fail if port 4321 is blocked
-7. **ESLint 9 flat config** - Root `eslint.config.js` (ESM) is base, frontend/backend extend it
+7. **ESLint 9 flat config** - Root `eslint.config.ts` (TypeScript) is base, frontend/backend extend it
 8. **TypeScript ESLint rules** - Frontend uses TypeScript ESLint; disable base `no-unused-vars` to avoid conflicts
 9. **ESM configs** - All config files use ESM exports (`export default`) since root has `"type": "module"`
 10. **No .eslintignore** - ESLint 9 uses `ignores` property in config file, not `.eslintignore`
@@ -325,9 +325,9 @@ Defined in `turbo.json`:
 - `pnpm-workspace.yaml` - Workspace packages definition
 - `frontend/next.config.ts` - Next.js framework configuration
 - `frontend/drizzle.config.ts` - Database migration settings
-- `eslint.config.js` - Root ESLint 9 flat config (base rules)
-- `frontend/eslint.config.js` - Frontend linting (TypeScript, React, Next.js, accessibility)
-- `backend/eslint.config.js` - Backend linting (extends root)
+- `eslint.config.ts` - Root ESLint 9 flat config (base rules)
+- `frontend/eslint.config.ts` - Frontend linting (TypeScript, React, Next.js, accessibility)
+- `backend/eslint.config.ts` - Backend linting (extends root)
 - `backend/tsconfig.json` - TypeScript config (ESNext, bundler resolution)
 - `backend/src/index.ts` - Fastify server with routes (/, /health)
 - `.prettierrc` - Code formatting rules (no semicolons)
