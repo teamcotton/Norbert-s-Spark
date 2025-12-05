@@ -126,8 +126,9 @@ Example `backend/init-scripts/001-create-tables.sql`:
 
 ```sql
 -- Create your initial tables here
+-- Note: PostgreSQL 17+ includes native uuidv7() for time-ordered UUIDs
 CREATE TABLE IF NOT EXISTS users (
-  id SERIAL PRIMARY KEY,
+  id UUID PRIMARY KEY DEFAULT uuidv7(),
   name VARCHAR(255) NOT NULL,
   email VARCHAR(255) UNIQUE NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
