@@ -16,12 +16,13 @@
     "lint:fix": {
       "dependsOn": ["^lint:fix"]
     },
-    "test": {
-      "dependsOn": ["^build"],
+    "test:unit": {
+      "dependsOn": ["^build", "^test:unit"],
       "outputs": ["coverage/**"]
     },
     "test:e2e": {
-      "cache": false
+      "cache": false,
+      "dependsOn": ["^build", "^test:e2e"]
     },
     "typecheck": {
       "dependsOn": ["^typecheck"]
