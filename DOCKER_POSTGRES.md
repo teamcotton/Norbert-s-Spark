@@ -126,7 +126,8 @@ Example `backend/init-scripts/001-create-tables.sql`:
 
 ```sql
 -- Create your initial tables here
--- Note: PostgreSQL 17+ includes native uuidv7() for time-ordered UUIDs
+-- Using UUID v7 for primary keys (PostgreSQL 17+ native function)
+-- Benefits: Time-ordered for better index performance, universally unique
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT uuidv7(),
   name VARCHAR(255) NOT NULL,
@@ -134,6 +135,11 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
+
+**UUID v7 vs SERIAL for Primary Keys**:
+- **UUID v7**: Time-ordered UUIDs improve index performance, globally unique, suitable for distributed systems
+- **SERIAL**: Sequential integers, smaller storage (4/8 bytes vs 16 bytes), simpler for debugging
+- PostgreSQL 17+ provides native `uuidv7()` without requiring extensions
 
 Scripts are executed in alphabetical order. Prefix with numbers (001-, 002-, etc.) to control execution order.
 
