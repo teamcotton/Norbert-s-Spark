@@ -1,5 +1,5 @@
 import { ValidationException } from '../../shared/exceptions/validation.exception.js'
-
+import { ValidationUtil } from '../../shared/utils/validation.util.js'
 /**
  * Unique symbol for email branding to ensure type safety.
  * This prevents regular strings from being used where Email types are expected.
@@ -45,8 +45,7 @@ export class Email<T extends string = string> {
   }
 
   private validate(email: string): void {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
+    if (!ValidationUtil.isEmail(email)) {
       throw new ValidationException('Invalid email format')
     }
   }
