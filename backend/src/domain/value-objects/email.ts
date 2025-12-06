@@ -1,3 +1,5 @@
+import { ValidationException } from '../../shared/exceptions/validation.exception.js'
+
 declare const EmailBrand: unique symbol
 export type Email<T extends string = string> = EmailClass<T> & { readonly [EmailBrand]: T }
 
@@ -14,7 +16,7 @@ export class EmailClass<T extends string> {
   private validate(email: string): void {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
-      throw new Error('Invalid email format')
+      throw new ValidationException('Invalid email format')
     }
   }
 

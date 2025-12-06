@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { EmailClass } from '../../../src/domain/value-objects/email.js'
+import { ValidationException } from '../../../src/shared/exceptions/validation.exception.js'
 
 describe('EmailClass', () => {
   describe('constructor', () => {
@@ -26,30 +27,37 @@ describe('EmailClass', () => {
     })
 
     it('should throw error for invalid email format', () => {
+      expect(() => new EmailClass('invalid-email')).toThrow(ValidationException)
       expect(() => new EmailClass('invalid-email')).toThrow('Invalid email format')
     })
 
     it('should throw error for email without @', () => {
+      expect(() => new EmailClass('testexample.com')).toThrow(ValidationException)
       expect(() => new EmailClass('testexample.com')).toThrow('Invalid email format')
     })
 
     it('should throw error for email without domain', () => {
+      expect(() => new EmailClass('test@')).toThrow(ValidationException)
       expect(() => new EmailClass('test@')).toThrow('Invalid email format')
     })
 
     it('should throw error for email without local part', () => {
+      expect(() => new EmailClass('@example.com')).toThrow(ValidationException)
       expect(() => new EmailClass('@example.com')).toThrow('Invalid email format')
     })
 
     it('should throw error for email without TLD', () => {
+      expect(() => new EmailClass('test@example')).toThrow(ValidationException)
       expect(() => new EmailClass('test@example')).toThrow('Invalid email format')
     })
 
     it('should throw error for email with spaces', () => {
+      expect(() => new EmailClass('test @example.com')).toThrow(ValidationException)
       expect(() => new EmailClass('test @example.com')).toThrow('Invalid email format')
     })
 
     it('should throw error for empty string', () => {
+      expect(() => new EmailClass('')).toThrow(ValidationException)
       expect(() => new EmailClass('')).toThrow('Invalid email format')
     })
   })
