@@ -25,8 +25,10 @@
     "@tanstack/ai": "^0.0.2",
     "@tanstack/ai-gemini": "^0.0.2",
     "@tanstack/ai-openai": "^0.0.2",
+    "bcrypt": "^6.0.0",
     "dotenv": "^17.2.3",
     "fastify": "^5.2.3",
+    "obscured": "^2.0.4",
     "yaml": "^2.8.2"
   },
   "devDependencies": {
@@ -35,6 +37,7 @@
     "@stoplight/spectral-core": "^1.20.0",
     "@stoplight/spectral-rulesets": "^1.22.0",
     "@total-typescript/ts-reset": "^0.6.1",
+    "@types/bcrypt": "^6.0.0",
     "@types/node": "^24.10.1",
     "@typescript-eslint/eslint-plugin": "^8.48.1",
     "@typescript-eslint/parser": "^8.48.1",
