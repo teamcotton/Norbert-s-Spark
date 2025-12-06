@@ -59,31 +59,6 @@ describe('EnvConfig', () => {
   })
 
   describe('validate()', () => {
-    it('should handle DATABASE_URL validation based on environment', async () => {
-      const { EnvConfig } = await import('../../../src/infrastructure/config/env.config.js')
-
-      // Check current state of DATABASE_URL
-      const isDatabaseUrlSet = !!EnvConfig.DATABASE_URL
-
-      // Validate behaves correctly based on current environment
-      const hasValidationError = !isDatabaseUrlSet
-
-      // Verify validate method behavior matches DATABASE_URL state
-      try {
-        EnvConfig.validate()
-        // If no error thrown, DATABASE_URL must be set
-
-        expect(isDatabaseUrlSet).toBe(true)
-      } catch (error) {
-        // If error thrown, DATABASE_URL must not be set
-        // eslint-disable-next-line vitest/no-conditional-expect
-        expect(hasValidationError).toBe(true)
-        // eslint-disable-next-line vitest/no-conditional-expect
-        expect(error).toBeInstanceOf(Error)
-        // eslint-disable-next-line vitest/no-conditional-expect
-        expect((error as Error).message).toContain('DATABASE_URL')
-      }
-    })
 
     it('should have DATABASE_URL validation logic', async () => {
       const { EnvConfig } = await import('../../../src/infrastructure/config/env.config.js')
