@@ -1,3 +1,4 @@
+import crypto from 'crypto'
 import { ValidationException } from '../exceptions/validation.exception.js'
 
 /**
@@ -116,11 +117,11 @@ export class StringUtil {
    */
   static randomString(length: number): string {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-    const bytes = require('crypto').randomBytes(length)
+    const bytes = crypto.randomBytes(length)
     let result = ''
     for (let i = 0; i < length; i++) {
       // Map each byte to a character in the allowed set
-      result += chars.charAt(bytes[i] % chars.length)
+      result += chars.charAt(bytes[i]! % chars.length)
     }
     return result
   }
