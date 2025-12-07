@@ -30,9 +30,10 @@ if (useHttps) {
   } catch (error) {
     console.warn('⚠️  HTTPS certificates not found, falling back to HTTP')
     console.warn(`   Looked in: ${join(__dirname, '..', 'certs')}`)
-    console.warn(
-      '   Run: cd backend/certs && openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"'
-    )
+    console.warn('   To generate certificates with proper Subject Alternative Names:')
+    console.warn('   cd apps/backend/certs && openssl req -x509 -newkey rsa:4096 \\')
+    console.warn('     -keyout key.pem -out cert.pem -sha256 -days 365 -nodes \\')
+    console.warn('     -config openssl.cnf -extensions v3_req')
   }
 }
 
@@ -41,8 +42,8 @@ const fastify = buildApp(httpsOptions)
 // Start server
 const start = async () => {
   try {
-    const port = process.env.PORT ? parseInt(process.env.PORT) : 3000
-    const host = process.env.HOST || '0.0.0.0'
+    const port = process.env.PORT ? parseInt(process.env.PORT) : 3001
+    const host = process.env.HOST || '127.0.0.1'
 
     await fastify.listen({ port, host })
     const protocol = useHttps ? 'https' : 'http'

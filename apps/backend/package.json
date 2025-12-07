@@ -20,11 +20,10 @@
     "api:docs": "echo 'API docs available at http://localhost:3000/docs when server is running'"
   },
   "dependencies": {
+    "@ai-sdk/google": "^2.0.44",
     "@fastify/swagger": "^9.6.1",
     "@fastify/swagger-ui": "^5.2.3",
-    "@tanstack/ai": "^0.0.2",
-    "@tanstack/ai-gemini": "^0.0.2",
-    "@tanstack/ai-openai": "^0.0.2",
+    "ai": "^5.0.106",
     "bcrypt": "^6.0.0",
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.44.7",

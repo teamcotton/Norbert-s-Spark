@@ -42,5 +42,40 @@ export function buildApp(options?: FastifyServerOptions): FastifyInstance {
     return { status: 'ok', timestamp: new Date().toISOString() }
   })
 
+  fastify.get('/ai', async (_request, _reply) => {
+    return { status: 'ok', timestamp: new Date().toISOString() }
+  })
+
+  fastify.post('/ai', async (request, reply) => {
+    const { POST } = await import('./ai.js')
+
+    // Convert Fastify request to standard Request
+    const headers: Record<string, string> = {}
+    Object.entries(request.headers).forEach(([key, value]) => {
+      if (typeof value === 'string') {
+        headers[key] = value
+      } else if (Array.isArray(value)) {
+        headers[key] = value.join(', ')
+      }
+    })
+
+    const req = new Request(`https://localhost${request.url}`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(request.body),
+    })
+
+    // Get the streaming response from the AI handler
+    const response = await POST(req)
+
+    // Set the response headers
+    response.headers.forEach((value, key) => {
+      reply.header(key, value)
+    })
+
+    // Return the stream
+    return reply.send(response.body)
+  })
+
   return fastify
 }
