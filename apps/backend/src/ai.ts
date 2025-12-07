@@ -21,14 +21,25 @@ export const POST = async (req: Request): Promise<Response> => {
     model: google(process.env.MODEL_PROVIDER || ''),
     messages: modelMessages,
     system: SYSTEM_PROMPT,
+    onChunk({ chunk }) {
+      // Called for each partial piece of output
+      if (chunk.type === 'text-delta') {
+        process.stdout.write(chunk.text)
+      }
+      // you can also inspect chunk.reasoning / chunk.sources / etc.
+    },
+    onFinish({ text, finishReason, usage, response, totalUsage }) {
+      // Called once when the full output is complete
+      console.log("\n--- DONE ---");
+      console.log("Full text:", text);
+      console.log("Finish reason:", finishReason);
+      console.log("Usage info:", usage, totalUsage);
+      // response.messages contains the final message object(s)
+    },
+    onError({ error }) {
+      console.error("Stream error:", error);
+    }
   })
-
-  for await (const chunk of streamTextResult.textStream) {
-    process.stdout.write(chunk)
-  }
-
-  console.log() // Empty log to separate the output from the usage
-  console.log(await streamTextResult.usage)
 
   const stream = streamTextResult.toUIMessageStream()
 
