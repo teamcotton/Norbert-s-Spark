@@ -30,13 +30,10 @@
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "ai": "^5.0.106",
-    "drizzle-orm": "^0.44.7",
     "modern-normalize": "^3.0.1",
     "next": "^16.0.7",
-    "postgres": "^3.4.7",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-markdown": "^10.1.0",
     "streamdown": "^1.6.10"
   },
   "devDependencies": {
@@ -51,7 +48,6 @@
     "@vitejs/plugin-react": "^5.1.1",
     "@vitest/eslint-plugin": "^1.5.1",
     "babel-plugin-react-compiler": "^1.0.0",
-    "drizzle-kit": "^0.31.7",
     "eslint": "^9.39.1",
     "eslint-config-next": "^16.0.7",
     "eslint-plugin-codegen": "^0.34.1",

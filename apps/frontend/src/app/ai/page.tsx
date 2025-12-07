@@ -14,6 +14,7 @@ import {
 } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
 
+import { IntroComponent } from '@/components/IntroComponent.js'
 import { Wrapper } from '@/components/WrapperComponent.js'
 
 interface Message {
@@ -90,6 +91,7 @@ export default function AIChatPage() {
                 }
               } catch (e) {
                 // Skip invalid JSON
+                console.error('Error parsing JSON:', e)
               }
             }
           }
@@ -108,9 +110,7 @@ export default function AIChatPage() {
 
   return (
     <Wrapper>
-      <Typography variant="h4" component="h1" gutterBottom sx={{ mb: 3 }}>
-        AI Chat Assistant
-      </Typography>
+      <IntroComponent />
 
       <Paper
         elevation={3}

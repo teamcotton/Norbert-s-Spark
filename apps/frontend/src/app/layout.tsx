@@ -1,6 +1,7 @@
 import 'modern-normalize/modern-normalize.css'
 
 import type { Metadata } from 'next'
+import React from 'react'
 
 import ThemeRegistry from './ThemeRegistry.js'
 
