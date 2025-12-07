@@ -14,6 +14,7 @@ describe('ErrorCode', () => {
       expect(ErrorCode.VALIDATION_ERROR).toBe('VALIDATION_ERROR')
       expect(ErrorCode.INVALID_EMAIL).toBe('INVALID_EMAIL')
       expect(ErrorCode.INVALID_PASSWORD).toBe('INVALID_PASSWORD')
+      expect(ErrorCode.TYPE_ERROR).toBe('TYPE_ERROR')
     })
 
     it('should have resource error codes', () => {

@@ -1,3 +1,4 @@
+import { TypeErrorException } from '../../shared/exceptions/type-error.exception.js'
 import { ValidationException } from '../../shared/exceptions/validation.exception.js'
 import { isString } from '../../shared/guards/type.guards.js'
 
@@ -9,6 +10,10 @@ export class RegisterUserDto {
   ) {}
 
   static validate(data: any): RegisterUserDto {
+
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+      throw new TypeErrorException('Data must be a valid object')
+    }
     if (!data.email || !isString(data.email)) {
       throw new ValidationException('Email is required and must be a string')
     }
