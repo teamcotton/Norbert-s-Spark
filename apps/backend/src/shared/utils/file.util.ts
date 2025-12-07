@@ -26,7 +26,8 @@ export class FileUtil {
     const fullPath = path.resolve(FileUtil.BASE_DIR, normalizedPath)
     const baseDirResolved = path.resolve(FileUtil.BASE_DIR)
 
-    if (!fullPath.startsWith(baseDirResolved)) {
+    const relativePath = path.relative(baseDirResolved, fullPath)
+    if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
       throw new ValidationException(
         `Access denied: Path "${filePath}" is outside the allowed directory`
       )
@@ -111,7 +112,7 @@ export class FileUtil {
         throw error
       }
       throw new ValidationException(
-        `Error writing file: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Error reading file: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
     }
   }
@@ -164,7 +165,7 @@ export class FileUtil {
         throw error
       }
       throw new ValidationException(
-        `Error writing file: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Error deleting path: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
     }
   }
@@ -224,7 +225,7 @@ export class FileUtil {
         throw error
       }
       throw new ValidationException(
-        `Error writing file: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Error deleting path: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
     }
   }
@@ -261,7 +262,7 @@ export class FileUtil {
         throw error
       }
       throw new ValidationException(
-        `Error writing file: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Error creating directory: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
     }
   }
@@ -292,7 +293,7 @@ export class FileUtil {
         throw error
       }
       throw new ValidationException(
-        `Error writing file: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Error checking path existence: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
     }
   }
@@ -372,7 +373,7 @@ export class FileUtil {
         throw error
       }
       throw new ValidationException(
-        `Error writing file: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Error searching files: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
     }
   }
