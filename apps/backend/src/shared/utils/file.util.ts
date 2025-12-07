@@ -45,6 +45,18 @@ export class FileUtil {
   }
 
   /**
+   * Handle errors consistently across all methods
+   */
+  private static handleError(error: unknown, operation: string): never {
+    if (error instanceof ValidationException) {
+      throw error
+    }
+    throw new ValidationException(
+      `Error ${operation}: ${error instanceof Error ? error.message : 'Unknown error'}`
+    )
+  }
+
+  /**
    * Write content to a file
    */
   public static writeFile(
@@ -69,12 +81,7 @@ export class FileUtil {
         path: FileUtil.getRelativePath(fullPath),
       }
     } catch (error) {
-      if (error instanceof ValidationException) {
-        throw error
-      }
-      throw new ValidationException(
-        `Error writing file: ${error instanceof Error ? error.message : 'Unknown error'}`
-      )
+      FileUtil.handleError(error, 'writing file')
     }
   }
 
@@ -108,12 +115,7 @@ export class FileUtil {
         path: FileUtil.getRelativePath(fullPath),
       }
     } catch (error) {
-      if (error instanceof ValidationException) {
-        throw error
-      }
-      throw new ValidationException(
-        `Error reading file: ${error instanceof Error ? error.message : 'Unknown error'}`
-      )
+      FileUtil.handleError(error, 'reading file')
     }
   }
 
@@ -161,12 +163,7 @@ export class FileUtil {
         }
       }
     } catch (error) {
-      if (error instanceof ValidationException) {
-        throw error
-      }
-      throw new ValidationException(
-        `Error deleting path: ${error instanceof Error ? error.message : 'Unknown error'}`
-      )
+      FileUtil.handleError(error, 'deleting path')
     }
   }
 
@@ -221,12 +218,7 @@ export class FileUtil {
         path: FileUtil.getRelativePath(fullPath),
       }
     } catch (error) {
-      if (error instanceof ValidationException) {
-        throw error
-      }
-      throw new ValidationException(
-        `Error deleting path: ${error instanceof Error ? error.message : 'Unknown error'}`
-      )
+      FileUtil.handleError(error, 'listing directory')
     }
   }
 
@@ -258,12 +250,7 @@ export class FileUtil {
         path: FileUtil.getRelativePath(fullPath),
       }
     } catch (error) {
-      if (error instanceof ValidationException) {
-        throw error
-      }
-      throw new ValidationException(
-        `Error creating directory: ${error instanceof Error ? error.message : 'Unknown error'}`
-      )
+      FileUtil.handleError(error, 'creating directory')
     }
   }
 
@@ -289,12 +276,7 @@ export class FileUtil {
         path: FileUtil.getRelativePath(fullPath),
       }
     } catch (error) {
-      if (error instanceof ValidationException) {
-        throw error
-      }
-      throw new ValidationException(
-        `Error checking path existence: ${error instanceof Error ? error.message : 'Unknown error'}`
-      )
+      FileUtil.handleError(error, 'checking path existence')
     }
   }
 
@@ -369,12 +351,7 @@ export class FileUtil {
         searchDir: FileUtil.getRelativePath(fullSearchDir),
       }
     } catch (error) {
-      if (error instanceof ValidationException) {
-        throw error
-      }
-      throw new ValidationException(
-        `Error searching files: ${error instanceof Error ? error.message : 'Unknown error'}`
-      )
+      FileUtil.handleError(error, 'searching files')
     }
   }
 }
