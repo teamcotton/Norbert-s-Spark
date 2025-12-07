@@ -29,6 +29,7 @@
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.44.7",
     "fastify": "^5.2.3",
+    "js-tiktoken": "^1.0.21",
     "obscured": "^2.0.4",
     "pg": "^8.16.3",
     "uuidv7-utilities": "^3.1.0",
