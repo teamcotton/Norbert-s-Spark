@@ -5,6 +5,7 @@
   "description": "Monorepo for level-2-gym with frontend and backend",
   "type": "module",
   "scripts": {
+    "dev": "turbo dev",
     "build": "turbo build",
     "lint": "turbo lint",
     "lint:fix": "turbo lint:fix",
