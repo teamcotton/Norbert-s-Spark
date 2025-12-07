@@ -94,6 +94,7 @@ export default function AIChatPage() {
                   <Avatar
                     sx={{
                       bgcolor: message.role === 'user' ? 'primary.main' : 'secondary.main',
+                      color: message.role === 'user' ? 'primary.contrastText' : 'text.primary',
                     }}
                   >
                     {message.role === 'user' ? <PersonIcon /> : <SmartToyIcon />}
@@ -114,7 +115,7 @@ export default function AIChatPage() {
               ))}
               {isLoading && (
                 <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                  <Avatar sx={{ bgcolor: 'secondary.main' }}>
+                  <Avatar sx={{ bgcolor: 'secondary.main', color: 'text.primary' }}>
                     <SmartToyIcon />
                   </Avatar>
                   <CircularProgress size={24} />

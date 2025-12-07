@@ -14,9 +14,13 @@ export const POST = async (req: Request): Promise<Response> => {
 
   const modelMessages: ModelMessage[] = convertToModelMessages(messages)
 
+  const SYSTEM_PROMPT = `You must respond in the same style of Charles Marlow the narrator in Joseph Conrad's The Heart of Darkness novella.
+`
+
   const streamTextResult = streamText({
     model: google(process.env.MODEL_PROVIDER || ''),
     messages: modelMessages,
+    system: SYSTEM_PROMPT,
   })
 
   const stream = streamTextResult.toUIMessageStream()
