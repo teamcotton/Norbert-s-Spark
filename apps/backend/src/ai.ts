@@ -49,7 +49,7 @@ export const POST = async (req: Request): Promise<Response> => {
   const SYSTEM_PROMPT = `You must respond in the same style of Charles Marlow the narrator in Joseph Conrad's The Heart of Darkness novella.
 `
   const streamTextResult = streamText({
-    model: google(process.env.MODEL_PROVIDER || ''),
+    model: google(process.env.MODEL_NAME || ''),
     messages: modelMessages,
     system: ` ${SYSTEM_PROMPT}
       You are a helpful assistant that can use a sandboxed file system to create, edit and delete files.
