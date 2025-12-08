@@ -23,8 +23,8 @@ CREATE INDEX chats_user_id_updated_at_idx ON chats(user_id, updated_at DESC);
 CREATE TABLE messages (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     chat_id UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
-    created_at TIMESTAMP NOT NULL DEFAULT now(),
-    role VARCHAR NOT NULL CONSTRAINT namechk CHECK (char_length(name) <= 15)
+    created_at TIMESTAMPZ NOT NULL DEFAULT now(),
+    role VARCHAR NOT NULL CONSTRAINT role_length_check CHECK (char_length(role) <= 15)
 );
 
 -- Indexes for messages table
@@ -34,7 +34,7 @@ CREATE INDEX messages_chat_id_created_at_idx ON messages(chat_id, created_at);
 -- Parts table: Stores message parts (text, files, tools, etc.)
 CREATE TABLE parts (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
-    message_id VARCHAR NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
+    message_id UUID NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
     type VARCHAR NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     "order" INTEGER NOT NULL DEFAULT 0,
@@ -83,7 +83,7 @@ CREATE TABLE parts (
         CHECK (CASE WHEN type = 'source_url' THEN source_url_source_id IS NOT NULL AND source_url_url IS NOT NULL ELSE TRUE END),
     
     CONSTRAINT source_document_fields_required_if_type_is_source_document 
-        CHECK (CASE WHEN type = 'source_document' THEN source_document_source_id IS NOT NULL AND source_document_media_type IS NOT NULL AND source_document_title IS NOT NULL ELSE TRUE END),
+        CHECK (CASE WHEN type = 'source_document' THEN source_document_source_id IS NOT NULL AND source_document_media_type IS NOT NULL AND source_document_title IS NOT NULL ELSE TRUE END)
 );
 
 -- Indexes for parts table
