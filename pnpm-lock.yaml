@@ -116,6 +116,9 @@ importers:
       pino-logger:
         specifier: ^1.0.0
         version: 1.0.0
+      uuidv7:
+        specifier: ^1.1.0
+        version: 1.1.0
       uuidv7-utilities:
         specifier: ^3.1.0
         version: 3.1.0
