@@ -243,9 +243,6 @@ importers:
       uuidv7:
         specifier: ^1.1.0
         version: 1.1.0
-      validator:
-        specifier: ^13.15.23
-        version: 13.15.23
       zod:
         specifier: ^4.1.13
         version: 4.1.13
@@ -274,9 +271,6 @@ importers:
       '@types/node':
         specifier: ^24.10.1
         version: 24.10.1
-      '@types/validator':
-        specifier: ^13.15.10
-        version: 13.15.10
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.48.1
         version: 8.48.1(@typescript-eslint/parser@8.48.1(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
@@ -2170,9 +2164,6 @@ packages:
 
   '@types/urijs@1.19.26':
     resolution: {integrity: sha512-wkXrVzX5yoqLnndOwFsieJA7oKM8cNkOKJtf/3vVGSUFkWDKZvFHpIl9Pvqb/T9UsawBBFMTTD8xu7sK5MWuvg==}
-
-  '@types/validator@13.15.10':
-    resolution: {integrity: sha512-T8L6i7wCuyoK8A/ZeLYt1+q0ty3Zb9+qbSSvrIVitzT3YjZqkTZ40IbRsPanlB4h1QB3JVL1SYCdR6ngtFYcuA==}
 
   '@types/yargs-parser@21.0.3':
     resolution: {integrity: sha512-I4q9QU9MQv4oEOz4tAHJtNz1cwuLxn2F3xcc2iV5WdqLPpUnj30aUuxt1mAxYTG+oe8CZMV/+6rU4S4gRDzqtQ==}
@@ -5764,10 +5755,6 @@ packages:
   validate-npm-package-name@3.0.0:
     resolution: {integrity: sha512-M6w37eVCMMouJ9V/sdPGnC5H4uDr73/+xdq0FBLO3TFFX1+7wiUY6Es328NN+y43tmY+doUdN9g9J21vqB7iLw==}
 
-  validator@13.15.23:
-    resolution: {integrity: sha512-4yoz1kEWqUjzi5zsPbAS/903QXSYp0UOtHsPpp7p9rHAw/W+dkInskAE386Fat3oKRROwO98d9ZB0G4cObgUyw==}
-    engines: {node: '>= 0.10'}
-
   vfile-location@5.0.3:
     resolution: {integrity: sha512-5yXvWDEgqeiYiBe1lbxYF7UMAIm/IcopxMHrMQDq3nvKcjPKIhZklUKL+AE7J7uApI4kwe2snsK+eI6UTj9EHg==}
 
@@ -7843,8 +7830,6 @@ snapshots:
   '@types/unist@3.0.3': {}
 
   '@types/urijs@1.19.26': {}
-
-  '@types/validator@13.15.10': {}
 
   '@types/yargs-parser@21.0.3': {}
 
@@ -12212,8 +12197,6 @@ snapshots:
   validate-npm-package-name@3.0.0:
     dependencies:
       builtins: 1.0.3
-
-  validator@13.15.23: {}
 
   vfile-location@5.0.3:
     dependencies:
