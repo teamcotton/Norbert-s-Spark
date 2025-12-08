@@ -58,7 +58,7 @@ export function useRegistrationForm() {
     // Name validation
     const nameResult = NameSchema.safeParse(formData.name)
     if (!nameResult.success) {
-      newErrors.name = 'Name is required'
+      newErrors.name = nameResult.error.issues[0]?.message || 'Name is required'
     }
 
     // Password validation
@@ -76,11 +76,6 @@ export function useRegistrationForm() {
       newErrors.confirmPassword = 'Please confirm your password'
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match'
-    } else {
-      const result = PasswordSchema.safeParse(formData.confirmPassword)
-      if (!result.success) {
-        newErrors.confirmPassword = 'Password must be at least 12 characters'
-      }
     }
 
     setErrors(newErrors)

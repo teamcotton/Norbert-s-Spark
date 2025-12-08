@@ -23,7 +23,7 @@ interface SignInFormProps {
     password: string
   }
   onFieldChange: (
-    field: 'email' | 'password',
+    field: 'email' | 'password'
   ) => (event: React.ChangeEvent<HTMLInputElement>) => void
   onSubmit: (event: React.FormEvent) => void
   onGoogleSignIn: () => void

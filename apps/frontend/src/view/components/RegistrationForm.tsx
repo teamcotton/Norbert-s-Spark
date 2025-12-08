@@ -1,7 +1,17 @@
 'use client'
 
 import { GitHub as GitHubIcon, Google as GoogleIcon } from '@mui/icons-material'
-import { Box, Button, Container, Divider, Paper, TextField, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  Container,
+  Divider,
+  Link as MuiLink,
+  Paper,
+  TextField,
+  Typography,
+} from '@mui/material'
+import { useRouter } from 'next/navigation.js'
 
 interface RegistrationFormProps {
   formData: {
@@ -17,7 +27,7 @@ interface RegistrationFormProps {
     confirmPassword: string
   }
   onFieldChange: (
-    field: 'email' | 'name' | 'password' | 'confirmPassword',
+    field: 'email' | 'name' | 'password' | 'confirmPassword'
   ) => (event: React.ChangeEvent<HTMLInputElement>) => void
   onSubmit: (event: React.FormEvent) => void
   onGoogleSignUp: () => void
@@ -32,6 +42,8 @@ export function RegistrationForm({
   onGoogleSignUp,
   onSubmit,
 }: RegistrationFormProps) {
+  const router = useRouter()
+
   return (
     <Container maxWidth="sm">
       <Box
@@ -171,21 +183,22 @@ export function RegistrationForm({
           <Box sx={{ mt: 3, textAlign: 'center' }}>
             <Typography variant="body2" color="text.secondary">
               Already have an account?{' '}
-              <Typography
-                component="a"
-                href="/signin"
+              <MuiLink
+                component="button"
                 variant="body2"
+                onClick={() => router.push('/signin')}
                 sx={{
                   color: 'primary.main',
                   textDecoration: 'none',
                   fontWeight: 500,
+                  cursor: 'pointer',
                   '&:hover': {
                     textDecoration: 'underline',
                   },
                 }}
               >
                 Sign in
-              </Typography>
+              </MuiLink>
             </Typography>
           </Box>
 
