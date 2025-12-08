@@ -1,5 +1,6 @@
 import * as bcrypt from 'bcrypt'
 import { ValidationException } from '../../shared/exceptions/validation.exception.js'
+import { ConflictException } from '../../shared/exceptions/conflict.exception.js'
 /**
  * Unique symbol for password branding to ensure type safety.
  * This prevents regular strings from being used where Password types are expected.
@@ -102,7 +103,7 @@ export class Password<T extends string = string> {
     // Bcrypt hashes typically start with $2a$, $2b$, or $2y$ and are 60 chars long
     const bcryptRegex = /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/
     if (!hashedValue || !bcryptRegex.test(hashedValue)) {
-      throw new ValidationException('Invalid bcrypt hash provided to Password.fromHash')
+      throw new ConflictException('Invalid bcrypt hash provided to Password.fromHash')
     }
     return new Password(hashedValue)
   }

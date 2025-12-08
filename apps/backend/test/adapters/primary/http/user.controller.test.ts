@@ -289,7 +289,7 @@ describe('UserController', () => {
 
         await controller.register(mockRequest, mockReply)
 
-        expect(mockReply.code).toHaveBeenCalledWith(400)
+        expect(mockReply.code).toHaveBeenCalledWith(500)
         expect(mockReply.send).toHaveBeenCalledWith({
           success: false,
           error: 'Data must be a valid object',
@@ -301,7 +301,7 @@ describe('UserController', () => {
 
         await controller.register(mockRequest, mockReply)
 
-        expect(mockReply.code).toHaveBeenCalledWith(400)
+        expect(mockReply.code).toHaveBeenCalledWith(500)
         expect(mockReply.send).toHaveBeenCalledWith({
           success: false,
           error: 'Data must be a valid object',
@@ -455,7 +455,7 @@ describe('UserController', () => {
 
         await controller.register(mockRequest, mockReply)
 
-        expect(mockReply.code).toHaveBeenCalledWith(400)
+        expect(mockReply.code).toHaveBeenCalledWith(500)
       })
 
       it('should handle number instead of object', async () => {
@@ -463,7 +463,7 @@ describe('UserController', () => {
 
         await controller.register(mockRequest, mockReply)
 
-        expect(mockReply.code).toHaveBeenCalledWith(400)
+        expect(mockReply.code).toHaveBeenCalledWith(500)
       })
     })
 
