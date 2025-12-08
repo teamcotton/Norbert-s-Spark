@@ -10,14 +10,12 @@ interface ToolInput {
 
 function isToolInput(input: unknown): input is ToolInput {
   if (typeof input !== 'object' || input === null) return false
-  
-  // Check if input has at least one of the expected properties
-  // and that those properties (if present) have the correct types
-  const obj = input as Record<string, unknown>
-  const hasValidPath = !('path' in obj) || typeof obj.path === 'string'
-  const hasValidPattern = !('pattern' in obj) || typeof obj.pattern === 'string'
-  const hasValidContent = !('content' in obj) || typeof obj.content === 'string'
-  
+
+  // Validate that properties (if present) have the correct types
+  const hasValidPath = !('path' in input) || typeof input.path === 'string'
+  const hasValidPattern = !('pattern' in input) || typeof input.pattern === 'string'
+  const hasValidContent = !('content' in input) || typeof input.content === 'string'
+
   return hasValidPath && hasValidPattern && hasValidContent
 }
 
