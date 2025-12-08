@@ -26,7 +26,7 @@ export const GET = async (req: Request): Promise<Response> => {
   if (!chatId) {
     return new Response('No chatId provided', { status: 400 })
   }
-  if (!processUserUUID(chatId)) {
+  if (processUserUUID(chatId) !== 'v7') {
     return new Response('Invalid chatId provided', { status: 400 })
   }
   const chat = { id: chatId, messages: [] as UIMessage[] }
