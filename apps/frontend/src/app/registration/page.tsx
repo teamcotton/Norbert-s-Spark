@@ -4,7 +4,7 @@ import { GitHub as GitHubIcon, Google as GoogleIcon } from '@mui/icons-material'
 import { Box, Button, Container, Divider, Paper, TextField, Typography } from '@mui/material'
 import { useState } from 'react'
 
-import { EmailSchema, PasswordSchema} from '@/domain/auth/index.js'
+import { EmailSchema, PasswordSchema } from '@/domain/auth/index.js'
 
 export default function RegistrationPage() {
   const [formData, setFormData] = useState({
