@@ -8,6 +8,13 @@ interface ToolInput {
   content?: string
 }
 
+/**
+ * Type guard to validate if an unknown input matches the ToolInput interface.
+ * Ensures that if properties exist, they have the correct string type.
+ *
+ * @param input - The unknown value to validate
+ * @returns True if input is a valid ToolInput object, false otherwise
+ */
 function isToolInput(input: unknown): input is ToolInput {
   if (typeof input !== 'object' || input === null) return false
 
@@ -99,6 +106,14 @@ const TOOL_CONFIGS: Record<string, ToolConfig> = {
   },
 }
 
+/**
+ * Renders a tool execution part with appropriate styling and information.
+ * Each tool type has its own configuration for colors, emoji, and display fields.
+ *
+ * @param part - The UI message part containing tool execution data
+ * @param index - The index of the part in the message parts array (used as React key)
+ * @returns A Box component displaying the tool execution details, or null if invalid
+ */
 const renderToolPart = (part: UIMessagePart<UIDataTypes, UITools>, index: number) => {
   const config = TOOL_CONFIGS[part.type]
   if (!config) return null
@@ -139,6 +154,16 @@ const renderToolPart = (part: UIMessagePart<UIDataTypes, UITools>, index: number
   )
 }
 
+/**
+ * Message component for rendering AI assistant and user messages.
+ * Displays text content with markdown support and tool execution visualizations.
+ * Supports multiple tool types including file operations, directory management, and search.
+ *
+ * @param props - Component props
+ * @param props.role - The role of the message sender ('user' or 'assistant')
+ * @param props.parts - Array of message parts including text and tool executions
+ * @returns A Box component containing the formatted message with text and tool visualizations
+ */
 export const Message = ({
   parts,
   role,

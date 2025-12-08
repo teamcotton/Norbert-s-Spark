@@ -118,10 +118,26 @@ export const POST = async (req: Request): Promise<Response> => {
       // Called once when the full output is complete
       console.log('\n--- DONE ---')
       console.log('Full text:', text)
+      // The reason the model finished generating the text.
+      // "stop" | "length" | "content-filter" | "tool-calls" | "error" | "other" | "unknown"
       console.log('Finish reason:', finishReason)
+      //usage
       console.log('Usage info:', usage, totalUsage)
       // use proper logging for production
-      // response.messages contains the final message object(s)
+      console.log('toUIMessageStreamResponse.onFinish')
+
+      // Model messages (AssistantModelMessage or ToolModelMessage)
+      // Minimal information, no UI data
+      // Not suitable for UI applications
+      console.log('  messages')
+      console.dir(messages, { depth: null })
+
+      // 'response.messages' is an array of ToolModelMessage and AssistantModelMessage,
+      // which are the model messages that were generated during the stream.
+      // This is useful if you don't need UIMessages - for simpler applications.
+      console.log('toUIMessageStreamResponse.onFinish')
+      console.log('  response')
+      console.dir(response, { depth: null })
     },
     onError({ error }) {
       // use proper logging for production
@@ -129,9 +145,29 @@ export const POST = async (req: Request): Promise<Response> => {
     },
   })
 
-  const stream = streamTextResult.toUIMessageStream()
+  return streamTextResult.toUIMessageStreamResponse({
+    originalMessages: messages,
+    onFinish: ({ messages, responseMessage }) => {
+      // 'messages' is the full message history, including the original messages
+      // Includes original user message and assistant's response with all parts
+      // Ideal for persisting entire conversations
+      console.log('toUIMessageStreamResponse.onFinish')
+      console.log('  messages')
+      console.dir(messages, { depth: null })
+
+      // Single message
+      // Just the newly generated assistant message
+      // Good for persisting only the latest response
+      console.log('toUIMessageStreamResponse.onFinish')
+      console.log('  responseMessage')
+      console.dir(responseMessage, { depth: null })
+    },
+  })
+
+  /// streaming
+  /*const stream = streamTextResult.toUIMessageStream()
 
   return createUIMessageStreamResponse({
     stream,
-  })
+  })*/
 }
