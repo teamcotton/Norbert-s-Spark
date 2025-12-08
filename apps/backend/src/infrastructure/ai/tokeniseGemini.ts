@@ -41,7 +41,7 @@ export class TokeniseGemini {
     this.generativeAI = new GoogleGenerativeAI(
       obscured.value(EnvConfig.GOOGLE_GENERATIVE_AI_API_KEY) || ''
     )
-    this.model = this.generativeAI.getGenerativeModel({ model: EnvConfig.MODEL_PROVIDER || '' })
+    this.model = this.generativeAI.getGenerativeModel({ model: EnvConfig.MODEL_NAME || '' })
   }
 
   /**
