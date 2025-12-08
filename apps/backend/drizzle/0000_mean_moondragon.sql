@@ -3,7 +3,7 @@ CREATE TABLE "users" (
 	"user_id" uuid PRIMARY KEY DEFAULT uuidv7() NOT NULL,
 	"name" text NOT NULL,
 	"password" text NOT NULL,
-	"email" text NOT NULL,
+	"email" citext NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "users_email_unique" UNIQUE("email"),
 	CONSTRAINT "password_length_check" CHECK (length("users"."password") = 60)

@@ -562,7 +562,7 @@
         },
         "email": {
           "name": "email",
-          "type": "text",
+          "type": "citext",
           "primaryKey": false,
           "notNull": true
         },
