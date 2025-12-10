@@ -15,14 +15,14 @@ export const mapUIMessagePartsToDBParts = (
           messageId,
           order: index,
           type: part.type,
-          text_text: part.text,
+          textText: part.text,
         }
       case 'reasoning':
         return {
           messageId,
           order: index,
           type: part.type,
-          reasoning_text: part.text,
+          reasoningText: part.text,
           providerMetadata: part.providerMetadata,
         }
       case 'file':
@@ -30,19 +30,19 @@ export const mapUIMessagePartsToDBParts = (
           messageId,
           order: index,
           type: part.type,
-          file_mediaType: part.mediaType,
-          file_filename: part.filename,
-          file_url: part.url,
+          fileMediaType: part.mediaType,
+          fileFilename: part.filename,
+          fileUrl: part.url,
         }
       case 'source-document':
         return {
           messageId,
           order: index,
           type: part.type,
-          source_document_sourceId: part.sourceId,
-          source_document_mediaType: part.mediaType,
-          source_document_title: part.title,
-          source_document_filename: part.filename,
+          sourceDocumentSourceId: part.sourceId,
+          sourceDocumentMediaType: part.mediaType,
+          sourceDocumentTitle: part.title,
+          sourceDocumentFilename: part.filename,
           providerMetadata: part.providerMetadata,
         }
       case 'source-url':
@@ -50,9 +50,9 @@ export const mapUIMessagePartsToDBParts = (
           messageId,
           order: index,
           type: part.type,
-          source_url_sourceId: part.sourceId,
-          source_url_url: part.url,
-          source_url_title: part.title,
+          sourceUrlSourceId: part.sourceId,
+          sourceUrlUrl: part.url,
+          sourceUrlTitle: part.title,
           providerMetadata: part.providerMetadata,
         }
       case 'step-start':
