@@ -1,15 +1,9 @@
 import { google } from '@ai-sdk/google'
-import {
-  convertToModelMessages,
-  createUIMessageStreamResponse,
-  streamText,
-  stepCountIs,
-  tool,
-  type ModelMessage,
-  type UIMessage,
-} from 'ai'
+import { convertToModelMessages, stepCountIs, streamText, tool, type UIMessage } from 'ai'
 import { z } from 'zod'
-import { fileSystemTools } from './shared/utils/file.util.js'
+import type { FastifyRequest } from 'fastify'
+
+import { appendToChatMessages, createChat, getChat } from './shared/persistance-layer.js'
 
 import { isValidUUID, uuidVersionValidation } from 'uuidv7-utilities'
 
@@ -20,121 +14,58 @@ function processUserUUID(userInput: string | Buffer) {
   return uuidVersionValidation(userInput)
 }
 
-export const GET = async (req: Request): Promise<Response> => {
-  const url = new URL(req.url)
+export const GET = async (
+  req: FastifyRequest
+): Promise<Response | { id: string; messages: UIMessage[] }> => {
+  const url = new URL(req.url, `http://${req.hostname}`)
   const chatId = url.searchParams.get('id')
+  // : Promise<Response | { id: string; messages: UIMessage[] }> =>
   if (!chatId) {
     return new Response('No chatId provided', { status: 400 })
   }
   if (processUserUUID(chatId) !== 'v7') {
     return new Response('Invalid chatId provided', { status: 400 })
   }
-  const chat = { id: chatId, messages: [] as UIMessage[] }
-
-  return new Response(JSON.stringify(chat), {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
+  return { id: chatId, messages: [] as UIMessage[] }
 }
 
 export const POST = async (req: Request): Promise<Response> => {
   const body = (await req.json()) as { messages: UIMessage[]; id: string }
 
-  const messages: UIMessage[] = body.messages
-  const id = body.id
+  const { messages, id } = body
 
-  const modelMessages: ModelMessage[] = convertToModelMessages(messages)
+  let chat = await getChat(id)
+  const mostRecentMessage = messages[messages.length - 1]
 
-  const SYSTEM_PROMPT = `You must respond in the same style of Charles Marlow the narrator in Joseph Conrad's The Heart of Darkness novella. Only answer factual questions about the novella when using the heartOfDarknessQA tool. Do not use other sources.
-`
-  const streamTextResult = streamText({
-    model: google(process.env.MODEL_NAME || ''),
-    messages: modelMessages,
+  if (!mostRecentMessage) {
+    return new Response('No messages provided', { status: 400 })
+  }
+
+  if (mostRecentMessage.role !== 'user') {
+    return new Response('Last message must be from the user', {
+      status: 400,
+    })
+  }
+
+  if (!chat) {
+    const newChat = await createChat(id, messages)
+    chat = newChat
+  } else {
+    await appendToChatMessages(id, [mostRecentMessage])
+  }
+
+  const SYSTEM_PROMPT = `You must respond in the same style of Charles Marlow the narrator in 
+  Joseph Conrad's The Heart of Darkness novella. Only answer factual questions about the 
+  novella when using the heartOfDarknessQA tool. Do not use other sources.`
+
+  const result = streamText({
+    model: google('gemini-2.0-flash-001'),
+    messages: convertToModelMessages(messages),
     system: ` ${SYSTEM_PROMPT}
-      You are a helpful assistant that can use a sandboxed file system to create, edit and delete files.
-      
-      You also have access to the full text of Joseph Conrad's "Heart of Darkness" and can answer detailed questions about the novella using the heartOfDarknessQA tool.
-
       You have access to the following tools:
-      - writeFile
-      - readFile
-      - deletePath
-      - listDirectory
-      - createDirectory
-      - exists
-      - searchFiles
       - heartOfDarknessQA (for answering questions about the novella Heart of Darkness)
-
-      Use these tools to record notes, create todo lists, and edit documents for the user.
-
-      Use markdown files to store information.
     `,
     tools: {
-      writeFile: tool({
-        description: 'Write to a file',
-        inputSchema: z.object({
-          path: z.string().describe('The path to the file to create'),
-          content: z.string().describe('The content of the file to create'),
-        }),
-        execute: async ({ path, content }) => {
-          return fileSystemTools.writeFile(path, content)
-        },
-      }),
-      readFile: tool({
-        description: 'Read a file',
-        inputSchema: z.object({
-          path: z.string().describe('The path to the file to read'),
-        }),
-        execute: async ({ path }) => {
-          return fileSystemTools.readFile(path)
-        },
-      }),
-      deletePath: tool({
-        description: 'Delete a file or directory',
-        inputSchema: z.object({
-          path: z.string().describe('The path to the file or directory to delete'),
-        }),
-        execute: async ({ path }) => {
-          return fileSystemTools.deletePath(path)
-        },
-      }),
-      listDirectory: tool({
-        description: 'List a directory',
-        inputSchema: z.object({
-          path: z.string().describe('The path to the directory to list'),
-        }),
-        execute: async ({ path }) => {
-          return fileSystemTools.listDirectory(path)
-        },
-      }),
-      createDirectory: tool({
-        description: 'Create a directory',
-        inputSchema: z.object({
-          path: z.string().describe('The path to the directory to create'),
-        }),
-        execute: async ({ path }) => {
-          return fileSystemTools.createDirectory(path)
-        },
-      }),
-      exists: tool({
-        description: 'Check if a file or directory exists',
-        inputSchema: z.object({
-          path: z.string().describe('The path to the file or directory to check'),
-        }),
-        execute: async ({ path }) => {
-          return fileSystemTools.exists(path)
-        },
-      }),
-      searchFiles: tool({
-        description: 'Search for files',
-        inputSchema: z.object({
-          pattern: z.string().describe('The pattern to search for'),
-        }),
-        execute: async ({ pattern }) => {
-          return fileSystemTools.searchFiles(pattern)
-        },
-      }),
       heartOfDarknessQA: tool({
         description:
           'Answer questions about Joseph Conrad\'s novella "Heart of Darkness" using the full text of the book',
@@ -205,9 +136,9 @@ export const POST = async (req: Request): Promise<Response> => {
     },
   })
 
-  return streamTextResult.toUIMessageStreamResponse({
+  return result.toUIMessageStreamResponse({
     originalMessages: messages,
-    onFinish: ({ messages, responseMessage }) => {
+    onFinish: async ({ responseMessage }) => {
       // 'messages' is the full message history, including the original messages
       // Includes original user message and assistant's response with all parts
       // Ideal for persisting entire conversations
@@ -221,13 +152,7 @@ export const POST = async (req: Request): Promise<Response> => {
       console.log('toUIMessageStreamResponse.onFinish')
       console.log('  responseMessage')
       console.dir(responseMessage, { depth: null })
+      await appendToChatMessages(id, [responseMessage])
     },
   })
-
-  /// streaming
-  /*const stream = streamTextResult.toUIMessageStream()
-
-  return createUIMessageStreamResponse({
-    stream,
-  })*/
 }

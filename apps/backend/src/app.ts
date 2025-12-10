@@ -51,12 +51,18 @@ export function buildApp(options?: FastifyServerOptions): FastifyInstance {
     return { status: 'ok', timestamp: new Date().toISOString() }
   })
 
-  fastify.get('/ai', async (_request, _reply) => {
-    return { status: 'ok', timestamp: new Date().toISOString() }
+  fastify.get('/ai', async (request, _reply) => {
+    const { GET } = await import('./ai-persistance.js')
+    const chat = await GET(request)
+    return new Response(JSON.stringify(chat), {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
   })
 
   fastify.post('/ai', async (request, reply) => {
-    const { POST } = await import('./ai.js')
+    const { POST } = await import('./ai-persistance.js')
 
     // Convert Fastify request to standard Request
     const headers: Record<string, string> = {}
