@@ -26,7 +26,12 @@ export const GET = async (
   if (processUserUUID(chatId) !== 'v7') {
     return new Response('Invalid chatId provided', { status: 400 })
   }
-  return { id: chatId, messages: [] as UIMessage[] }
+  const chat = await getChat(chatId)
+  if (!chat) {
+    // If chat does not exist, return empty messages array (or consider 404)
+    return { id: chatId, messages: [] as UIMessage[] }
+  }
+  return { id: chatId, messages: chat.messages as UIMessage[] }
 }
 
 export const POST = async (req: Request): Promise<Response> => {
