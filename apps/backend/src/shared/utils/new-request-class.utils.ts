@@ -1,5 +1,5 @@
 interface RequestBuilderInterface {
-  newRequest(): void;
+  newRequest(): void
 }
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS'
@@ -33,16 +33,11 @@ export class RequestBuilder implements RequestBuilderInterface {
     // Clone headers to avoid mutating the original
     const headers = { ...this.headers }
     // Only set body and Content-Type for methods that support a body
-    if (
-      this.method !== 'GET' &&
-      this.method !== 'DELETE' &&
-      this.method !== 'OPTIONS'
-    ) {
+    if (this.method !== 'GET' && this.method !== 'DELETE' && this.method !== 'OPTIONS') {
       // Check for Content-Type header (case-insensitive)
-      const hasContentType =
-        Object.keys(headers).some(
-          (key) => key.toLowerCase() === 'content-type'
-        )
+      const hasContentType = Object.keys(headers).some(
+        (key) => key.toLowerCase() === 'content-type'
+      )
       if (!hasContentType) {
         headers['Content-Type'] = 'application/json'
       }
