@@ -167,6 +167,10 @@ export const parts = pgTable(
       'source_document_fields_required_if_type_is_source_document',
       sql`CASE WHEN ${table.type} = 'source_document' THEN ${table.sourceDocumentSourceId} IS NOT NULL AND ${table.sourceDocumentMediaType} IS NOT NULL AND ${table.sourceDocumentTitle} IS NOT NULL ELSE TRUE END`
     ),
+    dataContentRequiredIfTypeIsData: check(
+      'data_content_required_if_type_is_data',
+      sql`CASE WHEN ${table.type} = 'data' THEN ${table.dataContent} IS NOT NULL ELSE TRUE END`
+    ),
   })
 )
 

@@ -1,4 +1,4 @@
-import type { MyUIMessagePart } from '../types/index.js'
+import type { MyUIMessagePart, MyDataPart } from '../types/index.js'
 import type {
   MyDBUIMessagePart,
   MyDBUIMessagePartSelect,
@@ -118,7 +118,7 @@ export const mapDBPartToUIMessagePart = (part: MyDBUIMessagePartSelect): MyUIMes
     case 'data':
       return {
         type: part.type,
-        data: part.dataContent as any,
+        data: part.dataContent as MyDataPart,
       }
     default:
       throw new Error(`Unsupported part type: ${part.type}`)
