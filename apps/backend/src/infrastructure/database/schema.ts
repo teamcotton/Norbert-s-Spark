@@ -94,7 +94,7 @@ export const messages = pgTable(
 /**
  * Parts table: Stores message parts with polymorphic structure based on type field
  * Type discriminator values: text, reasoning, file, source_url, source_document,
- * tool-getWeatherInformation, tool-getLocation, data-weather
+ * step-start, data (for custom data parts - currently supports darkness, extensible for weather, etc.)
  */
 export const parts = pgTable(
   'parts',
@@ -138,6 +138,9 @@ export const parts = pgTable(
     toolState: varchar('tool_state'),
     toolErrorText: varchar('tool_error_text'),
 
+    // Data part fields (for custom data like darkness, weather, etc.)
+    dataContent: jsonb('data_content'),
+
     // Provider metadata
     providerMetadata: jsonb('provider_metadata'),
   },
@@ -163,6 +166,10 @@ export const parts = pgTable(
     sourceDocumentFieldsRequiredIfTypeIsSourceDocument: check(
       'source_document_fields_required_if_type_is_source_document',
       sql`CASE WHEN ${table.type} = 'source_document' THEN ${table.sourceDocumentSourceId} IS NOT NULL AND ${table.sourceDocumentMediaType} IS NOT NULL AND ${table.sourceDocumentTitle} IS NOT NULL ELSE TRUE END`
+    ),
+    dataContentRequiredIfTypeIsData: check(
+      'data_content_required_if_type_is_data',
+      sql`CASE WHEN ${table.type} = 'data' THEN ${table.dataContent} IS NOT NULL ELSE TRUE END`
     ),
   })
 )
@@ -200,3 +207,6 @@ export const auditLog = pgTable(
     actionIdx: index('audit_log_action_idx').on(table.action),
   })
 )
+
+export type MyDBUIMessagePart = typeof parts.$inferInsert
+export type MyDBUIMessagePartSelect = typeof parts.$inferSelect
