@@ -147,7 +147,87 @@ export const POST = async (req: Request): Promise<Response> => {
 
           // Simple list of English stopwords for keyword extraction
           const STOPWORDS = new Set([
-            'the', 'and', 'a', 'an', 'of', 'to', 'in', 'on', 'for', 'with', 'at', 'by', 'from', 'up', 'about', 'into', 'over', 'after', 'under', 'above', 'below', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'but', 'if', 'or', 'because', 'as', 'until', 'while', 'can', 'will', 'just', 'should', 'could', 'would', 'may', 'might', 'so', 'than', 'too', 'very', 'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'them', 'his', 'her', 'their', 'our', 'your', 'my', 'me', 'him', 'who', 'whom', 'which', 'what', 'when', 'where', 'why', 'how'
+            'the',
+            'and',
+            'a',
+            'an',
+            'of',
+            'to',
+            'in',
+            'on',
+            'for',
+            'with',
+            'at',
+            'by',
+            'from',
+            'up',
+            'about',
+            'into',
+            'over',
+            'after',
+            'under',
+            'above',
+            'below',
+            'is',
+            'are',
+            'was',
+            'were',
+            'be',
+            'been',
+            'being',
+            'have',
+            'has',
+            'had',
+            'do',
+            'does',
+            'did',
+            'but',
+            'if',
+            'or',
+            'because',
+            'as',
+            'until',
+            'while',
+            'can',
+            'will',
+            'just',
+            'should',
+            'could',
+            'would',
+            'may',
+            'might',
+            'so',
+            'than',
+            'too',
+            'very',
+            'this',
+            'that',
+            'these',
+            'those',
+            'i',
+            'you',
+            'he',
+            'she',
+            'it',
+            'we',
+            'they',
+            'them',
+            'his',
+            'her',
+            'their',
+            'our',
+            'your',
+            'my',
+            'me',
+            'him',
+            'who',
+            'whom',
+            'which',
+            'what',
+            'when',
+            'where',
+            'why',
+            'how',
           ])
 
           function extractKeywords(text: string): string[] {
@@ -155,7 +235,7 @@ export const POST = async (req: Request): Promise<Response> => {
               .toLowerCase()
               .replace(/[^a-z0-9\s]/g, ' ')
               .split(/\s+/)
-              .filter(word => word && !STOPWORDS.has(word))
+              .filter((word) => word && !STOPWORDS.has(word))
           }
 
           try {
@@ -186,13 +266,11 @@ export const POST = async (req: Request): Promise<Response> => {
             })
 
             // Select top 3 relevant paragraphs (or fewer if not enough)
-            const topParagraphs = scoredParagraphs.slice(0, 3).filter(p => p.matchCount > 0)
+            const topParagraphs = scoredParagraphs.slice(0, 3).filter((p) => p.matchCount > 0)
 
             // If no relevant paragraphs found, fall back to the first paragraph
             const contextParagraphs =
-              topParagraphs.length > 0
-                ? topParagraphs.map(p => p.para)
-                : [paragraphs[0]]
+              topParagraphs.length > 0 ? topParagraphs.map((p) => p.para) : [paragraphs[0]]
 
             return {
               question,

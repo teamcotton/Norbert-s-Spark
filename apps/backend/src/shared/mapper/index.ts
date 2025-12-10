@@ -1,5 +1,4 @@
-import type { MyUIMessagePart, MyDataPart } from '../types/index.js'
-import { dataPartSchema } from '../types/index.js'
+import type { MyUIMessagePart } from '../types/index.js'
 import type {
   MyDBUIMessagePart,
   MyDBUIMessagePartSelect,
@@ -62,13 +61,6 @@ export const mapUIMessagePartsToDBParts = (
           order: index,
           type: part.type,
         }
-      case 'data':
-        return {
-          messageId,
-          order: index,
-          type: part.type,
-          dataContent: part.data,
-        }
       default:
         throw new Error(`Unsupported part type: ${JSON.stringify(part)}`)
     }
@@ -115,19 +107,6 @@ export const mapDBPartToUIMessagePart = (part: MyDBUIMessagePartSelect): MyUIMes
     case 'step-start':
       return {
         type: part.type,
-      }
-    case 'data':
-      // Validate data structure at runtime to ensure database integrity
-      try {
-        const validatedData = dataPartSchema.parse(part.dataContent)
-        return {
-          type: part.type,
-          data: validatedData,
-        }
-      } catch (error) {
-        throw new Error(
-          `Invalid data part structure in database: ${error instanceof Error ? error.message : 'Unknown error'}`
-        )
       }
     default:
       throw new Error(`Unsupported part type: ${part.type}`)
