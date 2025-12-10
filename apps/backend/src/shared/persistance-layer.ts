@@ -18,6 +18,57 @@ export namespace DB {
 
 // File path for storing the data
 const DATA_FILE_PATH = join(process.cwd(), 'data', 'chats.local.json')
+const LOCK_FILE_PATH = join(process.cwd(), 'data', 'chats.lock')
+
+// Lock management
+const LOCK_TIMEOUT = 10000 // 10 seconds timeout
+const LOCK_RETRY_DELAY = 50 // 50ms retry delay
+
+/**
+ * Acquire a file lock with timeout
+ */
+async function acquireLock(): Promise<void> {
+  const startTime = Date.now()
+
+  while (true) {
+    try {
+      // Try to create the lock file exclusively (fails if it exists)
+      await fs.writeFile(LOCK_FILE_PATH, String(process.pid), { flag: 'wx' })
+      return // Lock acquired successfully
+    } catch (error) {
+      // Lock file exists, check if we've timed out
+      if (Date.now() - startTime > LOCK_TIMEOUT) {
+        throw new Error('Failed to acquire lock: timeout exceeded')
+      }
+
+      // Wait before retrying
+      await new Promise((resolve) => setTimeout(resolve, LOCK_RETRY_DELAY))
+    }
+  }
+}
+
+/**
+ * Release the file lock
+ */
+async function releaseLock(): Promise<void> {
+  try {
+    await fs.unlink(LOCK_FILE_PATH)
+  } catch (error) {
+    // Ignore errors if lock file doesn't exist
+  }
+}
+
+/**
+ * Execute a function with file locking
+ */
+async function withLock<T>(fn: () => Promise<T>): Promise<T> {
+  await acquireLock()
+  try {
+    return await fn()
+  } finally {
+    await releaseLock()
+  }
+}
 
 /**
  * Ensure the data directory exists
@@ -47,32 +98,41 @@ export async function loadChats(): Promise<DB.Chat[]> {
 }
 
 /**
- * Save all chats to the JSON file
+ * Save all chats to the JSON file (internal function, assumes lock is held)
  */
-export async function saveChats(chats: DB.Chat[]): Promise<void> {
+async function saveChatsInternal(chats: DB.Chat[]): Promise<void> {
   await ensureDataDirectory()
   const data: DB.PersistenceData = { chats }
   await fs.writeFile(DATA_FILE_PATH, JSON.stringify(data, null, 2), 'utf-8')
 }
 
 /**
- * Create a new chat
+ * Save all chats to the JSON file with locking
+ */
+export async function saveChats(chats: DB.Chat[]): Promise<void> {
+  await withLock(() => saveChatsInternal(chats))
+}
+
+/**
+ * Create a new chat with locking to prevent race conditions
  */
 export async function createChat(id: string, initialMessages: UIMessage[] = []): Promise<DB.Chat> {
-  const chats = await loadChats()
-  const now = new Date().toISOString()
+  return withLock(async () => {
+    const chats = await loadChats()
+    const now = new Date().toISOString()
 
-  const newChat: DB.Chat = {
-    id,
-    messages: initialMessages,
-    createdAt: now,
-    updatedAt: now,
-  }
+    const newChat: DB.Chat = {
+      id,
+      messages: initialMessages,
+      createdAt: now,
+      updatedAt: now,
+    }
 
-  chats.push(newChat)
-  await saveChats(chats)
+    chats.push(newChat)
+    await saveChatsInternal(chats)
 
-  return newChat
+    return newChat
+  })
 }
 
 /**
@@ -84,38 +144,42 @@ export async function getChat(chatId: string): Promise<DB.Chat | null> {
 }
 
 /**
- * Update a chat's messages
+ * Update a chat's messages with locking to prevent race conditions
  */
 export async function appendToChatMessages(
   chatId: string,
   messages: UIMessage[]
 ): Promise<DB.Chat | null> {
-  const chats = await loadChats()
-  const chatIndex = chats.findIndex((chat) => chat.id === chatId)
+  return withLock(async () => {
+    const chats = await loadChats()
+    const chatIndex = chats.findIndex((chat) => chat.id === chatId)
 
-  if (chatIndex === -1) {
-    return null
-  }
+    if (chatIndex === -1) {
+      return null
+    }
 
-  chats[chatIndex]!.messages = [...chats[chatIndex]!.messages, ...messages]
-  chats[chatIndex]!.updatedAt = new Date().toISOString()
+    chats[chatIndex]!.messages = [...chats[chatIndex]!.messages, ...messages]
+    chats[chatIndex]!.updatedAt = new Date().toISOString()
 
-  await saveChats(chats)
-  return chats[chatIndex]!
+    await saveChatsInternal(chats)
+    return chats[chatIndex]!
+  })
 }
 
 /**
- * Delete a chat
+ * Delete a chat with locking to prevent race conditions
  */
 export async function deleteChat(chatId: string): Promise<boolean> {
-  const chats = await loadChats()
-  const initialLength = chats.length
-  const filteredChats = chats.filter((chat) => chat.id !== chatId)
+  return withLock(async () => {
+    const chats = await loadChats()
+    const initialLength = chats.length
+    const filteredChats = chats.filter((chat) => chat.id !== chatId)
 
-  if (filteredChats.length === initialLength) {
-    return false // Chat not found
-  }
+    if (filteredChats.length === initialLength) {
+      return false // Chat not found
+    }
 
-  await saveChats(filteredChats)
-  return true
+    await saveChatsInternal(filteredChats)
+    return true
+  })
 }
