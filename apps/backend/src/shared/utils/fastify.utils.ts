@@ -1,6 +1,6 @@
 import type { FastifyRequest } from 'fastify'
 
-export class FastifyUtilsUtil {
+export class FastifyUtil {
   static convertFastifyRequest(request: FastifyRequest): { headers: Record<string, string> } {
     const headers: Record<string, string> = {}
     Object.entries(request.headers).forEach(([key, value]) => {
