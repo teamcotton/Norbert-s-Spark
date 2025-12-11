@@ -19,18 +19,22 @@ export const GET = async (
 ): Promise<Response | { id: string; messages: UIMessage[] }> => {
   const url = new URL(req.url, `http://${req.hostname}`)
   const chatId = url.searchParams.get('id')
-  // : Promise<Response | { id: string; messages: UIMessage[] }> =>
+
   if (!chatId) {
     return new Response('No chatId provided', { status: 400 })
   }
-  if (processUserUUID(chatId) !== 'v7') {
-    return new Response('Invalid chatId provided', { status: 400 })
+
+  const uuidVersion = processUserUUID(chatId)
+  if (uuidVersion !== 'v7') {
+    return new Response(`Invalid chatId provided ${uuidVersion}`, { status: 400 })
   }
+
   const chat = await getChat(chatId)
+
   if (!chat) {
-    // If chat does not exist, return empty messages array (or consider 404)
-    return { id: chatId, messages: [] as UIMessage[] }
+    return new Response(`No chat data for ${chatId}`, { status: 400 })
   }
+
   return { id: chatId, messages: chat.messages as UIMessage[] }
 }
 
