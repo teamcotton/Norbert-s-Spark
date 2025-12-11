@@ -6,6 +6,7 @@ import type { FastifyRequest } from 'fastify'
 import { appendToChatMessages, createChat, getChat } from './shared/persistance-layer.js'
 
 import { isValidUUID, uuidVersionValidation } from 'uuidv7-utilities'
+import { FastifyUtil } from './shared/utils/fastify.utils.js'
 
 function processUserUUID(userInput: string | Buffer) {
   if (!isValidUUID(userInput)) {
@@ -14,9 +15,7 @@ function processUserUUID(userInput: string | Buffer) {
   return uuidVersionValidation(userInput)
 }
 
-export const GET = async (
-  req: FastifyRequest
-): Promise<Response | { id: string; messages: UIMessage[] }> => {
+export const GET = async (req: FastifyRequest): Promise<Response> => {
   const url = new URL(req.url, `http://${req.hostname}`)
   const chatId = url.searchParams.get('id')
 
@@ -35,7 +34,7 @@ export const GET = async (
     return new Response(`No chat data for ${chatId}`, { status: 400 })
   }
 
-  return { id: chatId, messages: chat.messages as UIMessage[] }
+  return FastifyUtil.createResponse({ id: chatId, messages: chat.messages as UIMessage[] })
 }
 
 export const POST = async (req: Request): Promise<Response> => {
