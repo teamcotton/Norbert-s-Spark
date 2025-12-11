@@ -94,7 +94,10 @@ export class FastifyUtil {
     }
   }
   static createResponse(body: unknown, status: number = 200): Response {
-    return new Response(JSON.stringify(body), { status })
+    return new Response(JSON.stringify(body), {
+      status,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
   static convertFastifyRequest(request: FastifyRequest): { headers: Record<string, string> } {
     const headers: Record<string, string> = {}
