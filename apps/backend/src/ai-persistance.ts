@@ -87,7 +87,7 @@ export const POST = async (req: Request): Promise<Response> => {
 
           try {
             // Read the Heart of Darkness text file
-            const textPath = join(process.cwd(), 'data', 'heart-of-darkness.txt')
+            const textPath = join(import.meta.dirname, '..', 'data', 'heart-of-darkness.txt')
             const heartOfDarknessText = await readFile(textPath, 'utf-8')
 
             // Return the full text as context for the AI to use in answering
