@@ -51,9 +51,19 @@ export function buildApp(options?: FastifyServerOptions): FastifyInstance {
     return { status: 'ok', timestamp: new Date().toISOString() }
   })
 
-  fastify.get('/ai', async (request, _reply) => {
+  fastify.get('/ai', async (request, reply) => {
     const { GET } = await import('./ai-persistance.js')
-    return await GET(request)
+    const response = await GET(request)
+
+    // Set the response headers (includes Content-Type: application/json)
+    response.headers.forEach((value, key) => {
+      reply.header(key, value)
+    })
+
+    // Get the response body (already JSON-stringified) and send it
+    // Using text() instead of json() to avoid double-serialization
+    const body = await response.text()
+    return reply.status(response.status).send(body)
   })
 
   fastify.post('/ai', async (request, reply) => {
