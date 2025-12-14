@@ -14,8 +14,8 @@ vi.mock('../../../../src/infrastructure/database/index.js', () => ({
     insert: vi.fn(),
     select: vi.fn(),
     update: vi.fn(),
-    delete: vi.fn()
-  }
+    delete: vi.fn(),
+  },
 }))
 
 describe('PostgresUserRepository', () => {
@@ -34,7 +34,7 @@ describe('PostgresUserRepository', () => {
     testPassword = await Password.create('password123')
     testRole = new Role('user')
     testUser = new User('user-123', testEmail, testPassword, 'John Doe', testRole)
-    
+
     // Valid bcrypt hash for testing (hash of "password123")
     validBcryptHash = '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy'
   })
@@ -52,7 +52,7 @@ describe('PostgresUserRepository', () => {
         expect.objectContaining({
           email: 'test@example.com',
           name: 'John Doe',
-          createdAt: expect.any(Date)
+          createdAt: expect.any(Date),
         })
       )
     })
@@ -107,7 +107,7 @@ describe('PostgresUserRepository', () => {
         email: 'test@example.com',
         password: validBcryptHash,
         name: 'John Doe',
-        createdAt: new Date('2024-01-01')
+        createdAt: new Date('2024-01-01'),
       }
 
       const mockWhere = vi.fn().mockResolvedValue([dbRecord])
@@ -153,7 +153,7 @@ describe('PostgresUserRepository', () => {
         email: 'found@example.com',
         password: validBcryptHash,
         name: 'Found User',
-        createdAt: new Date('2024-02-01')
+        createdAt: new Date('2024-02-01'),
       }
 
       const mockWhere = vi.fn().mockResolvedValue([dbRecord])
@@ -174,14 +174,14 @@ describe('PostgresUserRepository', () => {
         email: 'duplicate@example.com',
         password: validBcryptHash,
         name: 'User 1',
-        createdAt: new Date()
+        createdAt: new Date(),
       }
       const dbRecord2 = {
         id: 'user-2',
         email: 'duplicate@example.com',
         password: validBcryptHash,
         name: 'User 2',
-        createdAt: new Date()
+        createdAt: new Date(),
       }
 
       const mockWhere = vi.fn().mockResolvedValue([dbRecord1, dbRecord2])
@@ -209,7 +209,7 @@ describe('PostgresUserRepository', () => {
       expect(mockSet).toHaveBeenCalledWith(
         expect.objectContaining({
           email: 'test@example.com',
-          name: 'John Doe'
+          name: 'John Doe',
         })
       )
     })
@@ -221,13 +221,7 @@ describe('PostgresUserRepository', () => {
       vi.mocked(db.update).mockReturnValue(mockUpdate() as any)
 
       const newEmail = new Email('updated@example.com')
-      const updatedUser = new User(
-        'user-789',
-        newEmail,
-        testPassword,
-        'Updated Name',
-        testRole
-      )
+      const updatedUser = new User('user-789', newEmail, testPassword, 'Updated Name', testRole)
 
       await repository.update(updatedUser)
 
@@ -302,7 +296,7 @@ describe('PostgresUserRepository', () => {
         email: 'convert@example.com',
         password: validBcryptHash,
         name: 'Convert User',
-        createdAt: new Date('2024-03-01')
+        createdAt: new Date('2024-03-01'),
       }
 
       const mockWhere = vi.fn().mockResolvedValue([dbRecord])
@@ -324,7 +318,7 @@ describe('PostgresUserRepository', () => {
         email: 'password@example.com',
         password: validBcryptHash,
         name: 'Password User',
-        createdAt: new Date()
+        createdAt: new Date(),
       }
 
       const mockWhere = vi.fn().mockResolvedValue([dbRecord])

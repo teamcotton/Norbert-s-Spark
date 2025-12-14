@@ -12,7 +12,7 @@ export class PostgresUserRepository implements UserRepositoryPort {
       email: userEntity.getEmail(),
       password: userEntity['password'].getHash(), // Access private via bracket notation
       name: userEntity.getName(),
-      createdAt: new Date()
+      createdAt: new Date(),
     })
   }
 
@@ -37,10 +37,11 @@ export class PostgresUserRepository implements UserRepositoryPort {
   }
 
   async update(userEntity: User): Promise<void> {
-    await db.update(user)
+    await db
+      .update(user)
       .set({
         email: userEntity.getEmail(),
-        name: userEntity.getName()
+        name: userEntity.getName(),
       })
       .where(eq(user.userId, user.userId))
   }
@@ -50,9 +51,7 @@ export class PostgresUserRepository implements UserRepositoryPort {
   }
 
   async existsByEmail(email: string): Promise<boolean> {
-    const result = await db.select({ id: user.userId })
-      .from(user)
-      .where(eq(user.email, email))
+    const result = await db.select({ id: user.userId }).from(user).where(eq(user.email, email))
 
     return result.length > 0
   }
