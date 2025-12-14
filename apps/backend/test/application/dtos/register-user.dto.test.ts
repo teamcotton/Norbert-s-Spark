@@ -81,12 +81,12 @@ describe('RegisterUserDto', () => {
         expect(dto.role).toBe('user')
       })
 
-      it('should validate and create RegisterUserDto with custom role', () => {
+      it('should validate and create RegisterUserDto with user role explicitly set', () => {
         const data = {
-          email: 'admin@example.com',
+          email: 'user@example.com',
           password: 'password123',
-          name: 'Admin User',
-          role: 'admin',
+          name: 'Regular User',
+          role: 'user',
         }
 
         const dto = RegisterUserDto.validate(data)
@@ -95,7 +95,7 @@ describe('RegisterUserDto', () => {
         expect(dto.email).toBe(data.email)
         expect(dto.password).toBe(data.password)
         expect(dto.name).toBe(data.name)
-        expect(dto.role).toBe(data.role)
+        expect(dto.role).toBe('user')
       })
 
       it('should validate with extra properties in data', () => {
@@ -407,7 +407,32 @@ describe('RegisterUserDto', () => {
     })
 
     describe('role validation', () => {
-      it('should not throw when role is valid', () => {
+      it('should not throw when role is "user"', () => {
+        const data = {
+          email: 'test@example.com',
+          password: 'password123',
+          name: 'John Doe',
+          role: 'user',
+        }
+
+        expect(() => RegisterUserDto.validate(data)).not.toThrow()
+      })
+
+      it('should throw ValidationException when role is "admin"', () => {
+        const data = {
+          email: 'test@example.com',
+          password: 'password123',
+          name: 'John Doe',
+          role: 'admin',
+        }
+
+        expect(() => RegisterUserDto.validate(data)).toThrow(ValidationException)
+        expect(() => RegisterUserDto.validate(data)).toThrow(
+          'Only "user" role is allowed during registration'
+        )
+      })
+
+      it('should throw ValidationException when role is "moderator"', () => {
         const data = {
           email: 'test@example.com',
           password: 'password123',
@@ -415,7 +440,10 @@ describe('RegisterUserDto', () => {
           role: 'moderator',
         }
 
-        expect(() => RegisterUserDto.validate(data)).not.toThrow()
+        expect(() => RegisterUserDto.validate(data)).toThrow(ValidationException)
+        expect(() => RegisterUserDto.validate(data)).toThrow(
+          'Only "user" role is allowed during registration'
+        )
       })
 
       it('should throw ValidationException when role is not a string', () => {
@@ -487,7 +515,7 @@ describe('RegisterUserDto', () => {
 
         expect(() => RegisterUserDto.validate(data)).toThrow(ValidationException)
         expect(() => RegisterUserDto.validate(data)).toThrow(
-          'Invalid role. Must be one of: user, admin, moderator'
+          'Only "user" role is allowed during registration'
         )
       })
 
@@ -501,7 +529,7 @@ describe('RegisterUserDto', () => {
 
         expect(() => RegisterUserDto.validate(data)).toThrow(ValidationException)
         expect(() => RegisterUserDto.validate(data)).toThrow(
-          'Invalid role. Must be one of: user, admin, moderator'
+          'Only "user" role is allowed during registration'
         )
       })
 
@@ -515,7 +543,7 @@ describe('RegisterUserDto', () => {
 
         expect(() => RegisterUserDto.validate(data)).toThrow(ValidationException)
         expect(() => RegisterUserDto.validate(data)).toThrow(
-          'Invalid role. Must be one of: user, admin, moderator'
+          'Only "user" role is allowed during registration'
         )
       })
     })
