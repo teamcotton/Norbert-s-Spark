@@ -255,7 +255,7 @@ describe('POSTGRES_ERROR_CODE', () => {
   describe('Class 28 - Invalid Authorization Specification', () => {
     it('should have authorization codes', () => {
       expect(POSTGRES_ERROR_CODE.INVALID_AUTHORIZATION_SPECIFICATION).toBe('28000')
-      expect(POSTGRES_ERROR_CODE.INVALID_PASSWORD).toBe('28P01')
+      expect(POSTGRES_ERROR_CODE.PG_AUTH_INVALID_PASSWORD).toBe('28P01')
     })
   })
 

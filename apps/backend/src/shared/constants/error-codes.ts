@@ -193,7 +193,7 @@ export const POSTGRES_ERROR_CODE = {
 
   // Class 28 — Invalid Authorization Specification
   INVALID_AUTHORIZATION_SPECIFICATION: '28000',
-  INVALID_PASSWORD: '28P01',
+  PG_AUTH_INVALID_PASSWORD: '28P01',
 
   // Class 2B — Dependent Privilege Descriptors Still Exist
   DEPENDENT_PRIVILEGE_DESCRIPTORS_STILL_EXIST: '2B000',

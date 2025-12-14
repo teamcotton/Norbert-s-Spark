@@ -19,7 +19,7 @@ import { POSTGRES_ERROR_CODE } from '../constants/error-codes.js'
 export class DatabaseUtil {
   /**
    * PostgreSQL error code for unique constraint violations.
-   * Code 23505: UNIQUE VIOLATION
+   * Code from POSTGRES_ERROR_CODE.UNIQUE_VIOLATION (currently '23505'): UNIQUE VIOLATION
    * @see https://www.postgresql.org/docs/current/errcodes-appendix.html
    */
   private static readonly PG_UNIQUE_VIOLATION = POSTGRES_ERROR_CODE.UNIQUE_VIOLATION
