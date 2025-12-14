@@ -16,7 +16,7 @@ export class PostgresUserRepository implements UserRepositoryPort {
     try {
       await db.insert(user).values({
         email: userEntity.getEmail(),
-        password: userEntity['password'].getHash(), // Access private via bracket notation
+        password: userEntity.getPasswordHash(), // Access private via bracket notation
         name: userEntity.getName(),
         role: userEntity.getRole(),
         createdAt: new Date(),

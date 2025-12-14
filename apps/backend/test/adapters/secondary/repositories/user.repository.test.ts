@@ -53,6 +53,7 @@ describe('PostgresUserRepository', () => {
       expect(db.insert).toHaveBeenCalledTimes(1)
       expect(mockValues).toHaveBeenCalledWith(
         expect.objectContaining({
+          userId: 'user-123',
           email: 'test@example.com',
           name: 'John Doe',
           createdAt: expect.any(Date),
@@ -71,9 +72,7 @@ describe('PostgresUserRepository', () => {
       await repository.save(testUser)
 
       const callArgs = mockValues.mock.calls?.[0]?.[0]
-      expect(callArgs.password).toBeDefined()
-      expect(typeof callArgs.password).toBe('string')
-      expect(callArgs.password.length).toBeGreaterThan(0)
+      expect(callArgs.password).toBe(testUser.getPasswordHash())
     })
 
     it('should save user with correct email', async () => {
@@ -224,6 +223,8 @@ describe('PostgresUserRepository', () => {
           name: 'John Doe',
         })
       )
+      expect(mockWhere).toHaveBeenCalledTimes(1)
+      expect(mockWhere).toHaveBeenCalledWith(expect.anything())
     })
 
     it('should update user with new values', async () => {
