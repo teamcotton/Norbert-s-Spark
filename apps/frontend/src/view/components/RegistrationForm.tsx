@@ -1,18 +1,25 @@
 'use client'
 
-import { GitHub as GitHubIcon, Google as GoogleIcon } from '@mui/icons-material'
+import {
+  GitHub as GitHubIcon,
+  Google as GoogleIcon,
+  Visibility,
+  VisibilityOff,
+} from '@mui/icons-material'
 import {
   Box,
   Button,
   Container,
   Divider,
+  IconButton,
+  InputAdornment,
   Link as MuiLink,
   Paper,
   TextField,
   Typography,
 } from '@mui/material'
 import { useRouter } from 'next/navigation.js'
-import React from 'react'
+import React, { useState } from 'react'
 
 interface RegistrationFormProps {
   readonly formData: {
@@ -44,6 +51,16 @@ export function RegistrationForm({
   onSubmit,
 }: RegistrationFormProps) {
   const router = useRouter()
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+
+  const handleTogglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev)
+  }
+
+  const handleToggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword((prev) => !prev)
+  }
 
   return (
     <Container maxWidth="sm">
@@ -140,7 +157,7 @@ export function RegistrationForm({
             <TextField
               fullWidth
               label="Password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               value={formData.password}
               onChange={onFieldChange('password')}
               error={!!errors.password}
@@ -148,13 +165,28 @@ export function RegistrationForm({
               margin="normal"
               required
               autoComplete="new-password"
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={handleTogglePasswordVisibility}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+              }}
               sx={{ mb: 2 }}
             />
 
             <TextField
               fullWidth
               label="Confirm password"
-              type="password"
+              type={showConfirmPassword ? 'text' : 'password'}
               value={formData.confirmPassword}
               onChange={onFieldChange('confirmPassword')}
               error={!!errors.confirmPassword}
@@ -162,6 +194,21 @@ export function RegistrationForm({
               margin="normal"
               required
               autoComplete="new-password"
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle confirm password visibility"
+                        onClick={handleToggleConfirmPasswordVisibility}
+                        edge="end"
+                      >
+                        {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+              }}
               sx={{ mb: 3 }}
             />
 

@@ -92,9 +92,12 @@ export function useRegistrationForm() {
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault()
     if (validateForm()) {
+      // Obscure sensitive fields before processing
+      const obscuredData = obscured.obscureKeys(formData, ['password', 'confirmPassword'])
+
       // Handle registration
       // TODO: Implement registration API call with obscuredData
-      alert('Registration successful!')
+      alert(`Registration successful! ${JSON.stringify(obscuredData)}`)
     }
   }
 
