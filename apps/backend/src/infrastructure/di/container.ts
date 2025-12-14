@@ -68,10 +68,16 @@ export class Container {
           } as FastifyServerOptions
           this.logger.info('🔒 HTTPS enabled for development')
         } catch (error) {
+          const instructions = [
+            'To generate certificates with proper Subject Alternative Names:',
+            'cd apps/backend/certs && openssl req -x509 -newkey rsa:4096 \\',
+            '  -keyout key.pem -out cert.pem -sha256 -days 365 -nodes \\',
+            '  -config openssl.cnf -extensions v3_req',
+          ].join('\n')
+
           this.logger.warn('⚠️  HTTPS certificates not found, falling back to HTTP', {
             certsPath: join(__dirname, '..', 'certs'),
-            instructions:
-              'To generate certificates: cd apps/backend/certs && openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 365 -nodes -config openssl.cnf -extensions v3_req',
+            instructions,
           })
         }
       }
