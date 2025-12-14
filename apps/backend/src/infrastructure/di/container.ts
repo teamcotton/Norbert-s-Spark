@@ -43,6 +43,9 @@ export class Container {
     // Validate environment
     EnvConfig.validate()
 
+    // Initialize logger first for structured logging throughout initialization
+    this.logger = new PinoLoggerService()
+
     try {
       const __filename = fileURLToPath(import.meta.url)
       const __dirname = dirname(__filename)
@@ -52,25 +55,28 @@ export class Container {
 
       let httpsOptions: FastifyServerOptions | undefined
       if (useHttps) {
-        try {
-          // __dirname points to src/ or dist/ directory
-          // Go up one level to backend/, then into certs/
-          const certsPath = join(__dirname, '..', 'certs')
+        // __dirname points to src/ or dist/ directory
+        // Go up one level to backend/, then into certs/
+        const certsPath = join(__dirname, '..', 'certs')
 
+        try {
           httpsOptions = {
             https: {
               key: readFileSync(join(certsPath, 'key.pem')),
               cert: readFileSync(join(certsPath, 'cert.pem')),
             },
           } as FastifyServerOptions
-          console.log('🔒 HTTPS enabled for development')
+          this.logger.info('🔒 HTTPS enabled for development')
         } catch (error) {
-          console.warn('⚠️  HTTPS certificates not found, falling back to HTTP')
-          console.warn(`   Looked in: ${join(__dirname, '..', 'certs')}`)
-          console.warn('   To generate certificates with proper Subject Alternative Names:')
-          console.warn('   cd apps/backend/certs && openssl req -x509 -newkey rsa:4096 \\')
-          console.warn('     -keyout key.pem -out cert.pem -sha256 -days 365 -nodes \\')
-          console.warn('     -config openssl.cnf -extensions v3_req')
+          const instructions = `To generate certificates with proper Subject Alternative Names:
+cd apps/backend/certs && openssl req -x509 -newkey rsa:4096 \\
+  -keyout key.pem -out cert.pem -sha256 -days 365 -nodes \\
+  -config openssl.cnf -extensions v3_req`
+
+          this.logger.warn('⚠️  HTTPS certificates not found, falling back to HTTP', {
+            certsPath,
+            instructions,
+          })
         }
       }
 
@@ -83,7 +89,6 @@ export class Container {
     }
 
     // Initialize services (secondary adapters)
-    this.logger = new PinoLoggerService()
     this.emailService = new ResendService(EnvConfig.RESEND_API_KEY, this.logger)
 
     // Initialize repositories (secondary adapters)
@@ -126,8 +131,8 @@ export class Container {
 
       await this.app.listen({ port, host })
       const protocol = useHttps ? 'https' : 'http'
-      console.log(`Server listening on ${protocol}://${host}:${port}`)
-      console.log(`📚 API Documentation: ${protocol}://${host}:${port}/docs`)
+      this.logger.info(`Server listening on ${protocol}://${host}:${port}`)
+      this.logger.info(`📚 API Documentation: ${protocol}://${host}:${port}/docs`)
     } catch (error) {
       this.logger.error('Failed to start server', error as Error)
       throw new InternalErrorException('Failed to start server', error as Error)
