@@ -7,13 +7,13 @@ import { ExternalServiceException } from '../../../shared/exceptions/external-se
 import { EnvConfig } from '../../../infrastructure/config/env.config.js'
 
 export class ResendService implements EmailServicePort {
+  private readonly resendClient: Resend
+
   constructor(
     private readonly apiKey: Obscured<string | undefined>,
     private readonly logger: LoggerPort
-  ) {}
-
-  static registerResendClient(apiKey: Obscured<string | undefined>): Resend {
-    return new Resend(obscured.value(apiKey)) as Resend
+  ) {
+    this.resendClient = new Resend(obscured.value(apiKey))
   }
 
   async sendWelcomeEmail(to: string, name: string): Promise<void> {
@@ -26,9 +26,7 @@ export class ResendService implements EmailServicePort {
       html: '<p>Congrats on sending your <strong>first email</strong>!</p>',
     }
 
-    const { data, error } = await ResendService.registerResendClient(this.apiKey).emails.send(
-      emailData
-    )
+    const { data, error } = await this.resendClient.emails.send(emailData)
 
     if (error) {
       this.logger.error('Failed to send welcome email', new Error(error.message), { to, name })
