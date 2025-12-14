@@ -55,6 +55,9 @@ describe('PostgresUserRepository', () => {
           createdAt: expect.any(Date),
         })
       )
+
+      const callArgs = mockValues.mock.calls?.[0]?.[0]
+      expect(callArgs.role).toBe('user')
     })
 
     it('should save user password hash', async () => {
@@ -85,6 +88,7 @@ describe('PostgresUserRepository', () => {
       const callArgs = mockValues.mock.calls?.[0]?.[0]
       expect(callArgs.email).toBe('newemail@example.com')
       expect(callArgs.name).toBe('Jane Doe')
+      expect(callArgs.role).toBe('admin')
     })
   })
 
@@ -103,10 +107,11 @@ describe('PostgresUserRepository', () => {
 
     it('should return User entity when found', async () => {
       const dbRecord = {
-        id: 'user-123',
+        userId: 'user-123',
         email: 'test@example.com',
         password: validBcryptHash,
         name: 'John Doe',
+        role: 'user',
         createdAt: new Date('2024-01-01'),
       }
 
@@ -121,6 +126,7 @@ describe('PostgresUserRepository', () => {
       expect(result?.id).toBe('user-123')
       expect(result?.getEmail()).toBe('test@example.com')
       expect(result?.getName()).toBe('John Doe')
+      expect(result?.getRole()).toBe('user')
     })
 
     it('should call database with correct userId', async () => {
@@ -149,10 +155,11 @@ describe('PostgresUserRepository', () => {
 
     it('should return User entity when found by email', async () => {
       const dbRecord = {
-        id: 'user-456',
+        userId: 'user-456',
         email: 'found@example.com',
         password: validBcryptHash,
         name: 'Found User',
+        role: 'user',
         createdAt: new Date('2024-02-01'),
       }
 
@@ -170,17 +177,19 @@ describe('PostgresUserRepository', () => {
 
     it('should handle multiple results by returning first', async () => {
       const dbRecord1 = {
-        id: 'user-1',
+        userId: 'user-1',
         email: 'duplicate@example.com',
         password: validBcryptHash,
         name: 'User 1',
+        role: 'user',
         createdAt: new Date(),
       }
       const dbRecord2 = {
-        id: 'user-2',
+        userId: 'user-2',
         email: 'duplicate@example.com',
         password: validBcryptHash,
         name: 'User 2',
+        role: 'admin',
         createdAt: new Date(),
       }
 
@@ -292,10 +301,11 @@ describe('PostgresUserRepository', () => {
   describe('toDomain', () => {
     it('should convert database record to User entity', async () => {
       const dbRecord = {
-        id: 'user-convert',
+        userId: 'user-convert',
         email: 'convert@example.com',
         password: validBcryptHash,
         name: 'Convert User',
+        role: 'moderator',
         createdAt: new Date('2024-03-01'),
       }
 
@@ -314,10 +324,11 @@ describe('PostgresUserRepository', () => {
 
     it('should preserve password hash when converting to domain', async () => {
       const dbRecord = {
-        id: 'user-password',
+        userId: 'user-password',
         email: 'password@example.com',
         password: validBcryptHash,
         name: 'Password User',
+        role: 'user',
         createdAt: new Date(),
       }
 

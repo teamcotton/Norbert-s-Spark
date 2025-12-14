@@ -1,9 +1,11 @@
 import { eq } from 'drizzle-orm'
 import { db } from '../../../infrastructure/database/index.js'
 import { user } from '../../../infrastructure/database/schema.js'
+import type { DBUserSelect } from '../../../infrastructure/database/schema.js'
 import { User } from '../../../domain/entities/user.js'
 import { Email } from '../../../domain/value-objects/email.js'
 import { Password } from '../../../domain/value-objects/password.js'
+import { Role } from '../../../domain/value-objects/role.js'
 import type { UserRepositoryPort } from '../../../application/ports/user.repository.port.js'
 
 export class PostgresUserRepository implements UserRepositoryPort {
@@ -12,6 +14,7 @@ export class PostgresUserRepository implements UserRepositoryPort {
       email: userEntity.getEmail(),
       password: userEntity['password'].getHash(), // Access private via bracket notation
       name: userEntity.getName(),
+      role: userEntity.getRole(),
       createdAt: new Date(),
     })
   }
@@ -23,7 +26,7 @@ export class PostgresUserRepository implements UserRepositoryPort {
       return null
     }
 
-    return this.toDomain(result[0])
+    return this.toDomain(result[0]!)
   }
 
   async findByEmail(email: string): Promise<User | null> {
@@ -33,7 +36,7 @@ export class PostgresUserRepository implements UserRepositoryPort {
       return null
     }
 
-    return this.toDomain(result[0])
+    return this.toDomain(result[0]!)
   }
 
   async update(userEntity: User): Promise<void> {
@@ -42,6 +45,7 @@ export class PostgresUserRepository implements UserRepositoryPort {
       .set({
         email: userEntity.getEmail(),
         name: userEntity.getName(),
+        role: userEntity.getRole(),
       })
       .where(eq(user.userId, user.userId))
   }
@@ -56,9 +60,10 @@ export class PostgresUserRepository implements UserRepositoryPort {
     return result.length > 0
   }
 
-  private toDomain(record: any): User {
+  private toDomain(record: DBUserSelect): User {
     const email = new Email(record.email)
     const password = Password.fromHash(record.password)
-    return new User(record.id, email, password, record.name, record.createdAt)
+    const role = new Role(record.role)
+    return new User(record.userId, email, password, record.name, role, record.createdAt)
   }
 }
