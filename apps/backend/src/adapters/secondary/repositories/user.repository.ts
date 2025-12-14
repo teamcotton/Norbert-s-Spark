@@ -40,7 +40,8 @@ export class PostgresUserRepository implements UserRepositoryPort {
         return null
       }
 
-      return this.toDomain(result[0]!)
+      const dbRecord = result[0]
+      return this.toDomain(dbRecord)
     } catch (error) {
       throw new DatabaseException('Failed to find user by ID', { id, error })
     }
@@ -54,7 +55,8 @@ export class PostgresUserRepository implements UserRepositoryPort {
         return null
       }
 
-      return this.toDomain(result[0]!)
+      const dbRecord = result[0]
+      return this.toDomain(dbRecord)
     } catch (error) {
       throw new DatabaseException('Failed to find user by email', { email, error })
     }
