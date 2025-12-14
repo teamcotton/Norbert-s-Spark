@@ -515,7 +515,7 @@ describe('RegisterUserDto', () => {
 
         expect(() => RegisterUserDto.validate(data)).toThrow(ValidationException)
         expect(() => RegisterUserDto.validate(data)).toThrow(
-          'Invalid role. Must be one of: user, admin, moderator'
+          'Only "user" role is allowed during registration'
         )
       })
 
@@ -529,7 +529,7 @@ describe('RegisterUserDto', () => {
 
         expect(() => RegisterUserDto.validate(data)).toThrow(ValidationException)
         expect(() => RegisterUserDto.validate(data)).toThrow(
-          'Invalid role. Must be one of: user, admin, moderator'
+          'Only "user" role is allowed during registration'
         )
       })
 
@@ -543,7 +543,7 @@ describe('RegisterUserDto', () => {
 
         expect(() => RegisterUserDto.validate(data)).toThrow(ValidationException)
         expect(() => RegisterUserDto.validate(data)).toThrow(
-          'Invalid role. Must be one of: user, admin, moderator'
+          'Only "user" role is allowed during registration'
         )
       })
     })

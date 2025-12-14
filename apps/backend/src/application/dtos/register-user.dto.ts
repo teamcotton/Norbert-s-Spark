@@ -27,9 +27,6 @@ export class RegisterUserDto {
     if (data.role !== undefined && !isString(data.role)) {
       throw new ValidationException('Role must be a string')
     }
-    if (data.role !== undefined && !(USER_ROLES as readonly string[]).includes(data.role)) {
-      throw new ValidationException(`Invalid role. Must be one of: ${USER_ROLES.join(', ')}`)
-    }
     // Security: Only allow 'user' role during registration to prevent privilege escalation
     if (data.role !== undefined && data.role !== 'user') {
       throw new ValidationException('Only "user" role is allowed during registration')
