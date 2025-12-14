@@ -75,6 +75,11 @@ describe('Database Schema', () => {
         expect(user.email.name).toBe('email')
       })
 
+      it('should have role column', () => {
+        expect(user.role).toBeDefined()
+        expect(user.role.name).toBe('role')
+      })
+
       it('should have createdAt column', () => {
         expect(user.createdAt).toBeDefined()
         expect(user.createdAt.name).toBe('created_at')

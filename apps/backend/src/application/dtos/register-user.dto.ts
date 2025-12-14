@@ -6,7 +6,8 @@ export class RegisterUserDto {
   constructor(
     public readonly email: string,
     public readonly password: string,
-    public readonly name: string
+    public readonly name: string,
+    public readonly role: string = 'user'
   ) {}
 
   static validate(data: any): RegisterUserDto {
@@ -22,7 +23,10 @@ export class RegisterUserDto {
     if (!data.name || !isString(data.name)) {
       throw new ValidationException('Name is required and must be a string')
     }
+    if (data.role && !isString(data.role)) {
+      throw new ValidationException('Role must be a string')
+    }
 
-    return new RegisterUserDto(data.email, data.password, data.name)
+    return new RegisterUserDto(data.email, data.password, data.name, data.role)
   }
 }
