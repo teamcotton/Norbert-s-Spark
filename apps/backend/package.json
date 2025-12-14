@@ -73,5 +73,5 @@
     "vitest": "^4.0.15"
   },
   "packageManager": "pnpm@10.25.0",
-  "preinstall": "npx --yes only-allow pnpm",
+  "preinstall": "npx --yes only-allow pnpm"
 }
