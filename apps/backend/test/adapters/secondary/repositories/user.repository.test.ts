@@ -7,6 +7,9 @@ import { Password } from '../../../../src/domain/value-objects/password.js'
 import { Role } from '../../../../src/domain/value-objects/role.js'
 // Import db after mocking
 import { db } from '../../../../src/infrastructure/database/index.js'
+import { POSTGRES_ERROR_CODE } from '../../../../src/shared/constants/error-codes.js'
+import { ConflictException } from '../../../../src/shared/exceptions/conflict.exception.js'
+import { DatabaseException } from '../../../../src/shared/exceptions/database.exception.js'
 
 // Mock the database module
 vi.mock('../../../../src/infrastructure/database/index.js', () => ({
@@ -342,6 +345,125 @@ describe('PostgresUserRepository', () => {
       expect(result).toBeInstanceOf(User)
       // Password should be properly converted from hash
       expect(result).toBeDefined()
+    })
+  })
+
+  describe('error handling', () => {
+    describe('save', () => {
+      it('should throw ConflictException on duplicate key error', async () => {
+        const duplicateError = new Error('duplicate key') as any
+        duplicateError.code = POSTGRES_ERROR_CODE.UNIQUE_VIOLATION
+
+        const mockValues = vi.fn().mockRejectedValue(duplicateError)
+        const mockInsert = vi.fn().mockReturnValue({ values: mockValues })
+        vi.mocked(db.insert).mockReturnValue(mockInsert() as any)
+
+        await expect(repository.save(testUser)).rejects.toThrow(ConflictException)
+        await expect(repository.save(testUser)).rejects.toThrow(
+          'User with this email already exists'
+        )
+      })
+
+      it('should throw DatabaseException on general database error', async () => {
+        const dbError = new Error('Connection failed')
+
+        const mockValues = vi.fn().mockRejectedValue(dbError)
+        const mockInsert = vi.fn().mockReturnValue({ values: mockValues })
+        vi.mocked(db.insert).mockReturnValue(mockInsert() as any)
+
+        await expect(repository.save(testUser)).rejects.toThrow(DatabaseException)
+        await expect(repository.save(testUser)).rejects.toThrow('Failed to save user')
+      })
+    })
+
+    describe('findById', () => {
+      it('should throw DatabaseException on database error', async () => {
+        const dbError = new Error('Database connection lost')
+
+        const mockWhere = vi.fn().mockRejectedValue(dbError)
+        const mockFrom = vi.fn().mockReturnValue({ where: mockWhere })
+        const mockSelect = vi.fn().mockReturnValue({ from: mockFrom })
+        vi.mocked(db.select).mockReturnValue(mockSelect() as any)
+
+        await expect(repository.findById('user-123')).rejects.toThrow(DatabaseException)
+        await expect(repository.findById('user-123')).rejects.toThrow('Failed to find user by ID')
+      })
+    })
+
+    describe('findByEmail', () => {
+      it('should throw DatabaseException on database error', async () => {
+        const dbError = new Error('Query timeout')
+
+        const mockWhere = vi.fn().mockRejectedValue(dbError)
+        const mockFrom = vi.fn().mockReturnValue({ where: mockWhere })
+        const mockSelect = vi.fn().mockReturnValue({ from: mockFrom })
+        vi.mocked(db.select).mockReturnValue(mockSelect() as any)
+
+        await expect(repository.findByEmail('test@example.com')).rejects.toThrow(DatabaseException)
+        await expect(repository.findByEmail('test@example.com')).rejects.toThrow(
+          'Failed to find user by email'
+        )
+      })
+    })
+
+    describe('update', () => {
+      it('should throw ConflictException on duplicate key error', async () => {
+        const duplicateError = new Error('duplicate key') as any
+        duplicateError.code = POSTGRES_ERROR_CODE.UNIQUE_VIOLATION
+
+        const mockWhere = vi.fn().mockRejectedValue(duplicateError)
+        const mockSet = vi.fn().mockReturnValue({ where: mockWhere })
+        const mockUpdate = vi.fn().mockReturnValue({ set: mockSet })
+        vi.mocked(db.update).mockReturnValue(mockUpdate() as any)
+
+        await expect(repository.update(testUser)).rejects.toThrow(ConflictException)
+        await expect(repository.update(testUser)).rejects.toThrow(
+          'User with this email already exists'
+        )
+      })
+
+      it('should throw DatabaseException on general database error', async () => {
+        const dbError = new Error('Update failed')
+
+        const mockWhere = vi.fn().mockRejectedValue(dbError)
+        const mockSet = vi.fn().mockReturnValue({ where: mockWhere })
+        const mockUpdate = vi.fn().mockReturnValue({ set: mockSet })
+        vi.mocked(db.update).mockReturnValue(mockUpdate() as any)
+
+        await expect(repository.update(testUser)).rejects.toThrow(DatabaseException)
+        await expect(repository.update(testUser)).rejects.toThrow('Failed to update user')
+      })
+    })
+
+    describe('delete', () => {
+      it('should throw DatabaseException on database error', async () => {
+        const dbError = new Error('Delete operation failed')
+
+        const mockWhere = vi.fn().mockRejectedValue(dbError)
+        const mockDelete = vi.fn().mockReturnValue({ where: mockWhere })
+        vi.mocked(db.delete).mockReturnValue(mockDelete() as any)
+
+        await expect(repository.delete('user-123')).rejects.toThrow(DatabaseException)
+        await expect(repository.delete('user-123')).rejects.toThrow('Failed to delete user')
+      })
+    })
+
+    describe('existsByEmail', () => {
+      it('should throw DatabaseException on database error', async () => {
+        const dbError = new Error('Query execution failed')
+
+        const mockWhere = vi.fn().mockRejectedValue(dbError)
+        const mockFrom = vi.fn().mockReturnValue({ where: mockWhere })
+        const mockSelect = vi.fn().mockReturnValue({ from: mockFrom })
+        vi.mocked(db.select).mockReturnValue(mockSelect() as any)
+
+        await expect(repository.existsByEmail('test@example.com')).rejects.toThrow(
+          DatabaseException
+        )
+        await expect(repository.existsByEmail('test@example.com')).rejects.toThrow(
+          'Failed to check if user exists by email'
+        )
+      })
     })
   })
 })

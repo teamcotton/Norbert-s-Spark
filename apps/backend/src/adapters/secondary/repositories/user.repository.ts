@@ -7,57 +7,94 @@ import { Email } from '../../../domain/value-objects/email.js'
 import { Password } from '../../../domain/value-objects/password.js'
 import { Role } from '../../../domain/value-objects/role.js'
 import type { UserRepositoryPort } from '../../../application/ports/user.repository.port.js'
+import { DatabaseException } from '../../../shared/exceptions/database.exception.js'
+import { ConflictException } from '../../../shared/exceptions/conflict.exception.js'
+import { DatabaseUtil } from '../../../shared/utils/database.util.js'
 
 export class PostgresUserRepository implements UserRepositoryPort {
   async save(userEntity: User): Promise<void> {
-    await db.insert(user).values({
-      email: userEntity.getEmail(),
-      password: userEntity['password'].getHash(), // Access private via bracket notation
-      name: userEntity.getName(),
-      role: userEntity.getRole(),
-      createdAt: new Date(),
-    })
+    try {
+      await db.insert(user).values({
+        email: userEntity.getEmail(),
+        password: userEntity['password'].getHash(), // Access private via bracket notation
+        name: userEntity.getName(),
+        role: userEntity.getRole(),
+        createdAt: new Date(),
+      })
+    } catch (error) {
+      if (DatabaseUtil.isDuplicateKeyError(error)) {
+        throw new ConflictException('User with this email already exists', {
+          email: userEntity.getEmail(),
+        })
+      }
+      throw new DatabaseException('Failed to save user', { error })
+    }
   }
 
   async findById(id: string): Promise<User | null> {
-    const result = await db.select().from(user).where(eq(user.userId, id))
+    try {
+      const result = await db.select().from(user).where(eq(user.userId, id))
 
-    if (result.length === 0) {
-      return null
+      if (result.length === 0) {
+        return null
+      }
+
+      return this.toDomain(result[0]!)
+    } catch (error) {
+      throw new DatabaseException('Failed to find user by ID', { id, error })
     }
-
-    return this.toDomain(result[0]!)
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    const result = await db.select().from(user).where(eq(user.email, email))
+    try {
+      const result = await db.select().from(user).where(eq(user.email, email))
 
-    if (result.length === 0) {
-      return null
+      if (result.length === 0) {
+        return null
+      }
+
+      return this.toDomain(result[0]!)
+    } catch (error) {
+      throw new DatabaseException('Failed to find user by email', { email, error })
     }
-
-    return this.toDomain(result[0]!)
   }
 
   async update(userEntity: User): Promise<void> {
-    await db
-      .update(user)
-      .set({
-        email: userEntity.getEmail(),
-        name: userEntity.getName(),
-        role: userEntity.getRole(),
-      })
-      .where(eq(user.userId, user.userId))
+    try {
+      await db
+        .update(user)
+        .set({
+          email: userEntity.getEmail(),
+          name: userEntity.getName(),
+          role: userEntity.getRole(),
+        })
+        .where(eq(user.userId, userEntity.id))
+    } catch (error) {
+      if (DatabaseUtil.isDuplicateKeyError(error)) {
+        throw new ConflictException('User with this email already exists', {
+          email: userEntity.getEmail(),
+        })
+      }
+      throw new DatabaseException('Failed to update user', { error })
+    }
   }
 
   async delete(id: string): Promise<void> {
-    await db.delete(user).where(eq(user.userId, id))
+    try {
+      await db.delete(user).where(eq(user.userId, id))
+    } catch (error) {
+      throw new DatabaseException('Failed to delete user', { id, error })
+    }
   }
 
   async existsByEmail(email: string): Promise<boolean> {
-    const result = await db.select({ id: user.userId }).from(user).where(eq(user.email, email))
+    try {
+      const result = await db.select({ id: user.userId }).from(user).where(eq(user.email, email))
 
-    return result.length > 0
+      return result.length > 0
+    } catch (error) {
+      throw new DatabaseException('Failed to check if user exists by email', { email, error })
+    }
   }
 
   private toDomain(record: DBUserSelect): User {
