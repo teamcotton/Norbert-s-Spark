@@ -1,3 +1,4 @@
+import { POSTGRES_ERROR_CODE } from '../constants/error-codes.js'
 /**
  * Utility class for database error handling operations.
  * Provides methods to identify specific database errors, particularly PostgreSQL errors.
@@ -21,7 +22,7 @@ export class DatabaseUtil {
    * Code 23505: UNIQUE VIOLATION
    * @see https://www.postgresql.org/docs/current/errcodes-appendix.html
    */
-  private static readonly PG_UNIQUE_VIOLATION = '23505'
+  private static readonly PG_UNIQUE_VIOLATION = POSTGRES_ERROR_CODE.UNIQUE_VIOLATION
 
   /**
    * Checks if an error is a PostgreSQL duplicate key/unique constraint violation.
