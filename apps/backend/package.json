@@ -71,5 +71,8 @@
     "tsx": "^4.19.2",
     "typescript": "^5.9.3",
     "vitest": "^4.0.15"
-  }
+  },
+  "packageManager": "pnpm@10.24.0",
+  "preinstall": "npx --yes only-allow pnpm",
+  "preupdate": "npx --yes only-allow pnpm"
 }

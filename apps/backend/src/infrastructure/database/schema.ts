@@ -32,6 +32,7 @@ export const user = pgTable(
     name: text('name').notNull(),
     password: text('password').notNull(),
     email: citext('email').notNull().unique(),
+    role: text('role').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true })
       .notNull()
       .default(sql`now()`),
