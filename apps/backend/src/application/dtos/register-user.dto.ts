@@ -1,6 +1,7 @@
 import { TypeException } from '../../shared/exceptions/type.exception.js'
 import { ValidationException } from '../../shared/exceptions/validation.exception.js'
 import { isString } from '../../shared/guards/type.guards.js'
+import { USER_ROLES } from '../../domain/value-objects/role.js'
 
 export class RegisterUserDto {
   constructor(
@@ -25,6 +26,11 @@ export class RegisterUserDto {
     }
     if (data.role && !isString(data.role)) {
       throw new ValidationException('Role must be a string')
+    }
+    if (data.role && !(USER_ROLES as readonly string[]).includes(data.role)) {
+      throw new ValidationException(
+        `Invalid role. Must be one of: ${USER_ROLES.join(', ')}`
+      )
     }
 
     return new RegisterUserDto(data.email, data.password, data.name, data.role)

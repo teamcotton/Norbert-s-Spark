@@ -476,6 +476,48 @@ describe('RegisterUserDto', () => {
         const dto = RegisterUserDto.validate(data)
         expect(dto.role).toBe('user')
       })
+
+      it('should throw ValidationException when role is invalid', () => {
+        const data = {
+          email: 'test@example.com',
+          password: 'password123',
+          name: 'John Doe',
+          role: 'superuser',
+        }
+
+        expect(() => RegisterUserDto.validate(data)).toThrow(ValidationException)
+        expect(() => RegisterUserDto.validate(data)).toThrow(
+          'Invalid role. Must be one of: user, admin, moderator'
+        )
+      })
+
+      it('should throw ValidationException when role is empty string', () => {
+        const data = {
+          email: 'test@example.com',
+          password: 'password123',
+          name: 'John Doe',
+          role: '',
+        }
+
+        expect(() => RegisterUserDto.validate(data)).toThrow(ValidationException)
+        expect(() => RegisterUserDto.validate(data)).toThrow(
+          'Invalid role. Must be one of: user, admin, moderator'
+        )
+      })
+
+      it('should throw ValidationException when role has wrong case', () => {
+        const data = {
+          email: 'test@example.com',
+          password: 'password123',
+          name: 'John Doe',
+          role: 'Admin',
+        }
+
+        expect(() => RegisterUserDto.validate(data)).toThrow(ValidationException)
+        expect(() => RegisterUserDto.validate(data)).toThrow(
+          'Invalid role. Must be one of: user, admin, moderator'
+        )
+      })
     })
 
     describe('edge cases', () => {
