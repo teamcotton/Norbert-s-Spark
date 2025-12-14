@@ -43,6 +43,9 @@ export class Container {
     // Validate environment
     EnvConfig.validate()
 
+    // Initialize logger first for structured logging throughout initialization
+    this.logger = new PinoLoggerService()
+
     try {
       const __filename = fileURLToPath(import.meta.url)
       const __dirname = dirname(__filename)
@@ -63,14 +66,13 @@ export class Container {
               cert: readFileSync(join(certsPath, 'cert.pem')),
             },
           } as FastifyServerOptions
-          console.log('🔒 HTTPS enabled for development')
+          this.logger.info('🔒 HTTPS enabled for development')
         } catch (error) {
-          console.warn('⚠️  HTTPS certificates not found, falling back to HTTP')
-          console.warn(`   Looked in: ${join(__dirname, '..', 'certs')}`)
-          console.warn('   To generate certificates with proper Subject Alternative Names:')
-          console.warn('   cd apps/backend/certs && openssl req -x509 -newkey rsa:4096 \\')
-          console.warn('     -keyout key.pem -out cert.pem -sha256 -days 365 -nodes \\')
-          console.warn('     -config openssl.cnf -extensions v3_req')
+          this.logger.warn('⚠️  HTTPS certificates not found, falling back to HTTP', {
+            certsPath: join(__dirname, '..', 'certs'),
+            instructions:
+              'To generate certificates: cd apps/backend/certs && openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 365 -nodes -config openssl.cnf -extensions v3_req',
+          })
         }
       }
 
@@ -83,7 +85,6 @@ export class Container {
     }
 
     // Initialize services (secondary adapters)
-    this.logger = new PinoLoggerService()
     this.emailService = new ResendService(EnvConfig.RESEND_API_KEY, this.logger)
 
     // Initialize repositories (secondary adapters)
