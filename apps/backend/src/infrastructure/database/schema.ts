@@ -43,6 +43,8 @@ export const user = pgTable(
   })
 )
 
+export type DBUser = typeof user.$inferInsert
+
 /**
  * Chats table: Stores chat sessions linked to users
  */
