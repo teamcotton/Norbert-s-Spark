@@ -60,9 +60,13 @@ export function useRegistrationForm() {
     }
 
     // Name validation
-    const nameResult = NameSchema.safeParse(formData.name)
-    if (!nameResult.success) {
-      newErrors.name = nameResult.error.issues[0]?.message || 'Name is required'
+    if (!formData.name) {
+      newErrors.name = 'Name is required'
+    } else {
+      const nameResult = NameSchema.safeParse(formData.name)
+      if (!nameResult.success) {
+        newErrors.name = nameResult.error.issues[0]?.message || 'Invalid name'
+      }
     }
 
     // Password validation
