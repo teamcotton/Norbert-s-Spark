@@ -49,7 +49,7 @@ export class Container {
       const __dirname = dirname(__filename)
 
       const isDevelopment = EnvConfig.NODE_ENV !== 'production'
-      const useHttps = isDevelopment && process.env.USE_HTTPS === 'true'
+      const useHttps = isDevelopment && EnvConfig.USE_HTTPS === 'true'
 
       let httpsOptions: FastifyServerOptions | undefined
       if (useHttps) {
@@ -133,7 +133,7 @@ cd apps/backend/certs && openssl req -x509 -newkey rsa:4096 \\
       this.logger.info(`📚 API Documentation: ${protocol}://${host}:${port}/docs`)
     } catch (error) {
       this.logger.error('Failed to start server', error as Error)
-      process.exit(0)
+      process.exit(1)
     }
   }
 

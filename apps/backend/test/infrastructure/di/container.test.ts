@@ -263,7 +263,7 @@ describe('Container', () => {
       await expect(container.start()).rejects.toThrow('process.exit called')
 
       expect(container.logger.error).toHaveBeenCalledWith('Failed to start server', mockError)
-      expect(mockExit).toHaveBeenCalledWith(0)
+      expect(mockExit).toHaveBeenCalledWith(1)
 
       mockExit.mockRestore()
     })

@@ -2,42 +2,28 @@ import type { FastifyInstance, FastifyServerOptions } from 'fastify'
 import Fastify from 'fastify'
 import { readFileSync } from 'fs'
 import { join } from 'path'
-import { EnvConfig } from '../config/env.config.js'
 import cors from '@fastify/cors'
 import { parse } from 'yaml'
 import swagger from '@fastify/swagger'
 import swaggerUI from '@fastify/swagger-ui'
 import { fileURLToPath } from 'node:url'
 import { dirname } from 'node:path'
-
+/**
+ * Creates and configures a Fastify server instance with CORS, Swagger, and OpenAPI support.
+ *
+ * @param {FastifyServerOptions} [options] - Optional Fastify server options to customize the instance.
+ * @returns {FastifyInstance} The configured Fastify server instance.
+ *
+ * @throws {Error} If the OpenAPI specification file (`openapi.yaml`) cannot be found or parsed.
+ *
+ * @remarks
+ * - Registers CORS with permissive settings for development.
+ * - Loads and parses the OpenAPI specification from disk.
+ * - Registers Swagger and Swagger UI plugins for API documentation.
+ * - Registers a `/health` route for health checks.
+ * - Reads files from disk and may throw if files are missing or invalid.
+ */
 export function createFastifyApp(options?: FastifyServerOptions): FastifyInstance {
-  /* const options: FastifyServerOptions = {
-    logger: {
-      level: EnvConfig.LOG_LEVEL,
-    },
-  }
-
-  // Add HTTPS support in development
-  if (EnvConfig.USE_HTTPS && EnvConfig.NODE_ENV === 'development') {
-    options.https = {
-      key: readFileSync(join(__dirname, '../../certs/key.pem')),
-      cert: readFileSync(join(__dirname, '../../certs/cert.pem')),
-    }
-  }
-
-  const app = Fastify(options)
-
-  // Register CORS
-  app.register(require('@fastify/cors'), {
-    origin: true,
-  })
-
-  // Register error handler
-  app.setErrorHandler((error, request, reply) => {
-    request.log.error(error)
-    reply.status(500).send({ error: 'Internal Server Error' })
-  })*/
-
   const fastify = Fastify({
     logger: true,
     ...options,

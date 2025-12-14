@@ -6,6 +6,20 @@ import type { Obscured } from 'obscured'
 import { ExternalServiceException } from '../../../shared/exceptions/external-service.exception.js'
 import { EnvConfig } from '../../../infrastructure/config/env.config.js'
 
+/**
+ * Adapter for sending emails using the Resend API.
+ * Implements the EmailServicePort interface.
+ *
+ * @class ResendService
+ * @implements {EmailServicePort}
+ *
+ * @param {Obscured<string | undefined>} apiKey - The Resend API key, provided in an obscured form for security.
+ * @param {LoggerPort} logger - Logger instance for logging email operations.
+ *
+ * @dependency Uses the external Resend API via the `resend` npm package.
+ *
+ * @throws {ExternalServiceException} When the Resend API call fails.
+ */
 export class ResendService implements EmailServicePort {
   private readonly resendClient: Resend
 

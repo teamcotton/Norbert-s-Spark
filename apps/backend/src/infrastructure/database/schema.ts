@@ -105,8 +105,8 @@ export const messages = pgTable(
   })
 )
 
-export type DBMessages = typeof messages.$inferInsert
-export type DBMessagesSelect = typeof messages.$inferSelect
+export type DBMessage = typeof messages.$inferInsert
+export type DBMessageSelect = typeof messages.$inferSelect
 
 /**
  * Parts table: Stores message parts with polymorphic structure based on type field
