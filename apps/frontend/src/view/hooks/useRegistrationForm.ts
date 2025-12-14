@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import type { Obscured } from 'obscured'
+import { obscured } from 'obscured'
+import React, { useState } from 'react'
 
 import { EmailSchema, NameSchema, PasswordSchema } from '@/domain/auth/index.js'
 
@@ -7,6 +9,7 @@ interface FormData {
   name: string
   password: string
   confirmPassword: string
+  [key: string]: string
 }
 
 interface FormErrors {
@@ -38,6 +41,9 @@ export function useRegistrationForm() {
   }
 
   const validateForm = (): boolean => {
+    // Obscure sensitive fields before validation
+    const obscuredData = obscured.obscureKeys(formData, ['password', 'confirmPassword'])
+
     const newErrors: FormErrors = {
       email: '',
       name: '',
@@ -65,7 +71,7 @@ export function useRegistrationForm() {
     if (!formData.password) {
       newErrors.password = 'Password is required'
     } else {
-      const result = PasswordSchema.safeParse(formData.password)
+      const result = PasswordSchema.safeParse(obscured.value(obscuredData.password))
       if (!result.success) {
         newErrors.password = newErrors.password =
           result.error.issues[0]?.message || 'Password must be at least 12 characters'
@@ -75,7 +81,9 @@ export function useRegistrationForm() {
     // Confirm password validation
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = 'Please confirm your password'
-    } else if (formData.password !== formData.confirmPassword) {
+    } else if (
+      obscured.value(obscuredData.password) !== obscured.value(obscuredData.confirmPassword)
+    ) {
       newErrors.confirmPassword = 'Passwords do not match'
     }
 
@@ -86,8 +94,10 @@ export function useRegistrationForm() {
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault()
     if (validateForm()) {
+      // Obscure sensitive fields before processing
       // Handle registration
-      // TODO: Implement registration API call
+      // TODO: Implement registration API call with obscuredData
+      alert('Registration successful!')
     }
   }
 
