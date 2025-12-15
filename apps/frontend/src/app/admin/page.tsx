@@ -1,7 +1,7 @@
 'use client'
 
 import { Alert, Box, Container, TextField, Typography } from '@mui/material'
-import { DataGrid, type GridColDef } from '@mui/x-data-grid'
+import { DataGrid, type GridColDef, type GridPaginationModel } from '@mui/x-data-grid'
 import { useEffect, useState } from 'react'
 
 import type { User } from '@/domain/user/user.js'
@@ -11,6 +11,11 @@ export default function AdminPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
+    page: 0,
+    pageSize: 10,
+  })
+  const [rowCount, setRowCount] = useState(0)
   // TODO: Replace with actual user role from authentication
   const currentUserRole = 'admin' as 'admin' | 'moderator' | 'user'
 
@@ -18,7 +23,10 @@ export default function AdminPage() {
     async function fetchUsers() {
       try {
         setLoading(true)
-        const response = await fetch('/api/users', {
+        const limit = paginationModel.pageSize
+        const offset = paginationModel.page * paginationModel.pageSize
+
+        const response = await fetch(`/api/users?limit=${limit}&offset=${offset}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -43,6 +51,11 @@ export default function AdminPage() {
             role: string
             createdAt: string
           }>
+          pagination: {
+            total: number
+            limit: number
+            offset: number
+          }
         }
 
         // Map userId to id for MUI DataGrid compatibility
@@ -56,6 +69,7 @@ export default function AdminPage() {
           })) || []
 
         setUsers(mappedUsers)
+        setRowCount(data.pagination?.total ?? 0)
         setError(null)
       } catch (err) {
         console.warn('Error fetching users:', err)
@@ -69,7 +83,7 @@ export default function AdminPage() {
     }
 
     fetchUsers()
-  }, [])
+  }, [paginationModel])
 
   // Define columns
   const columns: GridColDef<User>[] = [
@@ -85,6 +99,7 @@ export default function AdminPage() {
   ]
 
   // Filter users based on search query (searches name, email, and role)
+  // Note: This is client-side filtering on the current page only
   const filteredUsers = users.filter((user) => {
     if (!searchQuery) return true
 
@@ -132,14 +147,10 @@ export default function AdminPage() {
           rows={filteredUsers}
           columns={columns}
           loading={loading}
-          initialState={{
-            pagination: {
-              paginationModel: { pageSize: 10, page: 0 },
-            },
-            sorting: {
-              sortModel: [{ field: 'createdAt', sort: 'desc' }],
-            },
-          }}
+          rowCount={rowCount}
+          paginationMode="server"
+          paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel}
           pageSizeOptions={[10, 25, 50, 100]}
           checkboxSelection={currentUserRole === 'admin'}
           disableRowSelectionOnClick

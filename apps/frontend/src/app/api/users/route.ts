@@ -1,6 +1,6 @@
 import type { User } from '@/domain/user/user.js'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const apiUrl = process.env.BACKEND_AI_CALLBACK_URL
 
@@ -13,6 +13,17 @@ export async function GET() {
         { status: 500 }
       )
     }
+
+    // Extract pagination parameters from URL query string
+    const { searchParams } = new URL(request.url)
+    const limit = searchParams.get('limit')
+    const offset = searchParams.get('offset')
+
+    // Build query string for backend API
+    const queryParams = new URLSearchParams()
+    if (limit) queryParams.set('limit', limit)
+    if (offset) queryParams.set('offset', offset)
+    const queryString = queryParams.toString() ? `?${queryParams.toString()}` : ''
 
     // For development with self-signed certificates, disable SSL verification
     const isLocalDevelopment = apiUrl.includes('localhost') || apiUrl.includes('127.0.0.1')
@@ -28,7 +39,7 @@ export async function GET() {
         rejectUnauthorized: process.env.NODE_ENV === 'production',
       })
 
-      response = (await nodeFetch(`${apiUrl}/users`, {
+      response = (await nodeFetch(`${apiUrl}/users${queryString}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -36,7 +47,7 @@ export async function GET() {
         agent,
       })) as unknown as Response
     } else {
-      response = await fetch(`${apiUrl}/users`, {
+      response = await fetch(`${apiUrl}/users${queryString}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

@@ -18,11 +18,38 @@ export class UserController {
 
   async getAllUsers(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
-      const users = await this.getAllUsersUseCase.execute()
+      // Extract pagination parameters from query string
+      const query = request.query as { limit?: string; offset?: string }
+      const limit = query.limit ? parseInt(query.limit, 10) : undefined
+      const offset = query.offset ? parseInt(query.offset, 10) : undefined
+
+      // Validate pagination parameters
+      if (limit !== undefined && (isNaN(limit) || limit < 1 || limit > 100)) {
+        reply.code(400).send({
+          success: false,
+          error: 'Invalid limit parameter. Must be between 1 and 100.',
+        })
+        return
+      }
+
+      if (offset !== undefined && (isNaN(offset) || offset < 0)) {
+        reply.code(400).send({
+          success: false,
+          error: 'Invalid offset parameter. Must be 0 or greater.',
+        })
+        return
+      }
+
+      const result = await this.getAllUsersUseCase.execute({ limit, offset })
 
       reply.code(200).send({
         success: true,
-        data: users,
+        data: result.data,
+        pagination: {
+          total: result.total,
+          limit: result.limit,
+          offset: result.offset,
+        },
       })
     } catch (error) {
       const err = error as Error
