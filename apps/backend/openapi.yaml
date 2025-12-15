@@ -126,7 +126,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-       
+
   /users:
     get:
       summary: Get all users
