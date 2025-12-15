@@ -132,13 +132,14 @@ export default function AdminPage() {
 
       <Box sx={{ mb: 3, display: 'flex', justifyContent: 'flex-end' }}>
         <TextField
-          label="Search users"
+          label="Search users (current page only)"
           variant="outlined"
           size="small"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           sx={{ width: 300 }}
           placeholder="Search by name, email, or role..."
+          helperText="Note: Search filters users on the current page only"
         />
       </Box>
 
