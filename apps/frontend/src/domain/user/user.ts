@@ -14,7 +14,9 @@ export const UserSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name must not exceed 100 characters'),
   email: z.string().email('Please enter a valid email address'),
   role: RoleSchema,
-  createdAt: z.string().datetime({ offset: true, message: 'Created at must be a valid ISO 8601 datetime' }),
+  createdAt: z
+    .string()
+    .datetime({ offset: true, message: 'Created at must be a valid ISO 8601 datetime' }),
 })
 
 // Types inferred from schemas
