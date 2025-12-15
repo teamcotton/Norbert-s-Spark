@@ -467,4 +467,181 @@ describe('PostgresUserRepository', () => {
       })
     })
   })
+
+  describe('findAll', () => {
+    it('should return paginated users with default pagination', async () => {
+      const mockDbUsers = [
+        {
+          userId: 'user-1',
+          email: 'user1@example.com',
+          password: validBcryptHash,
+          name: 'User One',
+          role: 'user',
+          createdAt: new Date(),
+        },
+        {
+          userId: 'user-2',
+          email: 'user2@example.com',
+          password: validBcryptHash,
+          name: 'User Two',
+          role: 'admin',
+          createdAt: new Date(),
+        },
+      ]
+
+      const mockLimit = vi.fn().mockResolvedValue(mockDbUsers)
+      const mockOffset = vi.fn().mockReturnValue({ limit: mockLimit })
+      const mockFrom = vi.fn().mockReturnValue({ limit: mockLimit, offset: mockOffset })
+      const mockSelect = vi.fn().mockReturnValue({ from: mockFrom })
+
+      const mockCountFrom = vi.fn().mockResolvedValue([{ count: 2 }])
+      vi.mocked(db.select)
+        .mockReturnValueOnce({ from: mockCountFrom } as any)
+        .mockReturnValueOnce(mockSelect() as any)
+
+      const result = await repository.findAll()
+
+      expect(result).toEqual({
+        data: expect.arrayContaining([
+          expect.objectContaining({ id: 'user-1' }),
+          expect.objectContaining({ id: 'user-2' }),
+        ]),
+        total: 2,
+        page: 1,
+        pageSize: 10,
+        totalPages: 1,
+      })
+      expect(result.data).toHaveLength(2)
+    })
+
+    it('should return paginated users with custom pagination', async () => {
+      const mockDbUsers = [
+        {
+          userId: 'user-3',
+          email: 'user3@example.com',
+          password: validBcryptHash,
+          name: 'User Three',
+          role: 'user',
+          createdAt: new Date(),
+        },
+      ]
+
+      const mockLimit = vi.fn().mockResolvedValue(mockDbUsers)
+      const mockOffset = vi.fn().mockReturnValue({ limit: mockLimit })
+      const mockFrom = vi.fn().mockReturnValue({ limit: mockLimit, offset: mockOffset })
+      const mockSelect = vi.fn().mockReturnValue({ from: mockFrom })
+
+      const mockCountFrom = vi.fn().mockResolvedValue([{ count: 25 }])
+      vi.mocked(db.select)
+        .mockReturnValueOnce({ from: mockCountFrom } as any)
+        .mockReturnValueOnce(mockSelect() as any)
+
+      const result = await repository.findAll({ page: 2, pageSize: 20 })
+
+      expect(mockOffset).toHaveBeenCalledWith(20)
+      expect(mockLimit).toHaveBeenCalledWith(20)
+      expect(result).toEqual({
+        data: expect.arrayContaining([expect.objectContaining({ id: 'user-3' })]),
+        total: 25,
+        page: 2,
+        pageSize: 20,
+        totalPages: 2,
+      })
+    })
+
+    it('should calculate correct offset for pagination', async () => {
+      const mockDbUsers = []
+      const mockLimit = vi.fn().mockResolvedValue(mockDbUsers)
+      const mockOffset = vi.fn().mockReturnValue({ limit: mockLimit })
+      const mockFrom = vi.fn().mockReturnValue({ limit: mockLimit, offset: mockOffset })
+      const mockSelect = vi.fn().mockReturnValue({ from: mockFrom })
+
+      const mockCountFrom = vi.fn().mockResolvedValue([{ count: 100 }])
+      vi.mocked(db.select)
+        .mockReturnValueOnce({ from: mockCountFrom } as any)
+        .mockReturnValueOnce(mockSelect() as any)
+
+      await repository.findAll({ page: 3, pageSize: 25 })
+
+      // Page 3 with pageSize 25 should offset by (3-1)*25 = 50
+      expect(mockOffset).toHaveBeenCalledWith(50)
+      expect(mockLimit).toHaveBeenCalledWith(25)
+    })
+
+    it('should calculate correct totalPages', async () => {
+      const mockDbUsers = []
+      const mockLimit = vi.fn().mockResolvedValue(mockDbUsers)
+      const mockOffset = vi.fn().mockReturnValue({ limit: mockLimit })
+      const mockFrom = vi.fn().mockReturnValue({ limit: mockLimit, offset: mockOffset })
+      const mockSelect = vi.fn().mockReturnValue({ from: mockFrom })
+
+      const mockCountFrom = vi.fn().mockResolvedValue([{ count: 47 }])
+      vi.mocked(db.select)
+        .mockReturnValueOnce({ from: mockCountFrom } as any)
+        .mockReturnValueOnce(mockSelect() as any)
+
+      const result = await repository.findAll({ page: 1, pageSize: 10 })
+
+      // 47 items with pageSize 10 should have 5 total pages (Math.ceil(47/10))
+      expect(result.totalPages).toBe(5)
+      expect(result.total).toBe(47)
+    })
+
+    it('should return empty array when no users exist', async () => {
+      const mockLimit = vi.fn().mockResolvedValue([])
+      const mockOffset = vi.fn().mockReturnValue({ limit: mockLimit })
+      const mockFrom = vi.fn().mockReturnValue({ limit: mockLimit, offset: mockOffset })
+      const mockSelect = vi.fn().mockReturnValue({ from: mockFrom })
+
+      const mockCountFrom = vi.fn().mockResolvedValue([{ count: 0 }])
+      vi.mocked(db.select)
+        .mockReturnValueOnce({ from: mockCountFrom } as any)
+        .mockReturnValueOnce(mockSelect() as any)
+
+      const result = await repository.findAll()
+
+      expect(result.data).toEqual([])
+      expect(result.total).toBe(0)
+      expect(result.totalPages).toBe(0)
+    })
+
+    it('should throw DatabaseException when query fails', async () => {
+      const mockCountFrom = vi.fn().mockRejectedValue(new Error('Database error'))
+      vi.mocked(db.select).mockReturnValueOnce({ from: mockCountFrom } as any)
+
+      await expect(repository.findAll()).rejects.toThrow(DatabaseException)
+      await expect(repository.findAll()).rejects.toThrow('Failed to find all users')
+    })
+
+    it('should map database records to User entities correctly', async () => {
+      const mockDbUsers = [
+        {
+          userId: 'user-1',
+          email: 'user1@example.com',
+          password: validBcryptHash,
+          name: 'User One',
+          role: 'admin',
+          createdAt: new Date('2024-01-01'),
+        },
+      ]
+
+      const mockLimit = vi.fn().mockResolvedValue(mockDbUsers)
+      const mockOffset = vi.fn().mockReturnValue({ limit: mockLimit })
+      const mockFrom = vi.fn().mockReturnValue({ limit: mockLimit, offset: mockOffset })
+      const mockSelect = vi.fn().mockReturnValue({ from: mockFrom })
+
+      const mockCountFrom = vi.fn().mockResolvedValue([{ count: 1 }])
+      vi.mocked(db.select)
+        .mockReturnValueOnce({ from: mockCountFrom } as any)
+        .mockReturnValueOnce(mockSelect() as any)
+
+      const result = await repository.findAll()
+
+      expect(result.data[0]).toBeInstanceOf(User)
+      expect(result.data[0]?.id).toBe('user-1')
+      expect(result.data[0]?.getEmail()).toBe('user1@example.com')
+      expect(result.data[0]?.getName()).toBe('User One')
+      expect(result.data[0]?.getRole()).toBe('admin')
+    })
+  })
 })
