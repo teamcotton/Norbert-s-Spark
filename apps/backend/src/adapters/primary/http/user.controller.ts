@@ -27,9 +27,10 @@ export class UserController {
     } catch (error) {
       const err = error as Error
       const statusCode = err instanceof BaseException ? err.statusCode : 500
+      const errorMessage = err?.message || 'An unexpected error occurred'
       reply.code(statusCode).send({
         success: false,
-        error: err.message,
+        error: errorMessage,
       })
     }
   }
@@ -50,9 +51,10 @@ export class UserController {
     } catch (error) {
       const err = error as Error
       const statusCode = err instanceof BaseException ? err.statusCode : 500
+      const errorMessage = err?.message || 'An unexpected error occurred'
       reply.code(statusCode).send({
         success: false,
-        error: err.message,
+        error: errorMessage,
       })
     }
   }
