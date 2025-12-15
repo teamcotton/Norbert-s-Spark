@@ -38,7 +38,7 @@ export function useRegistrationForm() {
     mutationFn: registerUserApi,
     onSuccess: (data) => {
       // Handle successful registration
-      console.warn('Registration successful:', data.data)
+      console.log('Registration successful:', data.data)
       // TODO: Redirect to success page or show success message
     },
     onError: (error: Error) => {

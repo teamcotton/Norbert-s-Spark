@@ -1,3 +1,4 @@
+'use server'
 import { obscured } from 'obscured'
 
 export interface RegisterUserData extends Record<string, string> {
