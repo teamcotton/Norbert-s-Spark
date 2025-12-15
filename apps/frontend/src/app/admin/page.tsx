@@ -1,7 +1,6 @@
 import type { User } from '@/domain/user/user.js'
 
 import AdminClient from './AdminClient.js'
-import * as https from 'node:https'
 
 async function getUsers(): Promise<readonly User[]> {
   try {
@@ -14,54 +13,40 @@ async function getUsers(): Promise<readonly User[]> {
     // eslint-disable-next-line no-console
     console.log('Fetching users from API:', `${apiUrl}/users`)
 
-    // Use custom HTTPS agent to allow self-signed certificates in development only
-    let fetchAgent;
-    if (process.env.NODE_ENV !== 'production') {
-      fetchAgent = new https.Agent({ rejectUnauthorized: false });
-    }
-
     const response = await fetch(`${apiUrl}/users`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
       cache: 'no-store', // Don't cache, always fetch fresh data
-      ...(fetchAgent ? { agent: fetchAgent } : {}),
     })
 
-      if (!response.ok) {
-        console.warn('Failed to fetch users from API')
-        return []
-      }
+    if (!response.ok) {
+      console.warn('Failed to fetch users from API')
+      return []
+    }
 
-      const data = (await response.json()) as {
-        success: boolean
-        data: Array<{
-          userId: string
-          email: string
-          name: string
-          role: string
-          createdAt: string
-        }>
-      }
-      // Map userId to id for MUI DataGrid compatibility
-      return (
-        data.data?.map((user) => ({
-          id: user.userId,
-          name: user.name,
-          email: user.email,
-          role: user.role as 'user' | 'admin' | 'moderator',
-          createdAt: user.createdAt,
-        })) || []
-      )
+    const data = (await response.json()) as {
+      success: boolean
+      data: Array<{
+        userId: string
+        email: string
+        name: string
+        role: string
+        createdAt: string
+      }>
+    }
+    // Map userId to id for MUI DataGrid compatibility
+    return (
+      data.data?.map((user) => ({
+        id: user.userId,
+        name: user.name,
+        email: user.email,
+        role: user.role as 'user' | 'admin' | 'moderator',
+        createdAt: user.createdAt,
+      })) || []
+    )
     // No finally block needed: agent is request-local, not global
-
-
-
-
-
-
-
   } catch (error) {
     console.warn('Error fetching users, using empty array:', error)
     return []
