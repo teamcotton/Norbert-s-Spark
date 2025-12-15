@@ -1,7 +1,5 @@
 'use server'
 
-import { obscured } from 'obscured'
-
 interface RegisterUserData extends Record<string, string> {
   email: string
   name: string
@@ -20,21 +18,14 @@ interface RegisterUserResponse {
 
 export async function registerUser(data: RegisterUserData): Promise<RegisterUserResponse> {
   try {
-    const apiUrl = process.env.BACKEND_AI_CALLBACK_URL
-
-    // Obscure sensitive data in memory to prevent exposure in logs/debugging
-    const obscuredData = obscured.obscureKeys(data, ['password'])
-
-    const response = await fetch(`${apiUrl}/users/register`, {
+    // Call the Next.js API route instead of calling backend directly
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:4321'
+    const response = await fetch(`${baseUrl}/api/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      // Extract the actual password value for API transmission
-      body: JSON.stringify({
-        ...data,
-        password: obscured.value(obscuredData.password),
-      }),
+      body: JSON.stringify(data),
     })
 
     const result = (await response.json()) as RegisterUserResponse
@@ -42,7 +33,7 @@ export async function registerUser(data: RegisterUserData): Promise<RegisterUser
     if (!response.ok) {
       return {
         success: false,
-        error: (result as { error?: string }).error || 'Registration failed',
+        error: result.error || 'Registration failed',
       }
     }
 

@@ -35,7 +35,7 @@ describe('registerUser', () => {
       expect(result).toEqual(mockResponse)
       expect(global.fetch).toHaveBeenCalledTimes(1)
       expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/users/register'),
+        expect.stringContaining('/api/register'),
         expect.objectContaining({
           method: 'POST',
           headers: {
@@ -46,9 +46,9 @@ describe('registerUser', () => {
       )
     })
 
-    it('should use BACKEND_AI_CALLBACK_URL environment variable when available', async () => {
-      const customApiUrl = 'https://api.example.com'
-      process.env.BACKEND_AI_CALLBACK_URL = customApiUrl
+    it('should use NEXT_PUBLIC_BASE_URL environment variable when available', async () => {
+      const customBaseUrl = 'https://app.example.com'
+      process.env.NEXT_PUBLIC_BASE_URL = customBaseUrl
 
       const mockResponse = {
         success: true,
@@ -72,12 +72,9 @@ describe('registerUser', () => {
 
       await registerUser(userData)
 
-      expect(global.fetch).toHaveBeenCalledWith(
-        `${customApiUrl}/users/register`,
-        expect.any(Object)
-      )
+      expect(global.fetch).toHaveBeenCalledWith(`${customBaseUrl}/api/register`, expect.any(Object))
 
-      delete process.env.BACKEND_AI_CALLBACK_URL
+      delete process.env.NEXT_PUBLIC_BASE_URL
     })
   })
 
