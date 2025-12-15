@@ -748,7 +748,7 @@ describe('RegistrationForm', () => {
       expect(confirmPasswordInput).toHaveAttribute('type', 'text')
     })
 
-    it('should display Visibility icon when password is hidden', () => {
+    it('should display VisibilityOff icon when password is hidden', () => {
       render(<RegistrationForm {...defaultProps} />)
 
       const toggleButton = screen.getByLabelText(/toggle password visibility/i)
@@ -757,7 +757,7 @@ describe('RegistrationForm', () => {
       expect(visibilityOffIcon).toBeInTheDocument()
     })
 
-    it('should display VisibilityOff icon when password is visible', () => {
+    it('should display Visibility icon when password is visible', () => {
       render(<RegistrationForm {...defaultProps} />)
 
       const toggleButton = screen.getByLabelText(/toggle password visibility/i)
@@ -769,7 +769,7 @@ describe('RegistrationForm', () => {
       expect(visibilityIcon).toBeInTheDocument()
     })
 
-    it('should display Visibility icon when confirm password is hidden', () => {
+    it('should display VisibilityOff icon when confirm password is hidden', () => {
       render(<RegistrationForm {...defaultProps} />)
 
       const toggleButton = screen.getByLabelText(/toggle confirm password visibility/i)
@@ -778,7 +778,7 @@ describe('RegistrationForm', () => {
       expect(visibilityOffIcon).toBeInTheDocument()
     })
 
-    it('should display VisibilityOff icon when confirm password is visible', () => {
+    it('should display Visibility icon when confirm password is visible', () => {
       render(<RegistrationForm {...defaultProps} />)
 
       const toggleButton = screen.getByLabelText(/toggle confirm password visibility/i)
