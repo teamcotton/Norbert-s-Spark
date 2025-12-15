@@ -1,7 +1,4 @@
-import type {
-  UserRepositoryPort,
-  PaginationParams,
-} from '../ports/user.repository.port.js'
+import type { UserRepositoryPort, PaginationParams } from '../ports/user.repository.port.js'
 import type { LoggerPort } from '../ports/logger.port.js'
 
 export interface UserDto {
