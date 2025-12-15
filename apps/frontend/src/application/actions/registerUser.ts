@@ -1,6 +1,8 @@
 'use server'
 
-interface RegisterUserData {
+import { obscured } from 'obscured'
+
+interface RegisterUserData extends Record<string, string> {
   email: string
   name: string
   password: string
@@ -20,12 +22,19 @@ export async function registerUser(data: RegisterUserData): Promise<RegisterUser
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
 
+    // Obscure sensitive data in memory to prevent exposure in logs/debugging
+    const obscuredData = obscured.obscureKeys(data, ['password'])
+
     const response = await fetch(`${apiUrl}/users/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      // Extract the actual password value for API transmission
+      body: JSON.stringify({
+        ...data,
+        password: obscured.value(obscuredData.password),
+      }),
     })
 
     const result = (await response.json()) as RegisterUserResponse
