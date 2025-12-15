@@ -110,16 +110,16 @@ export function useRegistrationForm() {
           console.warn('Registration successful:', result.data)
         } else {
           // Handle registration error
-          setErrors({
-            ...errors,
+          setErrors((prev) => ({
+            ...prev,
             email: result.error || 'Registration failed',
-          })
+          }))
         }
       } catch {
-        setErrors({
-          ...errors,
+        setErrors((prev) => ({
+          ...prev,
           email: 'An unexpected error occurred. Please try again.',
-        })
+        }))
       } finally {
         setIsSubmitting(false)
       }
