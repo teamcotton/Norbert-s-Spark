@@ -41,6 +41,7 @@ describe('UserController', () => {
     mockRequest = {
       body: {},
       params: {},
+      query: {},
     } as any
   })
 
@@ -132,12 +133,20 @@ describe('UserController', () => {
           },
         ]
 
-        vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue(mockUsers)
+        vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue({
+          data: mockUsers,
+          total: mockUsers.length,
+          limit: 10,
+          offset: 0,
+        })
 
         await controller.getAllUsers(mockRequest, mockReply)
 
         expect(mockGetAllUsersUseCase.execute).toHaveBeenCalledTimes(1)
-        expect(mockGetAllUsersUseCase.execute).toHaveBeenCalledWith()
+        expect(mockGetAllUsersUseCase.execute).toHaveBeenCalledWith({
+          limit: undefined,
+          offset: undefined,
+        })
       })
 
       it('should return 200 status code for successful retrieval', async () => {
@@ -151,7 +160,12 @@ describe('UserController', () => {
           },
         ]
 
-        vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue(mockUsers)
+        vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue({
+          data: mockUsers,
+          total: mockUsers.length,
+          limit: 10,
+          offset: 0,
+        })
 
         await controller.getAllUsers(mockRequest, mockReply)
 
@@ -176,20 +190,35 @@ describe('UserController', () => {
           },
         ]
 
-        vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue(mockUsers)
+        vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue({
+          data: mockUsers,
+          total: mockUsers.length,
+          limit: 10,
+          offset: 0,
+        })
 
         await controller.getAllUsers(mockRequest, mockReply)
 
         expect(mockReply.send).toHaveBeenCalledWith({
           success: true,
           data: mockUsers,
+          pagination: {
+            total: mockUsers.length,
+            limit: 10,
+            offset: 0,
+          },
         })
       })
 
       it('should handle empty users array', async () => {
         const mockUsers: any[] = []
 
-        vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue(mockUsers)
+        vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue({
+          data: mockUsers,
+          total: mockUsers.length,
+          limit: 10,
+          offset: 0,
+        })
 
         await controller.getAllUsers(mockRequest, mockReply)
 
@@ -197,6 +226,11 @@ describe('UserController', () => {
         expect(mockReply.send).toHaveBeenCalledWith({
           success: true,
           data: [],
+          pagination: {
+            total: 0,
+            limit: 10,
+            offset: 0,
+          },
         })
       })
 
@@ -209,7 +243,12 @@ describe('UserController', () => {
           createdAt: new Date('2024-01-01'),
         }))
 
-        vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue(mockUsers)
+        vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue({
+          data: mockUsers,
+          total: mockUsers.length,
+          limit: 10,
+          offset: 0,
+        })
 
         await controller.getAllUsers(mockRequest, mockReply)
 
@@ -217,6 +256,11 @@ describe('UserController', () => {
         expect(mockReply.send).toHaveBeenCalledWith({
           success: true,
           data: mockUsers,
+          pagination: {
+            total: mockUsers.length,
+            limit: 10,
+            offset: 0,
+          },
         })
       })
 
@@ -231,17 +275,28 @@ describe('UserController', () => {
           },
         ]
 
-        vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue(mockUsers)
+        vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue({
+          data: mockUsers,
+          total: mockUsers.length,
+          limit: 10,
+          offset: 0,
+        })
 
         await controller.getAllUsers(mockRequest, mockReply)
 
         const sentData = vi.mocked(mockReply.send).mock.calls[0]?.[0] as {
           success: boolean
           data: typeof mockUsers
+          pagination: { total: number; limit: number; offset: number }
         }
         expect(sentData).toEqual({
           success: true,
           data: mockUsers,
+          pagination: {
+            total: mockUsers.length,
+            limit: 10,
+            offset: 0,
+          },
         })
         expect(sentData.data[0]).toHaveProperty('userId', 'user-1')
         expect(sentData.data[0]).toHaveProperty('email', 'test@example.com')
@@ -328,18 +383,29 @@ describe('UserController', () => {
           },
         ]
 
-        vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue(mockUsers)
+        vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue({
+          data: mockUsers,
+          total: mockUsers.length,
+          limit: 10,
+          offset: 0,
+        })
 
         await controller.getAllUsers(mockRequest, mockReply)
 
         const sentData = vi.mocked(mockReply.send).mock.calls[0]?.[0] as {
           success: boolean
           data?: typeof mockUsers
+          pagination?: { total: number; limit: number; offset: number }
           error?: string
         }
         expect(sentData).toEqual({
           success: true,
           data: mockUsers,
+          pagination: {
+            total: mockUsers.length,
+            limit: 10,
+            offset: 0,
+          },
         })
         expect(sentData).toHaveProperty('success')
         expect(typeof sentData.success).toBe('boolean')
@@ -356,18 +422,29 @@ describe('UserController', () => {
           },
         ]
 
-        vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue(mockUsers)
+        vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue({
+          data: mockUsers,
+          total: mockUsers.length,
+          limit: 10,
+          offset: 0,
+        })
 
         await controller.getAllUsers(mockRequest, mockReply)
 
         const sentData = vi.mocked(mockReply.send).mock.calls[0]?.[0] as {
           success: boolean
           data?: typeof mockUsers
+          pagination?: { total: number; limit: number; offset: number }
           error?: string
         }
         expect(sentData).toEqual({
           success: true,
           data: mockUsers,
+          pagination: {
+            total: mockUsers.length,
+            limit: 10,
+            offset: 0,
+          },
         })
         expect(sentData).toHaveProperty('data')
         expect(Array.isArray(sentData.data)).toBe(true)
@@ -411,7 +488,12 @@ describe('UserController', () => {
           },
         ]
 
-        vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue(mockUsers)
+        vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue({
+          data: mockUsers,
+          total: mockUsers.length,
+          limit: 10,
+          offset: 0,
+        })
 
         await getAllUsersHandler(mockRequest, mockReply)
 
@@ -442,7 +524,12 @@ describe('UserController', () => {
           },
         ]
 
-        vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue(mockUsers)
+        vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue({
+          data: mockUsers,
+          total: mockUsers.length,
+          limit: 10,
+          offset: 0,
+        })
 
         await getAllUsersHandler(mockRequest, mockReply)
 
