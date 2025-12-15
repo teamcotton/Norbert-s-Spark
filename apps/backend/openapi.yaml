@@ -206,6 +206,7 @@ components:
         - id
         - email
         - name
+        - role
         - createdAt
       properties:
         id:
@@ -219,6 +220,11 @@ components:
         name:
           type: string
           example: John Doe
+        role:
+          type: string
+          enum: [user, admin]
+          example: user
+          description: User's role in the system
         createdAt:
           type: string
           format: date-time
