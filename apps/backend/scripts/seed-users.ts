@@ -19,8 +19,8 @@
  * or 'Password123!' if SEED_PASSWORD is not set.
  *
  * Maximum Users:
- * The script can generate approximately 52,560 unique email addresses
- * (72 firstNames × 73 lastNames × 10 domains). If you need more users,
+ * The script can generate approximately 51,840 unique email addresses
+ * (72 firstNames × 72 lastNames × 10 domains). If you need more users,
  * the script will throw an error to prevent duplicate email generation.
  */
 import { db } from '../src/infrastructure/database/index.js'
@@ -240,8 +240,8 @@ const emailDomains = [
 /**
  * Generate a unique email address with collision detection
  *
- * Note: This function can generate up to approximately 52,560 unique emails
- * (72 firstNames × 73 lastNames × 10 domains). Beyond this limit, the function
+ * Note: This function can generate up to approximately 51,840 unique emails
+ * (72 firstNames × 72 lastNames × 10 domains). Beyond this limit, the function
  * will throw an error to prevent duplicate email generation.
  *
  * @param firstName - The first name to use in the email
