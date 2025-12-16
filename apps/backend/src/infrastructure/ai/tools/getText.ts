@@ -1,8 +1,13 @@
 import * as fs from 'node:fs/promises'
 import * as fsSync from 'node:fs'
 import path from 'node:path'
+import {z} from 'zod'
 
 //const textPath = join(import.meta.dirname, '..', 'data', 'heart-of-darkness.txt')
+const FileExtensionSchema = z.string().regex(/\.(txt|csv|json|toon|onnx|safetensors|pt|py|gguf)$/i)
+
+type FilePathSchema = z.infer<typeof FileExtensionSchema>
+
 
 /**
  * Class for managing text file retrieval with state management
@@ -14,12 +19,19 @@ export class GetText {
 
   /**
    * Create a new GetText instance
-   * @param dataFolder - The data folder name (default: 'data')
-   * @param fileName - The file name to read (default: 'heart-of-darkness.txt')
+   * @param dataFolder - The data folder name (id: 'data')
+   * @param filePath - The file name to read (id: 'heart-of-darkness.txt')
    */
-  constructor(dataFolder: string, fileName: string) {
-    this.file = fileName
-    this.filePath = path.join(process.cwd(), dataFolder, fileName)
+  constructor(dataFolder: string, filePath: FilePathSchema) {
+    try {
+      FileExtensionSchema.parse(filePath)
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        error.issues
+      }
+    }
+    this.file = filePath
+    this.filePath = path.join(process.cwd(), dataFolder, filePath)
     this.fileContents = new Map<string, string>()
   }
 
