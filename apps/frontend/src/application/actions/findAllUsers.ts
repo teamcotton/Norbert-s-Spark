@@ -59,12 +59,7 @@ export async function findAllUsers(params: FindAllUsersParams): Promise<FindAllU
     }
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
-      console.error('Aborted')
-      return {
-        success: false,
-        users: [],
-        total: 0,
-      }
+      throw error
     }
     console.warn('Error fetching users:', error)
     return {
