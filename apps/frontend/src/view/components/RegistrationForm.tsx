@@ -174,7 +174,7 @@ export function RegistrationForm({
                         onClick={handleTogglePasswordVisibility}
                         edge="end"
                       >
-                        {showPassword ? <apps/frontend/src/view/components/RegistrationForm.tsx /> : <Visibility />}
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
                       </IconButton>
                     </InputAdornment>
                   ),
