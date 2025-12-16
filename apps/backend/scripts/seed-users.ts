@@ -12,13 +12,19 @@
  *
  * All accounts use the password: Password123!
  */
-
+/*
+ * All accounts use the password specified by the SEED_PASSWORD environment variable,
+ * or 'Password123!' if SEED_PASSWORD is not set.
+ */
 import { db } from '../src/infrastructure/database/index.js'
 import { user } from '../src/infrastructure/database/schema.js'
 import { Password } from '../src/domain/value-objects/password.js'
-
-const TOTAL_USERS = 58
-const DEFAULT_PASSWORD = 'Password123!'
+const DEFAULT_PASSWORD = process.env.SEED_PASSWORD || 'Password123!'
+if (!process.env.SEED_PASSWORD) {
+  console.warn(
+    '[seed-users] Warning: SEED_PASSWORD environment variable not set. Using default password "Password123!".'
+  )
+}
 
 // Diverse first names
 const firstNames = [

@@ -152,7 +152,7 @@ Example emails:
 
 - Admin: `james.smith@gmail.com`
 - Moderator 1: `mary.smith@yahoo.com`
-- Moderator 2: `john.johnson@outlook.com`
+- Moderator 2: `john.smith@outlook.com`
 - Users: Various combinations of names and domains
 
 ### Email Generation
@@ -206,7 +206,7 @@ Example output:
 👥 Generating user data...
    👑 Admin: james.smith@gmail.com
    🛡️  Moderator: mary.smith@yahoo.com
-   🛡️  Moderator: john.johnson@outlook.com
+   🛡️  Moderator: john.smith@outlook.com
    👤 Regular users: 55
 
 💾 Inserting users into database...
