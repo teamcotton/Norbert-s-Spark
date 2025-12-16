@@ -1,8 +1,7 @@
-import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { FileUtil } from '../../../shared/utils/file.util.js'
 
-const textPath = join(import.meta.dirname, '..', 'data', 'heart-of-darkness.txt')
+//const textPath = join(import.meta.dirname, '..', 'data', 'heart-of-darkness.txt')
 
 /**
  * Class for managing text file retrieval with state management
@@ -28,6 +27,9 @@ export class GetText {
    * @throws Error if file cannot be read
    */
   public async getText(textPath: string): Promise<string | undefined> {
+    if (this.hasCachedContent(textPath)) {
+      return this.getCachedContent(textPath)
+    }
     const fileExists = this.fileUtil.readFile(textPath)
     if (fileExists.success && fileExists.content) {
       // Save the successfully retrieved content to state
@@ -35,7 +37,7 @@ export class GetText {
       return fileExists.content
     }
     if (!fileExists.success) {
-      throw new Error(`Error reading Heart of Darkness text: ${fileExists.message}`)
+      throw new Error(`Error reading file "${textPath}": ${fileExists.message}`)
     }
   }
 

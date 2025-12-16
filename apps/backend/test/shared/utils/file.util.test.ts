@@ -67,8 +67,19 @@ describe('FileUtil', () => {
         expect(fs.existsSync(customDir)).toBe(true)
       } finally {
         // Clean up custom directory and parent folder
-        if (fs.existsSync(path.join(process.cwd(), customFolder))) {
-          fs.rmSync(path.join(process.cwd(), customFolder), { recursive: true, force: true })
+        try {
+          const customFolderPath = path.join(process.cwd(), customFolder)
+          if (fs.existsSync(customFolderPath)) {
+            fs.rmSync(customFolderPath, {
+              recursive: true,
+              force: true,
+              maxRetries: 3,
+              retryDelay: 100,
+            })
+          }
+        } catch (error) {
+          // Ignore cleanup errors in tests
+          console.warn('Failed to cleanup test-data folder:', error)
         }
       }
     })

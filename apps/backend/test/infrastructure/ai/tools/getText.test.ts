@@ -97,7 +97,7 @@ come to and wait for the turn of the tide.`
 
       // Act & Assert: Expect an error to be thrown
       await expect(getText(nonExistentFile, TEST_DATA_FOLDER, TEST_DB_NAME)).rejects.toThrow(
-        'Error reading Heart of Darkness text'
+        'Error reading file'
       )
     })
 
@@ -127,7 +127,7 @@ come to and wait for the turn of the tide.`
 
       // Act & Assert: Expect an error to be thrown
       await expect(getText(HEART_OF_DARKNESS_FILE, TEST_DATA_FOLDER, TEST_DB_NAME)).rejects.toThrow(
-        'Error reading Heart of Darkness text'
+        'Error reading file'
       )
     })
   })
@@ -245,7 +245,7 @@ come to and wait for the turn of the tide.`
     it('should throw error for non-existent file', async () => {
       // Act & Assert
       await expect(getTextInstance.getText('non-existent.txt')).rejects.toThrow(
-        'Error reading Heart of Darkness text'
+        'Error reading file'
       )
     })
 
