@@ -27,7 +27,7 @@ import { useRouter } from 'next/navigation.js'
 import React, { use, useEffect, useRef, useState } from 'react'
 import { uuidv7 } from 'uuidv7'
 
-import { fileToDataURL } from '@/application/services/fileToDataURL.js'
+import { fileToDataURL } from '@/application/services/fileToDataURL.service.js'
 import { ChatInput } from '@/view/components/ChatInputComponent.js'
 import { IntroComponent } from '@/view/components/IntroComponent.js'
 import { Message } from '@/view/components/MessageComponent.js'

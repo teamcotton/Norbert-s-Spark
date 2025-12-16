@@ -261,6 +261,12 @@ importers:
       obscured:
         specifier: ^2.0.4
         version: 2.0.4
+      pino:
+        specifier: ^10.1.0
+        version: 10.1.0
+      pino-pretty:
+        specifier: ^13.1.3
+        version: 13.1.3
       react:
         specifier: ^19.2.3
         version: 19.2.3
