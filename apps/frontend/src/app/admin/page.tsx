@@ -84,6 +84,7 @@ export default function AdminPage() {
     },
   ]
 
+  // TODO: include API call to search by email as all emails must be unique
   // Filter users based on search query (searches name, email, and role)
   // Note: This is client-side filtering on the current page only
   const filteredUsers = users.filter((user) => {
@@ -118,18 +119,18 @@ export default function AdminPage() {
 
       <Box sx={{ mb: 3, display: 'flex', justifyContent: 'flex-end' }}>
         <TextField
-          label="Search users (current page only)"
+          label="Search users"
           variant="outlined"
           size="small"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           sx={{ width: 300 }}
-          placeholder="Search by name, email, or role..."
-          helperText="Note: Search filters users on the current page only"
+          placeholder="Search by email"
+          helperText="Search through all users"
         />
       </Box>
 
-      <Box sx={{ height: 600, width: '100%' }}>
+      <Box sx={{ height: '100%', width: '100%' }}>
         <DataGrid
           rows={filteredUsers}
           columns={columns}

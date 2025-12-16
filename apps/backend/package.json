@@ -24,7 +24,8 @@
     "db:studio": "drizzle-kit studio",
     "db:push": "drizzle-kit push",
     "db:drop": "docker exec -i level2gym-postgres psql -U postgres -d level2gym < drizzle/drop_all_tables.sql",
-    "db:reset": "pnpm db:drop && pnpm db:push"
+    "db:reset": "pnpm db:drop && pnpm db:push",
+    "seed:users": "tsx scripts/seed-users.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.46",
