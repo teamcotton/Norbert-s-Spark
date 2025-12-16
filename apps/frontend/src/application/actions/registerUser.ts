@@ -1,4 +1,3 @@
-'use server'
 import type { RegisterUserData, RegisterUserResponse } from '@/domain/auth/index.js'
 
 export async function registerUser(data: RegisterUserData): Promise<RegisterUserResponse> {

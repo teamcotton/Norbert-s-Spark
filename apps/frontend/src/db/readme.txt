@@ -1,2 +1,1 @@
-keep all db connections in the backend folder with data
-retrieved through the api calls
+db folder but keep direct db connections in the backend
