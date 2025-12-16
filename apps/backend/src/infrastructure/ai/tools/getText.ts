@@ -26,7 +26,7 @@ export class GetText {
       FileExtensionSchema.parse(filePath)
     } catch (error) {
       if (error instanceof z.ZodError) {
-        error.issues
+        throw error
       }
     }
     this.file = filePath
