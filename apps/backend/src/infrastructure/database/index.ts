@@ -4,6 +4,13 @@ import { obscured } from 'obscured'
 import { EnvConfig } from '../config/env.config.js'
 import { ValidationException } from '../../shared/exceptions/validation.exception.js'
 
+const logger = {
+  info: (...params: unknown[]) => console.info(...params),
+  error: (...params: unknown[]) => console.error(...params),
+}
+
+logger.info('Connecting to database...')
+
 if (!obscured.value(EnvConfig.DATABASE_URL)) {
   throw new ValidationException('DATABASE_URL is required but not configured')
 }
@@ -22,7 +29,7 @@ export const pool = new Pool({
 })
 
 pool.on('error', (err) => {
-  console.error('Unexpected error on idle client', err)
+  logger.error('Unexpected error on idle client', err)
   process.exit(-1)
 })
 
