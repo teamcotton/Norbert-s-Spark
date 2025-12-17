@@ -295,8 +295,8 @@ test.describe('Registration Page', () => {
   test('should show error when trying to register with an already registered email', async ({
     page,
   }) => {
-    // Generate a unique email for this test using timestamp
-    const uniqueEmail = `test-duplicate-${Date.now()}@example.com`
+    // Generate a unique email for this test using timestamp and random string
+    const uniqueEmail = `test-duplicate-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`
     const name = 'Test User'
     const password = 'securepassword123'
 
@@ -311,19 +311,19 @@ test.describe('Registration Page', () => {
 
     const submitButton = page.getByRole('button', { name: /create account/i })
 
-    // Listen for the API response to know when registration completes
-    const responsePromise = page.waitForResponse(
+    // Wait for the registration API response
+    const firstRegistrationPromise = page.waitForResponse(
       (response) =>
         response.url().includes('/api/register') && response.request().method() === 'POST',
-      { timeout: 5000 }
+      { timeout: 10000 }
     )
 
     await submitButton.click()
 
-    // Wait for first registration to complete
-    await responsePromise.catch(() => {
-      // Ignore if response doesn't come - may have redirected
-    })
+    // Verify first registration succeeded
+    const firstResponse = await firstRegistrationPromise
+    expect(firstResponse.status()).toBeGreaterThanOrEqual(200)
+    expect(firstResponse.status()).toBeLessThan(300)
 
     // Navigate back to registration page to test duplicate registration
     await page.goto('/registration')
@@ -337,12 +337,22 @@ test.describe('Registration Page', () => {
       .fill(password)
     await page.locator('input[autocomplete="new-password"]').nth(1).fill(password)
 
+    // Wait for the duplicate registration API response
+    const duplicateRegistrationPromise = page.waitForResponse(
+      (response) =>
+        response.url().includes('/api/register') && response.request().method() === 'POST',
+      { timeout: 10000 }
+    )
+
     await submitButton.click()
 
+    // Verify duplicate registration returns 409 Conflict
+    const duplicateResponse = await duplicateRegistrationPromise
+    expect(duplicateResponse.status()).toBe(409)
+
     // Check for the duplicate email error message in the Alert component
-    // expect() has built-in waiting, no need for explicit timeout
     await expect(
       page.getByText(/this email is already registered\. please use a different email\./i)
-    ).toBeVisible({ timeout: 5000 })
+    ).toBeVisible({ timeout: 10000 })
   })
 })
