@@ -3,9 +3,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { EnvConfig } from '../../../src/infrastructure/config/env.config.js'
 import { JwtUtil } from '../../../src/infrastructure/security/jwt.util.js'
-import type { JwtUserClaims } from '../../../src/shared/types/index.js'
-import { UnauthorizedException } from '../../../src/shared/exceptions/unauthorized.exception.js'
 import { ErrorCode } from '../../../src/shared/constants/error-codes.js'
+import { UnauthorizedException } from '../../../src/shared/exceptions/unauthorized.exception.js'
+import type { JwtUserClaims } from '../../../src/shared/types/index.js'
 
 describe('JwtUtil', () => {
   const validClaims: JwtUserClaims = {
@@ -139,14 +139,16 @@ describe('JwtUtil', () => {
         expiresIn: -1,
       })
 
+      let thrownError: UnauthorizedException | null = null
       try {
         JwtUtil.verifyToken(expiredToken)
-        expect.fail('Should have thrown UnauthorizedException')
       } catch (error) {
-        expect(error).toBeInstanceOf(UnauthorizedException)
-        expect((error as UnauthorizedException).code).toBe(ErrorCode.TOKEN_EXPIRED)
-        expect((error as UnauthorizedException).message).toBe('Token has expired')
+        thrownError = error as UnauthorizedException
       }
+
+      expect(thrownError).toBeInstanceOf(UnauthorizedException)
+      expect(thrownError?.code).toBe(ErrorCode.TOKEN_EXPIRED)
+      expect(thrownError?.message).toBe('Token has expired')
     })
 
     it('should throw UnauthorizedException for malformed token', () => {

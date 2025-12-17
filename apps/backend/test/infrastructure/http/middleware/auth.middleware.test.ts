@@ -3,9 +3,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { authMiddleware } from '../../../../src/infrastructure/http/middleware/auth.middleware.js'
 import { JwtUtil } from '../../../../src/infrastructure/security/jwt.util.js'
-import type { JwtUserClaims } from '../../../../src/shared/types/index.js'
-import { UnauthorizedException } from '../../../../src/shared/exceptions/unauthorized.exception.js'
 import { ErrorCode } from '../../../../src/shared/constants/error-codes.js'
+import { UnauthorizedException } from '../../../../src/shared/exceptions/unauthorized.exception.js'
+import type { JwtUserClaims } from '../../../../src/shared/types/index.js'
 
 describe('authMiddleware', () => {
   let mockRequest: Partial<FastifyRequest>
@@ -149,9 +149,9 @@ describe('authMiddleware', () => {
         expect.objectContaining({
           method: 'GET',
           route: '/test',
-          err: expect.any(Error),
+          errorCode: expect.any(String),
         }),
-        'Authentication failed: invalid or expired token'
+        expect.stringContaining('Authentication failed:')
       )
     })
 
@@ -166,9 +166,9 @@ describe('authMiddleware', () => {
         expect.objectContaining({
           method: 'GET',
           route: '/test',
-          err: expect.any(Error),
+          errorCode: expect.any(String),
         }),
-        'Authentication failed: invalid or expired token'
+        expect.stringContaining('Authentication failed:')
       )
     })
 
@@ -200,14 +200,14 @@ describe('authMiddleware', () => {
       )
     })
 
-    it('should include error object in log context for invalid tokens', async () => {
+    it('should include error code in log context for invalid tokens', async () => {
       mockRequest.headers = { authorization: 'Bearer malformed' }
 
       await authMiddleware(mockRequest as FastifyRequest, mockReply as FastifyReply)
 
       const logCall = logWarnSpy.mock.calls[0]
-      expect(logCall?.[0]).toHaveProperty('err')
-      expect(logCall?.[0].err).toBeInstanceOf(Error)
+      expect(logCall?.[0]).toHaveProperty('errorCode')
+      expect(logCall?.[0].errorCode).toMatch(/UNAUTHORIZED/)
     })
   })
 
@@ -276,6 +276,95 @@ describe('authMiddleware', () => {
 
       expect(codeSpy).toHaveBeenCalledWith(401)
       expect(sendSpy).toHaveBeenCalledWith({ error: 'No token provided' })
+    })
+  })
+
+  describe('Token format validation', () => {
+    it('should reject token exceeding maximum length', async () => {
+      const veryLongToken = 'a'.repeat(9000) + '.' + 'b'.repeat(100) + '.' + 'c'.repeat(100)
+      mockRequest.headers = { authorization: `Bearer ${veryLongToken}` }
+
+      await authMiddleware(mockRequest as FastifyRequest, mockReply as FastifyReply)
+
+      expect(codeSpy).toHaveBeenCalledWith(401)
+      expect(sendSpy).toHaveBeenCalledWith({ error: 'Invalid or expired token' })
+      expect(logWarnSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          errorCode: 'UNAUTHORIZED',
+        }),
+        'Authentication failed: Token exceeds maximum allowed length'
+      )
+    })
+
+    it('should reject token with less than 3 parts', async () => {
+      mockRequest.headers = { authorization: 'Bearer token.only' }
+
+      await authMiddleware(mockRequest as FastifyRequest, mockReply as FastifyReply)
+
+      expect(codeSpy).toHaveBeenCalledWith(401)
+      expect(sendSpy).toHaveBeenCalledWith({ error: 'Invalid or expired token' })
+      expect(logWarnSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          errorCode: 'UNAUTHORIZED',
+        }),
+        'Authentication failed: Invalid token format'
+      )
+    })
+
+    it('should reject token with more than 3 parts', async () => {
+      mockRequest.headers = { authorization: 'Bearer part1.part2.part3.part4' }
+
+      await authMiddleware(mockRequest as FastifyRequest, mockReply as FastifyReply)
+
+      expect(codeSpy).toHaveBeenCalledWith(401)
+      expect(sendSpy).toHaveBeenCalledWith({ error: 'Invalid or expired token' })
+      expect(logWarnSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          errorCode: 'UNAUTHORIZED',
+        }),
+        'Authentication failed: Invalid token format'
+      )
+    })
+
+    it('should reject token with invalid characters', async () => {
+      mockRequest.headers = { authorization: 'Bearer token@#$.with$.invalid!' }
+
+      await authMiddleware(mockRequest as FastifyRequest, mockReply as FastifyReply)
+
+      expect(codeSpy).toHaveBeenCalledWith(401)
+      expect(sendSpy).toHaveBeenCalledWith({ error: 'Invalid or expired token' })
+      expect(logWarnSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          errorCode: 'UNAUTHORIZED',
+        }),
+        'Authentication failed: Invalid token characters'
+      )
+    })
+
+    it('should reject token with empty parts', async () => {
+      mockRequest.headers = { authorization: 'Bearer header..signature' }
+
+      await authMiddleware(mockRequest as FastifyRequest, mockReply as FastifyReply)
+
+      expect(codeSpy).toHaveBeenCalledWith(401)
+      expect(sendSpy).toHaveBeenCalledWith({ error: 'Invalid or expired token' })
+      expect(logWarnSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          errorCode: 'UNAUTHORIZED',
+        }),
+        'Authentication failed: Invalid token structure'
+      )
+    })
+
+    it('should accept token with valid Base64URL characters', async () => {
+      const token = JwtUtil.generateToken(validClaims)
+      mockRequest.headers = { authorization: `Bearer ${token}` }
+
+      await authMiddleware(mockRequest as FastifyRequest, mockReply as FastifyReply)
+
+      // Should pass format validation and attempt verification
+      expect(mockRequest.user).toBeDefined()
+      expect(codeSpy).not.toHaveBeenCalled()
     })
   })
 
