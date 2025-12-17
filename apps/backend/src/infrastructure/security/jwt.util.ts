@@ -17,7 +17,7 @@ export class JwtUtil {
     return jwt.sign(restClaims, EnvConfig.JWT_SECRET as string, options)
   }
 
-  static verifyToken(token: string): { sub: string; email: string; roles?: string[] } {
+  static verifyToken(token: string): JwtUserClaims {
     try {
       const decoded = jwt.verify(token, EnvConfig.JWT_SECRET as string, {
         issuer: EnvConfig.JWT_ISSUER,
