@@ -1,3 +1,5 @@
+import type { ChildProcess } from 'node:child_process'
+import { spawn } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 
@@ -7,9 +9,10 @@ import { migrate } from 'drizzle-orm/postgres-js/migrator'
 import postgres from 'postgres'
 
 let postgresContainer: StartedPostgreSqlContainer
+let backendProcess: ChildProcess | null = null
 
-// Export the container so teardown logic can access and stop it
-export { postgresContainer }
+// Export for teardown
+export { backendProcess, postgresContainer }
 
 async function globalSetup() {
   console.warn('🚀 Starting E2E test environment setup...')
@@ -65,8 +68,81 @@ async function globalSetup() {
     process.env.DATABASE_URL = connectionString
     process.env.TEST_DATABASE_URL = connectionString
 
+    // Start backend server
+    console.warn('🚀 Starting backend server...')
+    const backendPath = path.join(process.cwd(), '..', 'backend')
+
+    backendProcess = spawn('pnpm', ['dev'], {
+      cwd: backendPath,
+      env: {
+        ...process.env,
+        DATABASE_URL: connectionString,
+        PORT: '3000',
+        HOST: 'localhost',
+        NODE_ENV: 'test',
+        USE_HTTPS: 'false', // Use HTTP for E2E tests
+        JWT_SECRET: 'test-jwt-secret-for-e2e-tests-minimum-256-bits',
+        JWT_ISSUER: 'level2gym-test',
+        JWT_EXPIRATION: '1h',
+      },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    })
+
+    // Wait for backend to be ready
+    await new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error('Backend server failed to start within 30 seconds'))
+      }, 30000)
+
+      const checkServer = async () => {
+        try {
+          const response = await fetch('http://localhost:3000/health')
+          if (response.ok) {
+            clearTimeout(timeout)
+            resolve()
+          }
+        } catch {
+          // Server not ready yet, try again
+          setTimeout(checkServer, 500)
+        }
+      }
+
+      // Start checking after 2 seconds to give server time to start
+      setTimeout(checkServer, 2000)
+
+      // Log backend output
+      backendProcess?.stdout?.on('data', (data) => {
+        const message = data.toString().trim()
+        if (message) {
+          console.warn(`[Backend] ${message}`)
+        }
+      })
+
+      backendProcess?.stderr?.on('data', (data) => {
+        const message = data.toString().trim()
+        if (message) {
+          console.warn(`[Backend Error] ${message}`)
+        }
+      })
+
+      backendProcess?.on('error', (error) => {
+        clearTimeout(timeout)
+        reject(error)
+      })
+
+      backendProcess?.on('exit', (code) => {
+        if (code !== 0 && code !== null) {
+          clearTimeout(timeout)
+          reject(new Error(`Backend process exited with code ${code}`))
+        }
+      })
+    })
+
+    console.warn('✅ Backend server started at http://localhost:3000')
+
     console.warn('✅ E2E test environment ready!')
     console.warn(`📊 Database running at ${host}:${port}`)
+    console.warn(`🔧 Backend API running at http://localhost:3000`)
   } catch (error) {
     console.error('❌ Failed to set up E2E test environment:', error)
     if (postgresContainer) {

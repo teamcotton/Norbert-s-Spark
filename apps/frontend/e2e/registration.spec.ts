@@ -291,4 +291,58 @@ test.describe('Registration Page', () => {
     // Should not show name error
     await expect(page.getByText(/name must not exceed 100 characters/i)).toBeHidden()
   })
+
+  test('should show error when trying to register with an already registered email', async ({
+    page,
+  }) => {
+    // Generate a unique email for this test using timestamp
+    const uniqueEmail = `test-duplicate-${Date.now()}@example.com`
+    const name = 'Test User'
+    const password = 'securepassword123'
+
+    // First registration - should succeed
+    await page.getByLabel(/email address/i).fill(uniqueEmail)
+    await page.getByLabel(/^name/i).fill(name)
+    await page
+      .getByLabel(/^password/i, { exact: false })
+      .first()
+      .fill(password)
+    await page.locator('input[autocomplete="new-password"]').nth(1).fill(password)
+
+    const submitButton = page.getByRole('button', { name: /create account/i })
+
+    // Listen for the API response to know when registration completes
+    const responsePromise = page.waitForResponse(
+      (response) =>
+        response.url().includes('/api/register') && response.request().method() === 'POST',
+      { timeout: 5000 }
+    )
+
+    await submitButton.click()
+
+    // Wait for first registration to complete
+    await responsePromise.catch(() => {
+      // Ignore if response doesn't come - may have redirected
+    })
+
+    // Navigate back to registration page to test duplicate registration
+    await page.goto('/registration')
+
+    // Try to register again with the same email
+    await page.getByLabel(/email address/i).fill(uniqueEmail)
+    await page.getByLabel(/^name/i).fill('Another Name')
+    await page
+      .getByLabel(/^password/i, { exact: false })
+      .first()
+      .fill(password)
+    await page.locator('input[autocomplete="new-password"]').nth(1).fill(password)
+
+    await submitButton.click()
+
+    // Check for the duplicate email error message in the Alert component
+    // expect() has built-in waiting, no need for explicit timeout
+    await expect(
+      page.getByText(/this email is already registered\. please use a different email\./i)
+    ).toBeVisible({ timeout: 5000 })
+  })
 })

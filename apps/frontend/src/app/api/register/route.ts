@@ -20,6 +20,7 @@ export async function POST(request: Request) {
     const isLocalDevelopment = apiUrl.includes('localhost') || apiUrl.includes('127.0.0.1')
 
     let response: Response
+    let result: RegisterUserResponse
 
     if (isLocalDevelopment && apiUrl.startsWith('https')) {
       // Use dynamic import to avoid issues in production builds
@@ -31,7 +32,7 @@ export async function POST(request: Request) {
         rejectUnauthorized: process.env.NODE_ENV === 'production',
       })
 
-      response = (await nodeFetch(`${apiUrl}/users/register`, {
+      const nodeFetchResponse = await nodeFetch(`${apiUrl}/users/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -42,7 +43,17 @@ export async function POST(request: Request) {
           password: body.password,
         }),
         agent,
-      })) as unknown as Response
+      })
+
+      // Parse the response from node-fetch
+      result = (await nodeFetchResponse.json()) as RegisterUserResponse
+
+      // Convert node-fetch response to native Response for consistent handling
+      response = new Response(JSON.stringify(result), {
+        status: nodeFetchResponse.status,
+        statusText: nodeFetchResponse.statusText,
+        headers: nodeFetchResponse.headers as unknown as HeadersInit,
+      })
     } else {
       response = await fetch(`${apiUrl}/users/register`, {
         method: 'POST',
@@ -56,9 +67,9 @@ export async function POST(request: Request) {
           password: body.password,
         }),
       })
-    }
 
-    const result = (await response.json()) as RegisterUserResponse
+      result = (await response.json()) as RegisterUserResponse
+    }
 
     if (response.status === 409) {
       return Response.json(
