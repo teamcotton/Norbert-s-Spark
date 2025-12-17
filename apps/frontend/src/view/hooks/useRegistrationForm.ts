@@ -111,7 +111,11 @@ export function useRegistrationForm() {
         } else {
           // Handle registration error
 
-          if (result.error === 'Email already in use') {
+          // Check if error is about duplicate email (handles both backend messages)
+          if (
+            result.error === 'Email already in use' ||
+            result.error?.includes('email already exists')
+          ) {
             setErrors((prev) => ({
               ...prev,
               email: 'This email is already registered. Please use a different email.',

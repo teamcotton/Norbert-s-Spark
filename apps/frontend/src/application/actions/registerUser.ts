@@ -16,14 +16,14 @@ export async function registerUser(data: RegisterUserData): Promise<RegisterUser
     if (response.status === 409) {
       return {
         success: false,
-        error: 'Email already in use',
+        error: result.error || 'Email already in use',
       }
     }
 
     if (!response.ok) {
       return {
         success: false,
-        error: 'Registration failed',
+        error: result.error || 'Registration failed',
       }
     }
 
