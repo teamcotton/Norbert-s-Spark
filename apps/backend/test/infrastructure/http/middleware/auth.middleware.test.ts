@@ -10,6 +10,7 @@ describe('authMiddleware', () => {
   let mockReply: Partial<FastifyReply>
   let sendSpy: ReturnType<typeof vi.fn>
   let codeSpy: ReturnType<typeof vi.fn>
+  let logWarnSpy: ReturnType<typeof vi.fn>
 
   const validClaims: JwtUserClaims = {
     sub: 'user-123',
@@ -31,10 +32,23 @@ describe('authMiddleware', () => {
       send: sendSpy,
     } as Partial<FastifyReply>
 
+    // Setup log mock
+    logWarnSpy = vi.fn()
+
     // Setup request mock
     mockRequest = {
       headers: {},
       user: undefined,
+      method: 'GET',
+      url: '/test',
+      log: {
+        warn: logWarnSpy,
+        info: vi.fn(),
+        error: vi.fn(),
+        debug: vi.fn(),
+        trace: vi.fn(),
+        fatal: vi.fn(),
+      } as any,
     } as Partial<FastifyRequest>
   })
 
@@ -106,6 +120,92 @@ describe('authMiddleware', () => {
       // Should fail because of extra space
       expect(codeSpy).toHaveBeenCalledWith(401)
       expect(sendSpy).toHaveBeenCalledWith({ error: 'Invalid or expired token' })
+    })
+  })
+
+  describe('Logging behavior', () => {
+    it('should log warning when token is missing', async () => {
+      mockRequest.headers = {}
+
+      await authMiddleware(mockRequest as FastifyRequest, mockReply as FastifyReply)
+
+      expect(logWarnSpy).toHaveBeenCalledWith(
+        {
+          method: 'GET',
+          route: '/test',
+        },
+        'Authentication failed: missing bearer token'
+      )
+    })
+
+    it('should log warning when token is invalid', async () => {
+      mockRequest.headers = { authorization: 'Bearer invalid.token.here' }
+
+      await authMiddleware(mockRequest as FastifyRequest, mockReply as FastifyReply)
+
+      expect(logWarnSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'GET',
+          route: '/test',
+          err: expect.any(Error),
+        }),
+        'Authentication failed: invalid or expired token'
+      )
+    })
+
+    it('should log warning when token is expired', async () => {
+      const expiredToken =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTEyMyIsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsImlhdCI6MTYwOTQ1OTIwMCwiZXhwIjoxNjA5NDU5MjAxfQ.invalid'
+      mockRequest.headers = { authorization: `Bearer ${expiredToken}` }
+
+      await authMiddleware(mockRequest as FastifyRequest, mockReply as FastifyReply)
+
+      expect(logWarnSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'GET',
+          route: '/test',
+          err: expect.any(Error),
+        }),
+        'Authentication failed: invalid or expired token'
+      )
+    })
+
+    it('should not log warning on successful authentication', async () => {
+      const token = JwtUtil.generateToken(validClaims)
+      mockRequest.headers = { authorization: `Bearer ${token}` }
+
+      await authMiddleware(mockRequest as FastifyRequest, mockReply as FastifyReply)
+
+      expect(logWarnSpy).not.toHaveBeenCalled()
+    })
+
+    it('should include request method and route in log context', async () => {
+      mockRequest = {
+        ...mockRequest,
+        headers: {},
+        method: 'POST',
+        url: '/api/users',
+      }
+
+      await authMiddleware(mockRequest as FastifyRequest, mockReply as FastifyReply)
+
+      expect(logWarnSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'POST',
+          route: '/api/users',
+        }),
+        'Authentication failed: missing bearer token'
+      )
+    })
+
+    it('should include error object in log context for invalid tokens', async () => {
+      mockRequest.headers = { authorization: 'Bearer malformed' }
+
+      await authMiddleware(mockRequest as FastifyRequest, mockReply as FastifyReply)
+
+      const logCall = logWarnSpy.mock.calls[0]
+      expect(logCall?.[0]).toHaveProperty('err')
+      expect(logCall?.[0].err).toBeInstanceOf(Error)
     })
   })
 
@@ -352,9 +452,20 @@ describe('authMiddleware', () => {
       vi.clearAllMocks()
       const newSendSpy = vi.fn().mockReturnThis()
       const newCodeSpy = vi.fn().mockReturnValue({ send: newSendSpy })
+      const newLogWarnSpy = vi.fn()
       mockRequest = {
         headers: { authorization: `Bearer ${token}` },
         user: undefined,
+        method: 'GET',
+        url: '/test',
+        log: {
+          warn: newLogWarnSpy,
+          info: vi.fn(),
+          error: vi.fn(),
+          debug: vi.fn(),
+          trace: vi.fn(),
+          fatal: vi.fn(),
+        } as any,
       } as Partial<FastifyRequest>
       mockReply = { code: newCodeSpy, send: newSendSpy } as Partial<FastifyReply>
 
@@ -388,7 +499,21 @@ describe('authMiddleware', () => {
       vi.clearAllMocks()
       const newSendSpy = vi.fn().mockReturnThis()
       const newCodeSpy = vi.fn().mockReturnValue({ send: newSendSpy })
-      mockRequest = { headers: {}, user: undefined } as Partial<FastifyRequest>
+      const newLogWarnSpy = vi.fn()
+      mockRequest = {
+        headers: {},
+        user: undefined,
+        method: 'GET',
+        url: '/test',
+        log: {
+          warn: newLogWarnSpy,
+          info: vi.fn(),
+          error: vi.fn(),
+          debug: vi.fn(),
+          trace: vi.fn(),
+          fatal: vi.fn(),
+        } as any,
+      } as Partial<FastifyRequest>
       mockReply = { code: newCodeSpy, send: newSendSpy } as Partial<FastifyReply>
 
       // Second user
@@ -410,7 +535,21 @@ describe('authMiddleware', () => {
       vi.clearAllMocks()
       const newSendSpy = vi.fn().mockReturnThis()
       const newCodeSpy = vi.fn().mockReturnValue({ send: newSendSpy })
-      mockRequest = { headers: {}, user: undefined } as Partial<FastifyRequest>
+      const newLogWarnSpy = vi.fn()
+      mockRequest = {
+        headers: {},
+        user: undefined,
+        method: 'GET',
+        url: '/test',
+        log: {
+          warn: newLogWarnSpy,
+          info: vi.fn(),
+          error: vi.fn(),
+          debug: vi.fn(),
+          trace: vi.fn(),
+          fatal: vi.fn(),
+        } as any,
+      } as Partial<FastifyRequest>
       mockReply = { code: newCodeSpy, send: newSendSpy } as Partial<FastifyReply>
 
       // Second request with invalid token
@@ -445,9 +584,20 @@ describe('authMiddleware', () => {
       const token = JwtUtil.generateToken(validClaims)
       const newSendSpy = vi.fn().mockReturnThis()
       const newCodeSpy = vi.fn().mockReturnValue({ send: newSendSpy })
+      const newLogWarnSpy = vi.fn()
       mockRequest = {
         headers: { authorization: `Bearer ${token}` },
         user: undefined,
+        method: 'GET',
+        url: '/test',
+        log: {
+          warn: newLogWarnSpy,
+          info: vi.fn(),
+          error: vi.fn(),
+          debug: vi.fn(),
+          trace: vi.fn(),
+          fatal: vi.fn(),
+        } as any,
       } as Partial<FastifyRequest>
       mockReply = { code: newCodeSpy, send: newSendSpy } as Partial<FastifyReply>
       const successResult = await authMiddleware(
@@ -465,9 +615,20 @@ describe('authMiddleware', () => {
       const freshMockReply = { code: freshCodeSpy, send: freshSendSpy } as Partial<FastifyReply>
 
       const token = JwtUtil.generateToken(validClaims)
+      const freshLogWarnSpy = vi.fn()
       const freshMockRequest = {
         headers: { authorization: `Bearer ${token}` },
         user: undefined,
+        method: 'GET',
+        url: '/test',
+        log: {
+          warn: freshLogWarnSpy,
+          info: vi.fn(),
+          error: vi.fn(),
+          debug: vi.fn(),
+          trace: vi.fn(),
+          fatal: vi.fn(),
+        } as any,
       } as Partial<FastifyRequest>
 
       await authMiddleware(freshMockRequest as FastifyRequest, freshMockReply as FastifyReply)
@@ -486,7 +647,20 @@ describe('authMiddleware', () => {
       for (const testCase of errorCases) {
         // Reset mocks
         vi.clearAllMocks()
-        mockRequest = testCase as Partial<FastifyRequest>
+        const testLogWarnSpy = vi.fn()
+        mockRequest = {
+          ...testCase,
+          method: 'GET',
+          url: '/test',
+          log: {
+            warn: testLogWarnSpy,
+            info: vi.fn(),
+            error: vi.fn(),
+            debug: vi.fn(),
+            trace: vi.fn(),
+            fatal: vi.fn(),
+          } as any,
+        } as Partial<FastifyRequest>
         mockReply = { code: codeSpy, send: sendSpy } as Partial<FastifyReply>
 
         await authMiddleware(mockRequest as FastifyRequest, mockReply as FastifyReply)
