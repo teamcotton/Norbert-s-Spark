@@ -18,7 +18,19 @@ export async function POST(request: Request) {
     }
 
     // Parse URL to check hostname precisely
-    const url = new URL(apiUrl)
+    let url: URL
+    try {
+      url = new URL(apiUrl)
+    } catch (parseError) {
+      logger.withPrefix('[registration-route]').errorOnly(parseError)
+      return Response.json(
+        {
+          success: false,
+          error: 'Invalid Backend API URL configuration',
+        },
+        { status: 500 }
+      )
+    }
     const isLocalDevelopment =
       url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.hostname === '::1'
 

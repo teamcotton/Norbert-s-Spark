@@ -1,9 +1,22 @@
 import { act, renderHook } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { registerUser } from '@/application/actions/registerUser.js'
 import { useRegistrationForm } from '@/view/hooks/useRegistrationForm.js'
 
+// Mock the registerUser action
+vi.mock('@/application/actions/registerUser.js', () => ({
+  registerUser: vi.fn(),
+}))
+
 describe('useRegistrationForm', () => {
+  beforeEach(() => {
+    vi.mocked(registerUser).mockReset()
+  })
+
+  afterEach(() => {
+    vi.clearAllMocks()
+  })
   describe('Initial State', () => {
     it('should initialize with empty form data', () => {
       const { result } = renderHook(() => useRegistrationForm())
@@ -732,15 +745,10 @@ describe('useRegistrationForm', () => {
   describe('Error Handling - Early Return Behavior', () => {
     it('should set specific email error and return early for "Email already in use" without setting generic error', async () => {
       // Mock registerUser to return "Email already in use" error
-      const mockRegisterUser = vi.fn().mockResolvedValue({
+      vi.mocked(registerUser).mockResolvedValue({
         success: false,
         error: 'Email already in use',
       })
-
-      // Mock the registerUser import
-      vi.doMock('@/application/actions/registerUser.js', () => ({
-        registerUser: mockRegisterUser,
-      }))
 
       const { result } = renderHook(() => useRegistrationForm())
 
@@ -787,21 +795,14 @@ describe('useRegistrationForm', () => {
       // This verifies the early return prevents the fallback error
       expect(result.current.errors.email).not.toBe('Registration failed')
       expect(result.current.errors.email).not.toBe('Email already in use')
-
-      // Cleanup
-      vi.doUnmock('@/application/actions/registerUser.js')
     })
 
     it('should set generic error for other registration failures (not "Email already in use")', async () => {
       // Mock registerUser to return a different error
-      const mockRegisterUser = vi.fn().mockResolvedValue({
+      vi.mocked(registerUser).mockResolvedValue({
         success: false,
         error: 'Server error occurred',
       })
-
-      vi.doMock('@/application/actions/registerUser.js', () => ({
-        registerUser: mockRegisterUser,
-      }))
 
       const { result } = renderHook(() => useRegistrationForm())
 
@@ -840,24 +841,15 @@ describe('useRegistrationForm', () => {
       })
 
       // Should set the server error message (not the specific "already registered" message)
-      expect(result.current.errors.email).toBe(
-        'This email is already registered. Please use a different email.'
-      )
-
-      // Cleanup
-      vi.doUnmock('@/application/actions/registerUser.js')
+      expect(result.current.errors.email).toBe('Server error occurred')
     })
 
     it('should set fallback "Registration failed" when error message is undefined', async () => {
       // Mock registerUser to return success: false with no error message
-      const mockRegisterUser = vi.fn().mockResolvedValue({
+      vi.mocked(registerUser).mockResolvedValue({
         success: false,
         error: undefined,
       })
-
-      vi.doMock('@/application/actions/registerUser.js', () => ({
-        registerUser: mockRegisterUser,
-      }))
 
       const { result } = renderHook(() => useRegistrationForm())
 
@@ -896,12 +888,7 @@ describe('useRegistrationForm', () => {
       })
 
       // Should set the fallback "Registration failed" message
-      expect(result.current.errors.email).toBe(
-        'This email is already registered. Please use a different email.'
-      )
-
-      // Cleanup
-      vi.doUnmock('@/application/actions/registerUser.js')
+      expect(result.current.errors.email).toBe('Registration failed')
     })
   })
 })
