@@ -1,42 +1,66 @@
-import { FileUtil } from '../../../shared/utils/file.util.js'
+import * as fs from 'node:fs/promises'
+import path from 'node:path'
+import { z } from 'zod'
 
 //const textPath = join(import.meta.dirname, '..', 'data', 'heart-of-darkness.txt')
+const FileExtensionSchema = z.string().regex(/\.(txt|csv|json|toon|onnx|safetensors|pt|py|gguf)$/i)
+
+type FilePathSchema = z.infer<typeof FileExtensionSchema>
 
 /**
  * Class for managing text file retrieval with state management
  */
 export class GetText {
-  private readonly fileUtil: FileUtil
   private readonly fileContents: Map<string, string>
+  private readonly file: string
+  public readonly filePath: string
 
   /**
    * Create a new GetText instance
-   * @param dataFolder - The data folder name (default: 'data')
-   * @param dbName - The database directory name (default: 'file-system-db.local')
+   * @param dataFolder - The data folder name (id: 'data')
+   * @param filePath - The file name to read (id: 'heart-of-darkness.txt')
    */
-  constructor(dataFolder: string = 'data', dbName: string = 'file-system-db.local') {
-    this.fileUtil = new FileUtil(dataFolder, dbName)
+  constructor(dataFolder: string, filePath: FilePathSchema) {
+    try {
+      FileExtensionSchema.parse(filePath)
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        throw error
+      }
+    }
+    this.file = filePath
+    this.filePath = path.join(process.cwd(), dataFolder, filePath)
     this.fileContents = new Map<string, string>()
   }
 
   /**
    * Get text content from a file
-   * @param textPath - The relative path to the text file
    * @returns The file content as a string, or undefined if empty
    * @throws Error if file cannot be read
    */
-  public async getText(textPath: string): Promise<string | undefined> {
-    if (this.hasCachedContent(textPath)) {
-      return this.getCachedContent(textPath)
-    }
-    const fileExists = this.fileUtil.readFile(textPath)
-    if (fileExists.success && fileExists.content) {
+  public async getText(): Promise<string | undefined> {
+    try {
+      // Read file content - will throw ENOENT if file doesn't exist
+      const content = await fs.readFile(this.filePath, 'utf8')
+
+      // Return undefined if content is empty
+      if (!content) {
+        return undefined
+      }
+
       // Save the successfully retrieved content to state
-      this.fileContents.set(textPath, fileExists.content)
-      return fileExists.content
-    }
-    if (!fileExists.success) {
-      throw new Error(`Error reading file "${textPath}": ${fileExists.message}`)
+      this.fileContents.set(this.filePath, content)
+      return content
+    } catch (error) {
+      // Handle file not found error
+      const nodeError = error as NodeJS.ErrnoException
+      if (nodeError.code === 'ENOENT') {
+        throw new Error(`Error reading file "${this.filePath}": File not found: ${this.file}`)
+      }
+      // Handle other errors
+      throw new Error(
+        `Error reading file "${this.filePath}": ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
@@ -80,11 +104,7 @@ export class GetText {
 }
 
 // Legacy function export for backward compatibility
-export async function getText(
-  textPath: string,
-  dataFolder: string,
-  dbName: string
-): Promise<string | undefined> {
-  const getTextInstance = new GetText(dataFolder, dbName)
-  return getTextInstance.getText(textPath)
+export async function getText(textPath: string, dataFolder: string): Promise<string | undefined> {
+  const getTextInstance = new GetText(dataFolder, textPath)
+  return getTextInstance.getText()
 }
