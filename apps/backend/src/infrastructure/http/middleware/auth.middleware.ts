@@ -38,6 +38,64 @@ function validateTokenFormat(token: string): void {
   }
 }
 
+/**
+ * Fastify middleware for JWT-based authentication
+ *
+ * Authenticates incoming requests by validating JWT tokens from the Authorization header.
+ * Extracts and verifies Bearer tokens, validates their format and cryptographic signature,
+ * and attaches verified user claims to the request object for downstream route handlers.
+ *
+ * @param request - Fastify request object containing headers and authentication state
+ * @param reply - Fastify reply object for sending authentication error responses
+ * @returns Promise that resolves to void on success or FastifyReply on authentication failure
+ *
+ * @throws {UnauthorizedException} When token validation fails (caught internally and converted to 401 response)
+ *
+ * @example
+ * ```typescript
+ * // Register as global preHandler hook
+ * fastify.addHook('preHandler', authMiddleware)
+ *
+ * // Or apply to specific routes
+ * fastify.get('/protected', { preHandler: authMiddleware }, async (request, reply) => {
+ *   const user = request.user // Typed user claims available
+ *   return { userId: user.sub, email: user.email }
+ * })
+ * ```
+ *
+ * @remarks
+ * **Authentication Flow:**
+ * 1. Extracts Bearer token from `Authorization` header
+ * 2. Validates token format (length, structure, character set)
+ * 3. Verifies cryptographic signature and expiration via JwtUtil
+ * 4. Attaches decoded user claims to `request.user`
+ * 5. Logs all authentication attempts (success and failures)
+ *
+ * **Authorization Header Format:**
+ * - Required format: `Bearer <token>`
+ * - Case-sensitive "Bearer" prefix
+ * - Single space separator
+ * - Token must be valid JWT with 3 Base64URL-encoded parts
+ *
+ * **Error Response Strategy:**
+ * - Low-level errors (format, signature): Generic `"Invalid or expired token"` message
+ * - High-level errors (expired, missing claims): Specific error messages
+ * - Prevents exposing implementation details to potential attackers
+ *
+ * **Security Features:**
+ * - DOS protection via MAX_TOKEN_LENGTH (8KB limit)
+ * - Fast-fail token format validation before expensive cryptographic verification
+ * - Structured logging with error codes for security monitoring
+ * - Generic error messages for low-level failures to prevent information disclosure
+ *
+ * **Logging Behavior:**
+ * - INFO: All authentication attempts with method and route
+ * - WARN: Missing tokens, invalid tokens, verification failures
+ * - Context includes: method, route, errorCode (for UnauthorizedException)
+ *
+ * @see {@link JwtUtil.verifyToken} for token verification implementation
+ * @see {@link validateTokenFormat} for format validation rules
+ */
 export async function authMiddleware(
   request: FastifyRequest,
   reply: FastifyReply
