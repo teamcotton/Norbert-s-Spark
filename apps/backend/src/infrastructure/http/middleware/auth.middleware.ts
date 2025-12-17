@@ -7,6 +7,7 @@ import { ErrorCode } from '../../../shared/constants/error-codes.js'
 const MAX_TOKEN_LENGTH = 8192
 
 // Regular expression for valid JWT format: Base64URL characters and dots
+// Note: Base64URL encoding (RFC 4648 §5) used by JWT does NOT include padding (=)
 const JWT_FORMAT_REGEX = /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/
 
 /**
@@ -76,16 +77,17 @@ export async function authMiddleware(request: FastifyRequest, reply: FastifyRepl
         `Authentication failed: ${error.message}`
       )
       // Return generic error message for low-level token errors to avoid exposing implementation details
-      // Return specific error messages only for high-level semantic errors (expired, missing claims, etc.)
-      const isLowLevelError =
-        error.message === 'Token exceeds maximum allowed length' ||
-        error.message === 'Invalid token format' ||
-        error.message === 'Invalid token characters' ||
-        error.message === 'Invalid token structure' ||
-        error.message === 'Invalid token' ||
-        error.message === 'Invalid token payload'
+      // High-level semantic errors (expired, missing claims) return specific messages
+      const lowLevelErrorMessages = new Set([
+        'Token exceeds maximum allowed length',
+        'Invalid token format',
+        'Invalid token characters',
+        'Invalid token structure',
+        'Invalid token',
+        'Invalid token payload',
+      ])
 
-      if (isLowLevelError) {
+      if (lowLevelErrorMessages.has(error.message)) {
         return reply.code(401).send({ error: 'Invalid or expired token' })
       }
 
