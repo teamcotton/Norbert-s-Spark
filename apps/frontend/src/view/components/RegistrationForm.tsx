@@ -63,6 +63,16 @@ export function RegistrationForm({
     setShowConfirmPassword((prev) => !prev)
   }
 
+  // Helper function to check if error should be displayed at field level
+  const isFieldLevelEmailError = (errorMessage: string | undefined): boolean => {
+    if (!errorMessage) return false
+    return (
+      !errorMessage.includes('already registered') &&
+      !errorMessage.includes('Registration failed') &&
+      !errorMessage.includes('unexpected error')
+    )
+  }
+
   return (
     <Container maxWidth="sm">
       <Box
@@ -150,20 +160,8 @@ export function RegistrationForm({
               type="email"
               value={formData.email}
               onChange={onFieldChange('email')}
-              error={
-                !!errors.email &&
-                !errors.email.includes('already registered') &&
-                !errors.email.includes('Registration failed') &&
-                !errors.email.includes('unexpected error')
-              }
-              helperText={
-                errors.email &&
-                !errors.email.includes('already registered') &&
-                !errors.email.includes('Registration failed') &&
-                !errors.email.includes('unexpected error')
-                  ? errors.email
-                  : ''
-              }
+              error={isFieldLevelEmailError(errors.email)}
+              helperText={isFieldLevelEmailError(errors.email) ? errors.email : ''}
               margin="normal"
               required
               autoComplete="email"
