@@ -17,7 +17,9 @@ export async function POST(request: Request) {
       )
     }
 
-    const isLocalDevelopment = apiUrl.includes('localhost') || apiUrl.includes('127.0.0.1')
+    // Parse URL to check hostname precisely
+    const url = new URL(apiUrl)
+    const isLocalDevelopment = url.hostname === 'localhost' || url.hostname === '127.0.0.1'
 
     let response: Response
     let result: RegisterUserResponse
