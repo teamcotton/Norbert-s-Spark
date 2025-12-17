@@ -104,7 +104,6 @@ export class JwtUtil {
     return jwt.sign(restClaims, EnvConfig.JWT_SECRET as string, options)
   }
 
-  static verifyToken(token: string): JwtUserClaims {
   /**
    * Verifies and decodes a JWT token, extracting user claims
    *
