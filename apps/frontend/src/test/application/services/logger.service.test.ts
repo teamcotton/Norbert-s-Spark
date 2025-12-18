@@ -3,12 +3,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createLogger, UnifiedLogger } from '@/application/services/logger.service.js'
 
 describe('UnifiedLogger', () => {
+  let consoleTraceSpy: ReturnType<typeof vi.spyOn>
   let consoleDebugSpy: ReturnType<typeof vi.spyOn>
   let consoleInfoSpy: ReturnType<typeof vi.spyOn>
   let consoleWarnSpy: ReturnType<typeof vi.spyOn>
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>
 
   beforeEach(() => {
+    consoleTraceSpy = vi.spyOn(console, 'trace').mockImplementation(() => {})
     consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {})
     consoleInfoSpy = vi.spyOn(console, 'info').mockImplementation(() => {})
     consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
@@ -16,6 +18,7 @@ describe('UnifiedLogger', () => {
   })
 
   afterEach(() => {
+    consoleTraceSpy.mockRestore()
     consoleDebugSpy.mockRestore()
     consoleInfoSpy.mockRestore()
     consoleWarnSpy.mockRestore()
@@ -54,6 +57,73 @@ describe('UnifiedLogger', () => {
       const loggedMessage = consoleWarnSpy.mock.calls[0][0]
       expect(loggedMessage).toBeTypeOf('object')
       expect(loggedMessage.prefix).toBe('[API] ')
+    })
+  })
+
+  describe('trace', () => {
+    it('should log trace messages when method is trace', () => {
+      const logger = new UnifiedLogger({ method: 'trace' })
+
+      logger.trace('trace message')
+
+      expect(consoleTraceSpy).toHaveBeenCalledTimes(1)
+      const loggedMessage = consoleTraceSpy.mock.calls[0][0]
+      expect(loggedMessage).toBeTypeOf('object')
+      expect(loggedMessage.method).toBe('TRACE')
+    })
+
+    it('should not log trace messages when method is debug', () => {
+      const logger = new UnifiedLogger({ method: 'debug' })
+
+      logger.trace('trace message')
+
+      expect(consoleTraceSpy).not.toHaveBeenCalled()
+    })
+
+    it('should not log trace messages when method is info', () => {
+      const logger = new UnifiedLogger({ method: 'info' })
+
+      logger.trace('trace message')
+
+      expect(consoleTraceSpy).not.toHaveBeenCalled()
+    })
+
+    it('should not log trace messages when method is warn', () => {
+      const logger = new UnifiedLogger({ method: 'warn' })
+
+      logger.trace('trace message')
+
+      expect(consoleTraceSpy).not.toHaveBeenCalled()
+    })
+
+    it('should not log trace messages when method is error', () => {
+      const logger = new UnifiedLogger({ method: 'error' })
+
+      logger.trace('trace message')
+
+      expect(consoleTraceSpy).not.toHaveBeenCalled()
+    })
+
+    it('should include timestamp in trace message', () => {
+      const logger = new UnifiedLogger({ method: 'trace' })
+
+      logger.trace('test')
+
+      const loggedMessage = consoleTraceSpy.mock.calls[0][0]
+      expect(loggedMessage).toBeTypeOf('object')
+      expect(loggedMessage.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)
+    })
+
+    it('should log trace message with additional arguments', () => {
+      const logger = new UnifiedLogger({ method: 'trace' })
+      const obj = { key: 'value' }
+
+      logger.trace('trace message', obj)
+
+      const loggedMessage = consoleTraceSpy.mock.calls[0][0]
+      expect(loggedMessage).toBeTypeOf('object')
+      expect(loggedMessage.message).toBe('trace message')
+      expect(consoleTraceSpy).toHaveBeenCalledWith(loggedMessage, obj)
     })
   })
 
@@ -294,6 +364,92 @@ describe('UnifiedLogger', () => {
     })
   })
 
+  describe('setMethod and getMethod', () => {
+    it('should change log method from debug to warn', () => {
+      const logger = new UnifiedLogger({ method: 'debug' })
+
+      expect(logger.getMethod()).toBe('debug')
+
+      logger.setMethod('warn')
+
+      expect(logger.getMethod()).toBe('warn')
+      logger.debug('should not appear')
+      expect(consoleDebugSpy).not.toHaveBeenCalled()
+    })
+
+    it('should change log method from debug to error', () => {
+      const logger = new UnifiedLogger({ method: 'debug' })
+
+      logger.setMethod('error')
+
+      expect(logger.getMethod()).toBe('error')
+      logger.info('should not appear')
+      expect(consoleInfoSpy).not.toHaveBeenCalled()
+    })
+
+    it('should allow changing method multiple times', () => {
+      const logger = new UnifiedLogger({ method: 'info' })
+
+      logger.setMethod('debug')
+      expect(logger.getMethod()).toBe('debug')
+
+      logger.setMethod('warn')
+      expect(logger.getMethod()).toBe('warn')
+
+      logger.setMethod('error')
+      expect(logger.getMethod()).toBe('error')
+    })
+
+    it('should affect logging behavior after method change', () => {
+      const logger = new UnifiedLogger({ method: 'error' })
+
+      logger.info('should not log')
+      expect(consoleInfoSpy).not.toHaveBeenCalled()
+
+      logger.setMethod('info')
+      logger.info('should log now')
+      expect(consoleInfoSpy).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('setLevel and getLevel', () => {
+    it('should set and get numeric level', () => {
+      const logger = new UnifiedLogger({ method: 'info' })
+
+      expect(logger.getLevel()).toBeUndefined()
+
+      logger.setLevel(30)
+
+      expect(logger.getLevel()).toBe(30)
+    })
+
+    it('should include level in formatted message after setLevel', () => {
+      const logger = new UnifiedLogger({ method: 'info' })
+
+      logger.info('without level')
+      let loggedMessage = consoleInfoSpy.mock.calls[0][0]
+      expect(loggedMessage.level).toBeUndefined()
+
+      logger.setLevel(40)
+      logger.info('with level')
+      loggedMessage = consoleInfoSpy.mock.calls[1][0]
+      expect(loggedMessage).toBeTypeOf('object')
+      expect(loggedMessage.level).toBe(40)
+    })
+
+    it('should allow changing level multiple times', () => {
+      const logger = new UnifiedLogger({ method: 'info', level: 10 })
+
+      expect(logger.getLevel()).toBe(10)
+
+      logger.setLevel(20)
+      expect(logger.getLevel()).toBe(20)
+
+      logger.setLevel(30)
+      expect(logger.getLevel()).toBe(30)
+    })
+  })
+
   describe('optional numeric level field', () => {
     it('should include level when provided', () => {
       const logger = new UnifiedLogger({ method: 'info', level: 20 })
@@ -351,7 +507,10 @@ describe('UnifiedLogger', () => {
     })
 
     it('should uppercase log method in formatted message', () => {
-      const logger = new UnifiedLogger({ method: 'debug' })
+      const logger = new UnifiedLogger({ method: 'trace' })
+
+      logger.trace('test')
+      expect(consoleTraceSpy.mock.calls[0][0].method).toBe('TRACE')
 
       logger.debug('test')
       expect(consoleDebugSpy.mock.calls[0][0].method).toBe('DEBUG')
@@ -368,14 +527,32 @@ describe('UnifiedLogger', () => {
   })
 
   describe('log method hierarchy', () => {
-    it('should respect log method hierarchy for debug', () => {
-      const logger = new UnifiedLogger({ method: 'debug' })
+    it('should respect log method hierarchy for trace', () => {
+      const logger = new UnifiedLogger({ method: 'trace' })
 
+      logger.trace('trace')
       logger.debug('debug')
       logger.info('info')
       logger.warn('warn')
       logger.error('error')
 
+      expect(consoleTraceSpy).toHaveBeenCalledTimes(1)
+      expect(consoleDebugSpy).toHaveBeenCalledTimes(1)
+      expect(consoleInfoSpy).toHaveBeenCalledTimes(1)
+      expect(consoleWarnSpy).toHaveBeenCalledTimes(1)
+      expect(consoleErrorSpy).toHaveBeenCalledTimes(1)
+    })
+
+    it('should respect log method hierarchy for debug', () => {
+      const logger = new UnifiedLogger({ method: 'debug' })
+
+      logger.trace('trace')
+      logger.debug('debug')
+      logger.info('info')
+      logger.warn('warn')
+      logger.error('error')
+
+      expect(consoleTraceSpy).not.toHaveBeenCalled()
       expect(consoleDebugSpy).toHaveBeenCalledTimes(1)
       expect(consoleInfoSpy).toHaveBeenCalledTimes(1)
       expect(consoleWarnSpy).toHaveBeenCalledTimes(1)
@@ -385,11 +562,13 @@ describe('UnifiedLogger', () => {
     it('should respect log method hierarchy for info', () => {
       const logger = new UnifiedLogger({ method: 'info' })
 
+      logger.trace('trace')
       logger.debug('debug')
       logger.info('info')
       logger.warn('warn')
       logger.error('error')
 
+      expect(consoleTraceSpy).not.toHaveBeenCalled()
       expect(consoleDebugSpy).not.toHaveBeenCalled()
       expect(consoleInfoSpy).toHaveBeenCalledTimes(1)
       expect(consoleWarnSpy).toHaveBeenCalledTimes(1)
@@ -399,11 +578,13 @@ describe('UnifiedLogger', () => {
     it('should respect log method hierarchy for warn', () => {
       const logger = new UnifiedLogger({ method: 'warn' })
 
+      logger.trace('trace')
       logger.debug('debug')
       logger.info('info')
       logger.warn('warn')
       logger.error('error')
 
+      expect(consoleTraceSpy).not.toHaveBeenCalled()
       expect(consoleDebugSpy).not.toHaveBeenCalled()
       expect(consoleInfoSpy).not.toHaveBeenCalled()
       expect(consoleWarnSpy).toHaveBeenCalledTimes(1)
@@ -413,11 +594,13 @@ describe('UnifiedLogger', () => {
     it('should respect log method hierarchy for error', () => {
       const logger = new UnifiedLogger({ method: 'error' })
 
+      logger.trace('trace')
       logger.debug('debug')
       logger.info('info')
       logger.warn('warn')
       logger.error('error')
 
+      expect(consoleTraceSpy).not.toHaveBeenCalled()
       expect(consoleDebugSpy).not.toHaveBeenCalled()
       expect(consoleInfoSpy).not.toHaveBeenCalled()
       expect(consoleWarnSpy).not.toHaveBeenCalled()
@@ -459,6 +642,20 @@ describe('UnifiedLogger', () => {
   })
 
   describe('multiple arguments', () => {
+    it('should pass multiple arguments to console.trace', () => {
+      const logger = new UnifiedLogger({ method: 'trace' })
+      const arg1 = { key: 'value' }
+      const arg2 = [1, 2, 3]
+      const arg3 = 'string'
+
+      logger.trace('message', arg1, arg2, arg3)
+
+      const loggedMessage = consoleTraceSpy.mock.calls[0][0]
+      expect(loggedMessage).toBeTypeOf('object')
+      expect(loggedMessage.message).toBe('message')
+      expect(consoleTraceSpy).toHaveBeenCalledWith(loggedMessage, arg1, arg2, arg3)
+    })
+
     it('should pass multiple arguments to console.debug', () => {
       const logger = new UnifiedLogger({ method: 'debug' })
       const arg1 = { key: 'value' }
@@ -519,6 +716,7 @@ describe('UnifiedLogger', () => {
       originalEnv = process.env.NODE_ENV
       ;(process.env as { NODE_ENV?: string }).NODE_ENV = 'production'
       // Clear mocks to ensure test isolation
+      consoleTraceSpy.mockClear()
       consoleDebugSpy.mockClear()
       consoleInfoSpy.mockClear()
       consoleWarnSpy.mockClear()
@@ -531,6 +729,14 @@ describe('UnifiedLogger', () => {
       } else {
         ;(process.env as { NODE_ENV?: string }).NODE_ENV = originalEnv
       }
+    })
+
+    it('should suppress trace messages in production', () => {
+      const logger = new UnifiedLogger({ method: 'trace' })
+
+      logger.trace('trace message')
+
+      expect(consoleTraceSpy).not.toHaveBeenCalled()
     })
 
     it('should suppress debug messages in production', () => {
@@ -572,13 +778,15 @@ describe('UnifiedLogger', () => {
     })
 
     it('should suppress debug and info but allow warn and error in production', () => {
-      const logger = new UnifiedLogger({ method: 'debug' })
+      const logger = new UnifiedLogger({ method: 'trace' })
 
+      logger.trace('trace message')
       logger.debug('debug message')
       logger.info('info message')
       logger.warn('warn message')
       logger.error('error message')
 
+      expect(consoleTraceSpy).not.toHaveBeenCalled()
       expect(consoleDebugSpy).not.toHaveBeenCalled()
       expect(consoleInfoSpy).not.toHaveBeenCalled()
       expect(consoleWarnSpy).toHaveBeenCalledTimes(1)
