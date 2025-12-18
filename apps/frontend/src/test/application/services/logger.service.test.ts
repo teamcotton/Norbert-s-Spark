@@ -512,6 +512,11 @@ describe('UnifiedLogger', () => {
     beforeEach(() => {
       originalEnv = process.env.NODE_ENV
       process.env.NODE_ENV = 'production'
+      // Clear mocks to ensure test isolation
+      consoleDebugSpy.mockClear()
+      consoleInfoSpy.mockClear()
+      consoleWarnSpy.mockClear()
+      consoleErrorSpy.mockClear()
     })
 
     afterEach(() => {
