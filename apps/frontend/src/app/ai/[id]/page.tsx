@@ -34,7 +34,7 @@ import { Message } from '@/view/components/MessageComponent.js'
 import { MessageIntroComponent } from '@/view/components/MessageIntroComponent.js'
 import { Wrapper } from '@/view/components/WrapperComponent.js'
 
-const logger = createLogger({ level: 'info', prefix: 'AIChatPage' })
+const logger = createLogger({ prefix: 'AIChatPage' })
 
 const DRAWER_WIDTH = 280
 

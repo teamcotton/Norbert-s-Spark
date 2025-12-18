@@ -1,7 +1,7 @@
 import { createLogger } from '@/application/services/logger.service.js'
 import type { PaginatedUsersResponse } from '@/domain/user/user.js'
 
-const logger = createLogger({ level: 'info', prefix: 'AIChatPage' })
+const logger = createLogger({ prefix: 'AIChatPage' })
 
 export async function GET(request: Request) {
   try {
