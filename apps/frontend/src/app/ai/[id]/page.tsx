@@ -27,18 +27,20 @@ import React, { use, useEffect, useRef, useState } from 'react'
 import { uuidv7 } from 'uuidv7'
 
 import { fileToDataURL } from '@/application/services/fileToDataURL.service.js'
-import { logger } from '@/application/services/log-layer.client.js'
+import { createLogger } from '@/application/services/logger.service.js'
 import { ChatInput } from '@/view/components/ChatInputComponent.js'
 import { IntroComponent } from '@/view/components/IntroComponent.js'
 import { Message } from '@/view/components/MessageComponent.js'
 import { MessageIntroComponent } from '@/view/components/MessageIntroComponent.js'
 import { Wrapper } from '@/view/components/WrapperComponent.js'
 
+const logger = createLogger({ prefix: 'AIChatPage' })
+
 const DRAWER_WIDTH = 280
 
 export default function AIChatPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
-  console.warn('id', id)
+  logger.warn('id', id)
 
   const { messages, sendMessage } = useChat({
     id: id ?? uuidv7(),
@@ -46,7 +48,7 @@ export default function AIChatPage({ params }: { params: Promise<{ id: string }>
       api: process.env.NEXT_PUBLIC_POST_AI_CALLBACK_URL,
     }),
     onError: (error) => {
-      logger.withPrefix('[AIChatPage]').errorOnly(error)
+      logger.error('Chat transport error', error)
     },
   })
 

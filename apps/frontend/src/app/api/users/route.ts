@@ -1,4 +1,7 @@
+import { createLogger } from '@/application/services/logger.service.js'
 import type { PaginatedUsersResponse } from '@/domain/user/user.js'
+
+const logger = createLogger({ prefix: 'UsersAPI' })
 
 export async function GET(request: Request) {
   try {
@@ -72,9 +75,7 @@ export async function GET(request: Request) {
     return Response.json(result, { status: 200 })
   } catch (error) {
     if (error instanceof Error) {
-      console.error('User API error:', error.message, error.stack)
-    } else {
-      console.error('User API error: An unexpected error occurred')
+      logger.error('User API error:', error.message, error.stack)
     }
     return Response.json(
       {

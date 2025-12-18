@@ -68,7 +68,15 @@ const config: Linter.Config[] = [
       ...reactHooksPlugin.configs.recommended.rules,
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/triple-slash-reference': 'off',
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'TSEnumDeclaration',
+          message: 'Enums are not allowed. Use const objects with "as const" instead.',
+        },
+      ],
       'no-unused-vars': 'off',
+      'no-console': 'off',
     },
   },
   {

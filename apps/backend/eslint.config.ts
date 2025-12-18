@@ -21,6 +21,13 @@ const config: Linter.Config[] = [
     },
     rules: {
       'no-console': 'off', // Console is fine in backend
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'TSEnumDeclaration',
+          message: 'Enums are not allowed. Use const objects with "as const" instead.',
+        },
+      ],
     },
   },
   {
