@@ -520,7 +520,11 @@ describe('UnifiedLogger', () => {
     })
 
     afterEach(() => {
-      process.env.NODE_ENV = originalEnv
+      if (originalEnv === undefined) {
+        delete process.env.NODE_ENV
+      } else {
+        process.env.NODE_ENV = originalEnv
+      }
     })
 
     it('should suppress debug messages in production', () => {
