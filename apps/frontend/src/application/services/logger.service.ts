@@ -103,8 +103,7 @@ export class UnifiedLogger {
 
   private shouldLog(logLevel: LogLevelType): boolean {
     return (
-      UnifiedLogger.LOG_LEVELS.indexOf(logLevel) >=
-      UnifiedLogger.LOG_LEVELS.indexOf(this.minLevel)
+      UnifiedLogger.LOG_LEVELS.indexOf(logLevel) >= UnifiedLogger.LOG_LEVELS.indexOf(this.minLevel)
     )
   }
 
