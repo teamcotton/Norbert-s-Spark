@@ -7,6 +7,7 @@ import { ValidationException } from '../exceptions/validation.exception.js'
  * Utility class for file system operations
  * Provides methods for reading, writing, deleting, and searching files within a controlled directory
  */
+//TODO: this either needs to be refactored or removed. Using FileUtil as a dependency in another class created confusing and inconsistent file paths
 export class FileUtil {
   private readonly baseDir: string
 

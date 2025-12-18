@@ -217,7 +217,7 @@ describe('POST /api/register', () => {
       expect(response.status).toBe(500)
       expect(result).toEqual({
         success: false,
-        error: 'Registration failed',
+        error: 'An unexpected error occurred',
       })
     })
 
@@ -239,7 +239,7 @@ describe('POST /api/register', () => {
       expect(response.status).toBe(500)
       expect(result).toEqual({
         success: false,
-        error: 'Network error',
+        error: 'An unexpected error occurred',
       })
     })
 

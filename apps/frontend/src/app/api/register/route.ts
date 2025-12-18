@@ -99,7 +99,7 @@ export async function POST(request: Request) {
       return Response.json(
         {
           success: false,
-          error: result.error || 'Registration failed',
+          error: result.error || 'An unexpected error occurred',
         },
         { status: response.status }
       )
@@ -130,11 +130,11 @@ export async function POST(request: Request) {
         )
       }
 
-      // Handle other errors with generic message
+      // Handle other errors with generic message (do not expose internal error details)
       return Response.json(
         {
           success: false,
-          error: error.message,
+          error: 'An unexpected error occurred',
         },
         { status: 500 }
       )
