@@ -1,4 +1,7 @@
+import { UnifiedLogger } from '@/application/services/logger.service.js'
 import type { RegisterUserData, RegisterUserResponse } from '@/domain/auth/index.js'
+
+const logger = new UnifiedLogger({ prefix: '[registerUser]' })
 
 export async function registerUser(data: RegisterUserData): Promise<RegisterUserResponse> {
   try {
@@ -12,6 +15,11 @@ export async function registerUser(data: RegisterUserData): Promise<RegisterUser
     })
 
     const result = (await response.json()) as RegisterUserResponse
+
+    logger.debug(`Registration response: ${JSON.stringify(result)}`)
+    logger.info(`Registration response: ${JSON.stringify(result)}`)
+    logger.warn(`Registration response: ${JSON.stringify(result)}`)
+    logger.error(`Registration response: ${JSON.stringify(result)}`)
 
     if (response.status === 409) {
       return {
