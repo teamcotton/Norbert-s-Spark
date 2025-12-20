@@ -11,6 +11,11 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [],
   },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
+  },
   // Set the workspace root for turbopack
   turbopack: {
     root: path.resolve(__dirname, '../../'),

@@ -4,13 +4,13 @@ import { POST } from '../../../../../src/app/api/register/route.js'
 
 describe('POST /api/register', () => {
   const mockEnv = {
-    BACKEND_AI_CALLBACK_URL: 'https://api.example.com',
+    BACKEND_AI_CALLBACK_URL_DEV: 'https://api.example.com',
   }
 
   beforeEach(() => {
     vi.resetAllMocks()
     global.fetch = vi.fn()
-    process.env.BACKEND_AI_CALLBACK_URL = mockEnv.BACKEND_AI_CALLBACK_URL
+    process.env.BACKEND_AI_CALLBACK_URL_DEV = mockEnv.BACKEND_AI_CALLBACK_URL_DEV
   })
 
   describe('Successful Registration', () => {
@@ -100,8 +100,8 @@ describe('POST /api/register', () => {
       })
     })
 
-    it('should use BACKEND_AI_CALLBACK_URL environment variable', async () => {
-      process.env.BACKEND_AI_CALLBACK_URL = 'https://custom-api.example.com'
+    it('should use BACKEND_AI_CALLBACK_URL_DEV environment variable', async () => {
+      process.env.BACKEND_AI_CALLBACK_URL_DEV = 'https://custom-api.example.com'
 
       const mockBackendResponse = {
         success: true,
@@ -137,8 +137,8 @@ describe('POST /api/register', () => {
   })
 
   describe('Error Handling', () => {
-    it('should return 500 when BACKEND_AI_CALLBACK_URL is not configured', async () => {
-      delete process.env.BACKEND_AI_CALLBACK_URL
+    it('should return 500 when BACKEND_AI_CALLBACK_URL_DEV is not configured', async () => {
+      delete process.env.BACKEND_AI_CALLBACK_URL_DEV
 
       const request = new Request('http://localhost:4321/api/register', {
         method: 'POST',
