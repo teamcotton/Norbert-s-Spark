@@ -557,7 +557,7 @@ describe('UserController', () => {
 
         mockRequest.body = requestBody
 
-        const mockResult = { userId: 'user-123-abc' }
+        const mockResult = { userId: 'user-123-abc', access_token: 'mock.jwt.token' }
         vi.mocked(mockRegisterUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.register(mockRequest, mockReply)
@@ -575,7 +575,7 @@ describe('UserController', () => {
 
         mockRequest.body = requestBody
 
-        const mockResult = { userId: 'user-123-abc' }
+        const mockResult = { userId: 'user-123-abc', access_token: 'mock.jwt.token' }
         vi.mocked(mockRegisterUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.register(mockRequest, mockReply)
@@ -594,7 +594,7 @@ describe('UserController', () => {
           name: 'Test User',
         }
 
-        const mockResult = { userId: 'user-123-abc' }
+        const mockResult = { userId: 'user-123-abc', access_token: 'mock.jwt.token' }
         vi.mocked(mockRegisterUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.register(mockRequest, mockReply)
@@ -609,7 +609,7 @@ describe('UserController', () => {
           name: 'Test User',
         }
 
-        const mockResult = { userId: 'user-123-abc' }
+        const mockResult = { userId: 'user-123-abc', access_token: 'mock.jwt.token' }
         vi.mocked(mockRegisterUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.register(mockRequest, mockReply)
@@ -627,14 +627,14 @@ describe('UserController', () => {
           name: 'Another User',
         }
 
-        const mockResult = { userId: 'user-456-xyz' }
+        const mockResult = { userId: 'user-456-xyz', access_token: 'mock.jwt.token' }
         vi.mocked(mockRegisterUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.register(mockRequest, mockReply)
 
         expect(mockReply.send).toHaveBeenCalledWith({
           success: true,
-          data: { userId: 'user-456-xyz' },
+          data: { userId: 'user-456-xyz', access_token: 'mock.jwt.token' },
         })
       })
 
@@ -645,7 +645,7 @@ describe('UserController', () => {
           name: 'Test User',
         }
 
-        const mockResult = { userId: 'user-123-abc' }
+        const mockResult = { userId: 'user-123-abc', access_token: 'mock.jwt.token' }
         vi.mocked(mockRegisterUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.register(mockRequest, mockReply)
@@ -853,7 +853,7 @@ describe('UserController', () => {
           anotherField: 123,
         }
 
-        const mockResult = { userId: 'user-123-abc' }
+        const mockResult = { userId: 'user-123-abc', access_token: 'mock.jwt.token' }
         vi.mocked(mockRegisterUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.register(mockRequest, mockReply)
@@ -872,7 +872,7 @@ describe('UserController', () => {
           name: '  Test User  ',
         }
 
-        const mockResult = { userId: 'user-123-abc' }
+        const mockResult = { userId: 'user-123-abc', access_token: 'mock.jwt.token' }
         vi.mocked(mockRegisterUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.register(mockRequest, mockReply)
@@ -917,7 +917,7 @@ describe('UserController', () => {
           name: 'Test User',
         }
 
-        const mockResult = { userId: 'user-123-abc' }
+        const mockResult = { userId: 'user-123-abc', access_token: 'mock.jwt.token' }
         vi.mocked(mockRegisterUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.register(mockRequest, mockReply)
@@ -950,15 +950,18 @@ describe('UserController', () => {
           name: 'Test User',
         }
 
-        const mockResult = { userId: 'user-123-abc' }
+        const mockResult = { userId: 'user-123-abc', access_token: 'mock.jwt.token' }
         vi.mocked(mockRegisterUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.register(mockRequest, mockReply)
 
         const sentResponse = vi.mocked(mockReply.send).mock.calls[0]?.[0] as {
-          data?: { userId: string }
+          data?: { userId: string; access_token: string }
         }
-        expect(sentResponse.data).toEqual({ userId: 'user-123-abc' })
+        expect(sentResponse.data).toEqual({
+          userId: 'user-123-abc',
+          access_token: 'mock.jwt.token',
+        })
       })
 
       it('should include error message in error response', async () => {
@@ -1038,7 +1041,7 @@ describe('UserController', () => {
         name: 'Integration Test',
       }
 
-      const mockResult = { userId: 'user-integration-123' }
+      const mockResult = { userId: 'user-integration-123', access_token: 'mock.jwt.token' }
       vi.mocked(mockRegisterUserUseCase.execute).mockResolvedValue(mockResult)
 
       // Execute handler
@@ -1072,7 +1075,7 @@ describe('UserController', () => {
         name: 'Test User',
       }
 
-      const mockResult = { userId: 'user-123' }
+      const mockResult = { userId: 'user-123', access_token: 'mock.jwt.token' }
       vi.mocked(mockRegisterUserUseCase.execute).mockResolvedValue(mockResult)
 
       await registerHandler(mockRequest, mockReply)

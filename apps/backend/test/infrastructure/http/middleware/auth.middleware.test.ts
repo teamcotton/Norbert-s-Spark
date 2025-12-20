@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { authMiddleware } from '../../../../src/infrastructure/http/middleware/auth.middleware.js'
 import { JwtUtil } from '../../../../src/infrastructure/security/jwt.util.js'
@@ -791,6 +791,292 @@ describe('authMiddleware', () => {
 
         expect(codeSpy).toHaveBeenCalledWith(401)
       }
+    })
+  })
+
+  describe('validateTokenFormat', () => {
+    let validateTokenFormat: (token: string) => void
+
+    beforeAll(async () => {
+      const module =
+        await import('../../../../src/infrastructure/http/middleware/auth.middleware.js')
+      validateTokenFormat = module.validateTokenFormat
+    })
+
+    describe('Valid Token Format', () => {
+      it('should pass validation for a well-formed JWT token', () => {
+        const validToken =
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+
+        expect(() => validateTokenFormat(validToken)).not.toThrow()
+      })
+
+      it('should pass validation for token with Base64URL characters (includes hyphens and underscores)', () => {
+        const tokenWithBase64UrlChars =
+          'eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiMTIzLTQ1Ni03ODkwIn0.abcd-efgh_ijkl-mnop_qrst-uvwx_yz12-3456_7890'
+
+        expect(() => validateTokenFormat(tokenWithBase64UrlChars)).not.toThrow()
+      })
+
+      it('should pass validation for token with numeric characters', () => {
+        const tokenWithNumbers = '1234567890.0987654321.1111222233334444555566667777888899990000'
+
+        expect(() => validateTokenFormat(tokenWithNumbers)).not.toThrow()
+      })
+
+      it('should pass validation for token with mixed case letters', () => {
+        const mixedCaseToken = 'AbCdEfGhIjKlMnOp.QrStUvWxYzAbCdEf.GhIjKlMnOpQrStUvWxYz'
+
+        expect(() => validateTokenFormat(mixedCaseToken)).not.toThrow()
+      })
+
+      it('should pass validation for token at maximum allowed length', () => {
+        // Create a token with exactly 8192 characters (MAX_TOKEN_LENGTH)
+        const headerLength = 2700
+        const payloadLength = 2700
+        const signatureLength = 2790 // Adjusted to total exactly 8192 with 2 dots
+
+        const header = 'A'.repeat(headerLength)
+        const payload = 'B'.repeat(payloadLength)
+        const signature = 'C'.repeat(signatureLength)
+        const maxLengthToken = `${header}.${payload}.${signature}`
+
+        expect(maxLengthToken.length).toBe(8192)
+        expect(() => validateTokenFormat(maxLengthToken)).not.toThrow()
+      })
+    })
+
+    describe('Invalid Token Length', () => {
+      it('should throw UnauthorizedException when token exceeds maximum length', () => {
+        // Create a token with 8193 characters (exceeds MAX_TOKEN_LENGTH)
+        const headerLength = 2731
+        const payloadLength = 2731
+        const signatureLength = 2729
+
+        const header = 'A'.repeat(headerLength)
+        const payload = 'B'.repeat(payloadLength)
+        const signature = 'C'.repeat(signatureLength)
+        const tooLongToken = `${header}.${payload}.${signature}`
+
+        expect(tooLongToken.length).toBe(8193)
+        expect(() => validateTokenFormat(tooLongToken)).toThrow(UnauthorizedException)
+        expect(() => validateTokenFormat(tooLongToken)).toThrow(
+          'Token exceeds maximum allowed length'
+        )
+      })
+
+      it('should throw UnauthorizedException when token is significantly over limit', () => {
+        const veryLongToken = 'A'.repeat(10000) + '.B'.repeat(10000) + '.C'.repeat(10000)
+
+        expect(() => validateTokenFormat(veryLongToken)).toThrow(UnauthorizedException)
+        expect(() => validateTokenFormat(veryLongToken)).toThrow(
+          'Token exceeds maximum allowed length'
+        )
+      })
+    })
+
+    describe('Invalid Token Structure', () => {
+      it('should throw UnauthorizedException when token has only 1 part', () => {
+        const singlePartToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9'
+
+        expect(() => validateTokenFormat(singlePartToken)).toThrow(UnauthorizedException)
+        expect(() => validateTokenFormat(singlePartToken)).toThrow('Invalid token format')
+      })
+
+      it('should throw UnauthorizedException when token has only 2 parts', () => {
+        const twoPartToken = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0'
+
+        expect(() => validateTokenFormat(twoPartToken)).toThrow(UnauthorizedException)
+        expect(() => validateTokenFormat(twoPartToken)).toThrow('Invalid token format')
+      })
+
+      it('should throw UnauthorizedException when token has 4 parts', () => {
+        const fourPartToken = 'part1.part2.part3.part4'
+
+        expect(() => validateTokenFormat(fourPartToken)).toThrow(UnauthorizedException)
+        expect(() => validateTokenFormat(fourPartToken)).toThrow('Invalid token format')
+      })
+
+      it('should throw UnauthorizedException when token has multiple extra parts', () => {
+        const manyPartToken = 'part1.part2.part3.part4.part5.part6'
+
+        expect(() => validateTokenFormat(manyPartToken)).toThrow(UnauthorizedException)
+        expect(() => validateTokenFormat(manyPartToken)).toThrow('Invalid token format')
+      })
+
+      it('should throw UnauthorizedException when token has no dots', () => {
+        const noDotToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjMifQ'
+
+        expect(() => validateTokenFormat(noDotToken)).toThrow(UnauthorizedException)
+        expect(() => validateTokenFormat(noDotToken)).toThrow('Invalid token format')
+      })
+    })
+
+    describe('Invalid Token Parts', () => {
+      it('should throw UnauthorizedException when header part is empty', () => {
+        const emptyHeaderToken = '.payload.signature'
+
+        expect(() => validateTokenFormat(emptyHeaderToken)).toThrow(UnauthorizedException)
+        expect(() => validateTokenFormat(emptyHeaderToken)).toThrow('Invalid token structure')
+      })
+
+      it('should throw UnauthorizedException when payload part is empty', () => {
+        const emptyPayloadToken = 'header..signature'
+
+        expect(() => validateTokenFormat(emptyPayloadToken)).toThrow(UnauthorizedException)
+        expect(() => validateTokenFormat(emptyPayloadToken)).toThrow('Invalid token structure')
+      })
+
+      it('should throw UnauthorizedException when signature part is empty', () => {
+        const emptySignatureToken = 'header.payload.'
+
+        expect(() => validateTokenFormat(emptySignatureToken)).toThrow(UnauthorizedException)
+        expect(() => validateTokenFormat(emptySignatureToken)).toThrow('Invalid token structure')
+      })
+
+      it('should throw UnauthorizedException when all parts are empty', () => {
+        const allEmptyToken = '..'
+
+        expect(() => validateTokenFormat(allEmptyToken)).toThrow(UnauthorizedException)
+        expect(() => validateTokenFormat(allEmptyToken)).toThrow('Invalid token structure')
+      })
+
+      it('should throw UnauthorizedException when multiple parts are empty', () => {
+        const multipleEmptyToken = '.payload.'
+
+        expect(() => validateTokenFormat(multipleEmptyToken)).toThrow(UnauthorizedException)
+        expect(() => validateTokenFormat(multipleEmptyToken)).toThrow('Invalid token structure')
+      })
+    })
+
+    describe('Invalid Token Characters', () => {
+      it('should throw UnauthorizedException when token contains equals sign (Base64 padding)', () => {
+        const paddedToken = 'eyJhbGciOiJIUzI1NiJ9=.eyJzdWIiOiIxMjMifQ==.signature='
+
+        expect(() => validateTokenFormat(paddedToken)).toThrow(UnauthorizedException)
+        expect(() => validateTokenFormat(paddedToken)).toThrow('Invalid token characters')
+      })
+
+      it('should throw UnauthorizedException when token contains spaces', () => {
+        const tokenWithSpaces = 'header part.payload part.signature part'
+
+        expect(() => validateTokenFormat(tokenWithSpaces)).toThrow(UnauthorizedException)
+        expect(() => validateTokenFormat(tokenWithSpaces)).toThrow('Invalid token characters')
+      })
+
+      it('should throw UnauthorizedException when token contains special characters', () => {
+        const tokenWithSpecialChars = 'header!@#.payload$%^.signature&*()'
+
+        expect(() => validateTokenFormat(tokenWithSpecialChars)).toThrow(UnauthorizedException)
+        expect(() => validateTokenFormat(tokenWithSpecialChars)).toThrow('Invalid token characters')
+      })
+
+      it('should throw UnauthorizedException when token contains newline characters', () => {
+        const tokenWithNewline = 'header\n.payload.signature'
+
+        expect(() => validateTokenFormat(tokenWithNewline)).toThrow(UnauthorizedException)
+        expect(() => validateTokenFormat(tokenWithNewline)).toThrow('Invalid token characters')
+      })
+
+      it('should throw UnauthorizedException when token contains tab characters', () => {
+        const tokenWithTab = 'header\t.payload.signature'
+
+        expect(() => validateTokenFormat(tokenWithTab)).toThrow(UnauthorizedException)
+        expect(() => validateTokenFormat(tokenWithTab)).toThrow('Invalid token characters')
+      })
+
+      it('should throw UnauthorizedException when token contains plus signs', () => {
+        const tokenWithPlus = 'header+test.payload+test.signature+test'
+
+        expect(() => validateTokenFormat(tokenWithPlus)).toThrow(UnauthorizedException)
+        expect(() => validateTokenFormat(tokenWithPlus)).toThrow('Invalid token characters')
+      })
+
+      it('should throw UnauthorizedException when token contains forward slashes', () => {
+        const tokenWithSlash = 'header/test.payload/test.signature/test'
+
+        expect(() => validateTokenFormat(tokenWithSlash)).toThrow(UnauthorizedException)
+        expect(() => validateTokenFormat(tokenWithSlash)).toThrow('Invalid token characters')
+      })
+
+      it('should throw UnauthorizedException when token contains unicode characters', () => {
+        const tokenWithUnicode = 'héader.pâyload.signaturé'
+
+        expect(() => validateTokenFormat(tokenWithUnicode)).toThrow(UnauthorizedException)
+        expect(() => validateTokenFormat(tokenWithUnicode)).toThrow('Invalid token characters')
+      })
+    })
+
+    describe('Edge Cases', () => {
+      it('should throw UnauthorizedException for empty string', () => {
+        const emptyToken = ''
+
+        expect(() => validateTokenFormat(emptyToken)).toThrow(UnauthorizedException)
+        expect(() => validateTokenFormat(emptyToken)).toThrow('Invalid token format')
+      })
+
+      it('should throw UnauthorizedException for single dot', () => {
+        const singleDot = '.'
+
+        expect(() => validateTokenFormat(singleDot)).toThrow(UnauthorizedException)
+        expect(() => validateTokenFormat(singleDot)).toThrow('Invalid token format')
+      })
+
+      it('should throw UnauthorizedException for two dots', () => {
+        const twoDots = '..'
+
+        expect(() => validateTokenFormat(twoDots)).toThrow(UnauthorizedException)
+        expect(() => validateTokenFormat(twoDots)).toThrow('Invalid token structure')
+      })
+
+      it('should throw UnauthorizedException for token with leading dot', () => {
+        const leadingDot = '.header.payload.signature'
+
+        expect(() => validateTokenFormat(leadingDot)).toThrow(UnauthorizedException)
+        // Will fail with 'Invalid token format' due to 4 parts
+        expect(() => validateTokenFormat(leadingDot)).toThrow('Invalid token format')
+      })
+
+      it('should throw UnauthorizedException for token with trailing dot', () => {
+        const trailingDot = 'header.payload.signature.'
+
+        expect(() => validateTokenFormat(trailingDot)).toThrow(UnauthorizedException)
+        // Will fail with 'Invalid token format' due to 4 parts
+        expect(() => validateTokenFormat(trailingDot)).toThrow('Invalid token format')
+      })
+
+      it('should throw UnauthorizedException for token with consecutive dots', () => {
+        const consecutiveDots = 'header..payload.signature'
+
+        expect(() => validateTokenFormat(consecutiveDots)).toThrow(UnauthorizedException)
+        // Will fail with 'Invalid token format' due to 4 parts
+        expect(() => validateTokenFormat(consecutiveDots)).toThrow('Invalid token format')
+      })
+    })
+
+    describe('Real-World Scenarios', () => {
+      it('should validate token from actual JWT library output', () => {
+        // Example token generated by jsonwebtoken library
+        const realJwt =
+          'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwiZW1haWwiOiJ1c2VyQGV4YW1wbGUuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNjczMDAwMDAwLCJleHAiOjE2NzMwMDM2MDB9.abc123def456ghi789jkl012mno345pqr678stu901vwx234yz_567-890'
+
+        expect(() => validateTokenFormat(realJwt)).not.toThrow()
+      })
+
+      it('should reject malformed token that might come from client error', () => {
+        const malformedToken = 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ.signature'
+
+        expect(() => validateTokenFormat(malformedToken)).toThrow(UnauthorizedException)
+        // Contains space which is invalid Base64URL character
+        expect(() => validateTokenFormat(malformedToken)).toThrow('Invalid token characters')
+      })
+
+      it('should reject token with URL-encoded characters', () => {
+        const urlEncodedToken = 'header%20.payload%20.signature%20'
+
+        expect(() => validateTokenFormat(urlEncodedToken)).toThrow(UnauthorizedException)
+        expect(() => validateTokenFormat(urlEncodedToken)).toThrow('Invalid token characters')
+      })
     })
   })
 })
