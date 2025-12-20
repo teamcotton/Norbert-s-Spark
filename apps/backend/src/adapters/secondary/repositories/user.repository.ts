@@ -41,11 +41,11 @@ import { DatabaseUtil } from '../../../shared/utils/database.util.js'
  * ```typescript
  * // Instantiate and use repository
  * const userRepo = new PostgresUserRepository()
- * 
+ *
  * // Save a new user
  * const user = new User(id, email, password, name, role, createdAt)
  * await userRepo.save(user)
- * 
+ *
  * // Query users with pagination
  * const result = await userRepo.findAll({ limit: 20, offset: 0 })
  * console.log(`Found ${result.total} users`)
@@ -75,7 +75,7 @@ export class PostgresUserRepository implements UserRepositoryPort {
    * const password = await Password.fromPlainText('password123')
    * const role = new Role('user')
    * const user = new User('uuid', email, password, 'John Doe', role, new Date())
-   * 
+   *
    * try {
    *   await userRepo.save(user)
    *   console.log('User saved successfully')
@@ -170,7 +170,7 @@ export class PostgresUserRepository implements UserRepositoryPort {
    * @example
    * ```typescript
    * const user = await userRepo.findById('550e8400-e29b-41d4-a716-446655440000')
-   * 
+   *
    * if (user) {
    *   console.log(`Found user: ${user.getName()}`)
    * } else {
@@ -212,7 +212,7 @@ export class PostgresUserRepository implements UserRepositoryPort {
    * @example
    * ```typescript
    * const user = await userRepo.findByEmail('user@example.com')
-   * 
+   *
    * if (user) {
    *   console.log(`User ID: ${user.id}`)
    * } else {
@@ -256,7 +256,7 @@ export class PostgresUserRepository implements UserRepositoryPort {
    * @example
    * ```typescript
    * const user = await userRepo.findById('uuid')
-   * 
+   *
    * if (user) {
    *   // Update user properties
    *   const updatedEmail = new Email('newemail@example.com')
@@ -268,7 +268,7 @@ export class PostgresUserRepository implements UserRepositoryPort {
    *     user.getRoleObject(),
    *     user.createdAt
    *   )
-   *   
+   *
    *   await userRepo.update(updatedUser)
    *   console.log('User updated successfully')
    * }
@@ -311,7 +311,7 @@ export class PostgresUserRepository implements UserRepositoryPort {
    * // Delete user by ID
    * await userRepo.delete('550e8400-e29b-41d4-a716-446655440000')
    * console.log('User deleted')
-   * 
+   *
    * // Verify deletion
    * const deletedUser = await userRepo.findById('550e8400-e29b-41d4-a716-446655440000')
    * console.log(deletedUser) // null
@@ -341,11 +341,11 @@ export class PostgresUserRepository implements UserRepositoryPort {
    * ```typescript
    * // Check email availability before registration
    * const emailTaken = await userRepo.existsByEmail('user@example.com')
-   * 
+   *
    * if (emailTaken) {
    *   throw new ConflictException('Email already registered')
    * }
-   * 
+   *
    * // Proceed with registration
    * await userRepo.save(newUser)
    * ```
@@ -376,7 +376,7 @@ export class PostgresUserRepository implements UserRepositoryPort {
    * // Internal usage within repository methods
    * const dbRecord = await db.select().from(user).where(eq(user.userId, id))
    * const userEntity = this.toDomain(dbRecord[0])
-   * 
+   *
    * // userEntity now has all domain methods available
    * console.log(userEntity.getEmail()) // Email value object
    * console.log(userEntity.getRole()) // 'user' or 'admin'
