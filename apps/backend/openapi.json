@@ -100,6 +100,7 @@
         "description": "Creates a new user account",
         "operationId": "registerUser",
         "tags": ["users"],
+        "security": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -150,6 +151,7 @@
         "description": "Retrieves a user's profile information",
         "operationId": "getUserById",
         "tags": ["users"],
+        "security": [{ "bearerAuth": [] }],
         "parameters": [
           {
             "name": "id",
@@ -192,6 +194,7 @@
         "description": "Retrieves all users in date order",
         "operationId": "getAllUsers",
         "tags": ["users"],
+        "security": [{ "bearerAuth": [] }],
         "responses": {
           "200": {
             "description": "Users found",
@@ -257,6 +260,11 @@
                 "type": "string",
                 "format": "uuid",
                 "example": "550e8400-e29b-41d4-a716-446655440000"
+              },
+              "token": {
+                "type": "string",
+                "description": "JWT access token",
+                "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
               }
             }
           }
@@ -318,6 +326,5 @@
         "description": "JWT token for authenticated requests"
       }
     }
-  },
-  "security": []
+  }
 }

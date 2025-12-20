@@ -15,7 +15,7 @@ const JWT_FORMAT_REGEX = /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/
  * @param token - The JWT token to validate
  * @throws UnauthorizedException if token format is invalid
  */
-function validateTokenFormat(token: string): void {
+export function validateTokenFormat(token: string): void {
   // Check token length to prevent DOS from extremely large tokens
   if (token.length > MAX_TOKEN_LENGTH) {
     throw new UnauthorizedException('Token exceeds maximum allowed length', ErrorCode.UNAUTHORIZED)
