@@ -197,6 +197,12 @@ pnpm typecheck    # TypeScript type checking (no emit)
 - `pnpm run lint` - Lint all workspaces
 - `pnpm run typecheck` - TypeScript type checking
 - `pnpm run test` - Run all unit tests
+- `pnpm run test:e2e` - Run E2E tests (skipped if `SKIP_E2E=1` is set)
+
+To skip E2E tests during pre-push (useful for CI or automated environments), set `SKIP_E2E=1`:
+```bash
+SKIP_E2E=1 git push
+```
 
 Hooks are managed by Husky and located in `.husky/` directory.
 
