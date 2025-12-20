@@ -3,6 +3,7 @@ import 'modern-normalize/modern-normalize.css'
 import type { Metadata } from 'next'
 import React from 'react'
 
+import { QueryProvider } from './providers/QueryProvider.js'
 import ThemeRegistry from './ThemeRegistry.js'
 
 export const metadata: Metadata = {
@@ -18,7 +19,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ThemeRegistry>{children}</ThemeRegistry>
+        <QueryProvider>
+          <ThemeRegistry>{children}</ThemeRegistry>
+        </QueryProvider>
       </body>
     </html>
   )
