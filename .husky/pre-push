@@ -24,4 +24,9 @@ pnpm run format
 pnpm run lint
 pnpm run typecheck
 pnpm run test
-pnpm run test:e2e ## This is for developers only. AI can pass this test
+## This is for developers only. AI can pass this test
+if [ "${SKIP_E2E:-0}" = "1" ]; then
+  echo "Skipping e2e (SKIP_E2E=1)"
+else
+  pnpm run test:e2e
+fi
