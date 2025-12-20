@@ -254,14 +254,14 @@
           "data": {
             "type": "object",
             "description": "Registration result data",
-            "required": ["userId"],
+            "required": ["userId", "access_token"],
             "properties": {
               "userId": {
                 "type": "string",
                 "format": "uuid",
                 "example": "550e8400-e29b-41d4-a716-446655440000"
               },
-              "token": {
+              "access_token": {
                 "type": "string",
                 "description": "JWT access token",
                 "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."

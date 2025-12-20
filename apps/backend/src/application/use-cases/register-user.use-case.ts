@@ -8,6 +8,7 @@ import type { LoggerPort } from '../ports/logger.port.js'
 import { RegisterUserDto } from '../dtos/register-user.dto.js'
 import { ConflictException } from '../../shared/exceptions/conflict.exception.js'
 import { DatabaseUtil } from '../../shared/utils/database.util.js'
+import { JwtUtil } from '../../infrastructure/security/jwt.util.js'
 import { uuidv7 } from 'uuidv7'
 
 export class RegisterUserUseCase {
@@ -17,7 +18,7 @@ export class RegisterUserUseCase {
     private readonly logger: LoggerPort
   ) {}
 
-  async execute(dto: RegisterUserDto): Promise<{ userId: string }> {
+  async execute(dto: RegisterUserDto): Promise<{ userId: string; access_token: string }> {
     this.logger.info('Starting user registration', { email: dto.email })
 
     // Create domain objects
@@ -57,7 +58,32 @@ export class RegisterUserUseCase {
 
     this.logger.info('User registered successfully', { userId })
 
-    return { userId }
+    // Generate JWT access token
+    const accessToken = JwtUtil.generateToken({
+      sub: userId,
+      email: dto.email,
+      roles: [dto.role],
+    })
+
+    /**
+     *  "access_token": {
+     *                 "type": "string",
+     *                 "description": "JWT access token",
+     *                 "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+     *               },
+     *               "token_type": {
+     *                 "type": "string",
+     *                 "description": "Type of the token",
+     *                 "example": "Bearer"
+     *               },
+     *               "expires_in": {
+     *                 "type": "integer",
+     *                 "description": "How long the user token lasts for",
+     *                 "example": 3600
+     *               }
+     */
+
+    return { userId, access_token: accessToken }
   }
 
   private generateId(): string {

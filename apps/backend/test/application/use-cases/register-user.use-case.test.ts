@@ -435,7 +435,8 @@ describe('RegisterUserUseCase', () => {
         const result = await useCase.execute(dto)
 
         expect(result).toHaveProperty('userId')
-        expect(Object.keys(result)).toEqual(['userId'])
+        expect(result).toHaveProperty('access_token')
+        expect(Object.keys(result)).toEqual(['userId', 'access_token'])
       })
 
       it('should return userId matching saved user id', async () => {
