@@ -493,7 +493,12 @@ describe('RegisterUserUseCase', () => {
       })
 
       it('should include admin role in token when user is admin', async () => {
-        const dto = new RegisterUserDto('admin@example.com', 'SecurePass123!', 'Admin User', 'admin')
+        const dto = new RegisterUserDto(
+          'admin@example.com',
+          'SecurePass123!',
+          'Admin User',
+          'admin'
+        )
 
         vi.mocked(mockUserRepository.save).mockResolvedValue(undefined)
         vi.mocked(mockEmailService.sendWelcomeEmail).mockResolvedValue(undefined)

@@ -20,7 +20,7 @@ export interface TokenGeneratorPort {
    * @param claims - User identity and authorization information
    * @param claims.sub - Subject identifier (user ID)
    * @param claims.email - User's email address
-   * @param claims.roles - Optional array of user roles
+   * @param claims.roles - Array of user roles for authorization
    * @returns Signed authentication token string
    *
    * @example
