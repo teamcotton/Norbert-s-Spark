@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   reactStrictMode: true,
   // Optimize for production
-  poweredByHeader: process.env.NODE_ENV !== 'development',
+  poweredByHeader: false,
   // Configure image optimization if needed
   images: {
     remotePatterns: [],
@@ -23,10 +23,6 @@ const nextConfig: NextConfig = {
   // Set the workspace root for turbopack
   turbopack: {
     root: path.resolve(__dirname, '../../'),
-  },
-  typescript: {
-    ignoreBuildErrors: false,
-    tsconfigPath: 'tsconfig.json',
   },
 }
 
