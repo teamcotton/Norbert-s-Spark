@@ -3,7 +3,7 @@ import Fastify from 'fastify'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 import cors from '@fastify/cors'
-import { parse } from 'yaml'
+
 import swagger from '@fastify/swagger'
 import swaggerUI from '@fastify/swagger-ui'
 import { fileURLToPath } from 'node:url'
@@ -14,7 +14,7 @@ import { dirname } from 'node:path'
  * @param {FastifyServerOptions} [options] - Optional Fastify server options to customize the instance.
  * @returns {FastifyInstance} The configured Fastify server instance.
  *
- * @throws {Error} If the OpenAPI specification file (`openapi.yaml`) cannot be found or parsed.
+ * @throws {Error} If the OpenAPI specification file (`openapi.json`) cannot be found or parsed.
  *
  * @remarks
  * - Registers CORS with permissive settings for development.
@@ -41,8 +41,8 @@ export function createFastifyApp(options?: FastifyServerOptions): FastifyInstanc
   const __dirname = dirname(__filename)
 
   // Load OpenAPI specification
-  const openapiPath = join(__dirname, '../../..', 'openapi.yaml')
-  const openapiSpec = parse(readFileSync(openapiPath, 'utf8'))
+  const openapiPath = join(__dirname, '../../..', 'openapi.json')
+  const openapiSpec = JSON.parse(readFileSync(openapiPath, 'utf8'))
 
   // Register Swagger
   fastify.register(swagger, {

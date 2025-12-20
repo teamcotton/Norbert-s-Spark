@@ -346,7 +346,7 @@ describe('Container', () => {
 
     it('should throw error when Fastify app initialization fails', () => {
       vi.mocked(createFastifyApp).mockImplementationOnce(() => {
-        throw new Error('Failed to read openapi.yaml')
+        throw new Error('Failed to read openapi.json')
       })
 
       // Reset singleton

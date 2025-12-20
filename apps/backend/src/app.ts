@@ -4,7 +4,6 @@ import swagger from '@fastify/swagger'
 import swaggerUI from '@fastify/swagger-ui'
 import { readFileSync } from 'fs'
 import { join } from 'path'
-import { parse } from 'yaml'
 
 export function buildApp(options?: FastifyServerOptions): FastifyInstance {
   const fastify = Fastify({
@@ -22,8 +21,8 @@ export function buildApp(options?: FastifyServerOptions): FastifyInstance {
   })
 
   // Load OpenAPI specification
-  const openapiPath = join(import.meta.dirname, '..', 'openapi.yaml')
-  const openapiSpec = parse(readFileSync(openapiPath, 'utf8'))
+  const openapiPath = join(import.meta.dirname, '..', 'openapi.json')
+  const openapiSpec = JSON.parse(readFileSync(openapiPath, 'utf8'))
 
   // Register Swagger
   fastify.register(swagger, {
