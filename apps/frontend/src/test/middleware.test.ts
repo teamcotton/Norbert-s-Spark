@@ -2,7 +2,7 @@ import { getToken } from 'next-auth/jwt'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { middleware } from '../middleware.js'
-import { createMockToken } from './helpers/mockToken.js'
+import { createMockToken } from './helpers/index.js'
 
 // Mock next-auth/jwt
 vi.mock('next-auth/jwt', () => ({
