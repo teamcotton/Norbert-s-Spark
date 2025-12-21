@@ -1,17 +1,7 @@
 import { NextResponse } from 'next/server.js'
 import { getToken } from 'next-auth/jwt'
 
-/**
- * Protected route patterns that require authentication
- * @constant
- */
-const PROTECTED_ROUTES = ['/admin', '/dashboard', '/profile']
-
-/**
- * Authentication route patterns that redirect authenticated users
- * @constant
- */
-const AUTH_ROUTES = ['/login', '/register']
+import { AUTH_ROUTES, PROTECTED_ROUTES } from './lib/routes.js'
 
 /**
  * Next.js Middleware for route protection and authentication checks
