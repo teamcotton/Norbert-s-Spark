@@ -49,5 +49,10 @@ describe('scheduleRateMapCleanup', () => {
 
     // Both original timestamps should be expired and removed by the cleanup job
     expect(__getRateLimiterSize()).toBe(0)
+
+    // Stop the module's cleanup timer to avoid interfering with other tests
+    if (typeof middlewareModule.__stopRateMapCleanup === 'function') {
+      middlewareModule.__stopRateMapCleanup()
+    }
   })
 })

@@ -33,7 +33,7 @@ const RATE_LIMIT_CLEANUP_INTERVAL_SECONDS = RATE_LIMIT_WINDOW * 2
 // serverless/edge runtimes.
 // Avoid casting to `any` to satisfy `@typescript-eslint/no-explicit-any`.
 type TimerWithUnref = { unref?: () => void }
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 let rateMapCleanupTimer: TimerWithUnref | undefined
 
 export function scheduleRateMapCleanup() {
@@ -62,6 +62,19 @@ export function scheduleRateMapCleanup() {
   }
 
   rateMapCleanupTimer = timer
+}
+
+// Stop the periodic cleanup (test helper). Clears any scheduled timer so tests
+// can control lifecycle and avoid cross-test interference.
+export function __stopRateMapCleanup() {
+  if (rateMapCleanupTimer) {
+    try {
+      clearTimeout(rateMapCleanupTimer as unknown as ReturnType<typeof setTimeout>)
+    } catch {
+      // ignore any runtime differences
+    }
+    rateMapCleanupTimer = undefined
+  }
 }
 
 // Start the periodic cleanup loop when the module is loaded.
