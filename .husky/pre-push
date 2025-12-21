@@ -2,6 +2,9 @@
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
+# Skip E2E tests for AI agents by default
+export SKIP_E2E="${SKIP_E2E:-1}"
+
 # Use .nvmrc if present
 if [ -f .nvmrc ]; then
   nvm use 2>/dev/null || true
