@@ -73,7 +73,7 @@ scheduleRateMapCleanup()
  * deterministic starting state between test cases. Do NOT use this in
  * production code to coordinate rate-limiting across multiple instances.
  *
- * @returns {void}
+ *  @returns {number} The size of the rate limiter map after reset.
  */
 export function __resetRateLimiter() {
   rateMap.clear()
