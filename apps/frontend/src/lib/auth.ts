@@ -249,8 +249,8 @@ export async function requireAuth() {
  *
  * @example
  * ```typescript
+ *  'use server'
  * export async function adminAction() {
- *   'use server'
  *   const session = await requireRole('admin')
  *   // Proceed with admin logic
  * }

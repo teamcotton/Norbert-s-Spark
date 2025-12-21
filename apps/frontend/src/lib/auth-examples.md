@@ -15,11 +15,10 @@ This document provides examples of how to use the authentication utilities provi
 Get the JWT access token from the current session.
 
 ```typescript
+'use server'
 import { getAuthToken } from '@/lib/auth'
 
 export async function fetchProtectedData() {
-  'use server'
-
   const token = await getAuthToken()
 
   if (!token) {
@@ -41,11 +40,10 @@ export async function fetchProtectedData() {
 Ensure user is authenticated, throws error if not.
 
 ```typescript
+'use server'
 import { requireAuth } from '@/lib/auth'
 
 export async function protectedAction() {
-  'use server'
-
   const session = await requireAuth()
 
   // Session is guaranteed to exist here
@@ -60,11 +58,10 @@ export async function protectedAction() {
 Ensure user has a specific role.
 
 ```typescript
+'use server'
 import { requireRole } from '@/lib/auth'
 
 export async function adminAction() {
-  'use server'
-
   const session = await requireRole('admin')
 
   // User is guaranteed to be an admin here
@@ -81,13 +78,12 @@ Wrap Server Actions with automatic authentication checks.
 #### Basic Usage
 
 ```typescript
+'use server'
 import { withAuth } from '@/lib/auth'
 import type { Session } from 'next-auth'
 
 // Define your action logic
 async function getUserProfileAction(session: Session, userId: string) {
-  'use server'
-
   // Access session properties
   const currentUserId = session.user.id
   const token = session.accessToken
@@ -135,13 +131,12 @@ Wrap Server Actions with role-based authentication checks.
 #### Single Role
 
 ```typescript
+'use server'
 import { withRole } from '@/lib/auth'
 import type { Session } from 'next-auth'
 
 // Define admin-only action
 async function deleteUserAction(session: Session, userId: string) {
-  'use server'
-
   const token = session.accessToken
 
   await fetch(`${process.env.BACKEND_URL}/users/${userId}`, {
@@ -161,13 +156,12 @@ export const deleteUser = withRole('admin', deleteUserAction)
 #### Multiple Roles
 
 ```typescript
+'use server'
 import { withRole } from '@/lib/auth'
 import type { Session } from 'next-auth'
 
 // Define action that requires admin OR moderator role
 async function moderateContentAction(session: Session, contentId: string, action: string) {
-  'use server'
-
   const token = session.accessToken
 
   await fetch(`${process.env.BACKEND_URL}/content/${contentId}/moderate`, {
@@ -390,9 +384,8 @@ async function handleAction() {
 ### Before (Manual Auth Check)
 
 ```typescript
+'use server'
 export async function protectedAction(data: any) {
-  'use server'
-
   const session = await getServerSession(authOptions)
   if (!session) {
     throw new Error('Unauthorized')
@@ -406,11 +399,10 @@ export async function protectedAction(data: any) {
 ### After (Using withAuth)
 
 ```typescript
+'use server'
 import { withAuth } from '@/lib/auth'
 
 async function protectedActionLogic(session: Session, data: any) {
-  'use server'
-
   const token = session.accessToken
   // ... rest of logic
 }
