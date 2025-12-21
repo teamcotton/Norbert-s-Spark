@@ -4,8 +4,17 @@ import { getToken } from 'next-auth/jwt'
 import { AUTH_ROUTES, PROTECTED_ROUTES } from './lib/routes.js'
 
 // In-memory sliding-window rate limiter (hybrid keying: user-id when available, else IP)
-const RATE_LIMIT_WINDOW = 10 // seconds
-const RATE_LIMIT_MAX = 10
+const DEFAULT_RATE_LIMIT_WINDOW = 10 // seconds
+const DEFAULT_RATE_LIMIT_MAX = 10
+const RATE_LIMIT_WINDOW =
+  Number.isFinite(Number(process.env.RATE_LIMIT_WINDOW)) &&
+  Number(process.env.RATE_LIMIT_WINDOW) > 0
+    ? Number(process.env.RATE_LIMIT_WINDOW)
+    : DEFAULT_RATE_LIMIT_WINDOW
+const RATE_LIMIT_MAX =
+  Number.isFinite(Number(process.env.RATE_LIMIT_MAX)) && Number(process.env.RATE_LIMIT_MAX) > 0
+    ? Number(process.env.RATE_LIMIT_MAX)
+    : DEFAULT_RATE_LIMIT_MAX
 const rateMap = new Map<string, number[]>()
 
 /**
