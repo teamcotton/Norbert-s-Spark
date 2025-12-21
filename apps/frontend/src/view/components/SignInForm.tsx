@@ -26,12 +26,14 @@ interface SignInFormProps {
   readonly onFieldChange: (
     field: 'email' | 'password'
   ) => (event: React.ChangeEvent<HTMLInputElement>) => void
-  readonly onSubmit: (event: React.FormEvent) => void
+  readonly onSubmit?: (event: React.FormEvent) => void
   readonly onGoogleSignIn: () => void
   readonly onGitHubSignIn: () => void
+  readonly action?: string
 }
 
 export function SignInForm({
+  action,
   errors,
   formData,
   onFieldChange,
@@ -104,10 +106,17 @@ export function SignInForm({
             </Typography>
           </Divider>
 
-          <Box component="form" onSubmit={onSubmit} noValidate>
+          <Box
+            component="form"
+            onSubmit={action ? undefined : onSubmit}
+            action={action}
+            method={action ? 'post' : undefined}
+            noValidate
+          >
             <TextField
               fullWidth
               label="Email address"
+              name="email"
               type="email"
               value={formData.email}
               onChange={onFieldChange('email')}
@@ -122,6 +131,7 @@ export function SignInForm({
             <TextField
               fullWidth
               label="Password"
+              name="password"
               type="password"
               value={formData.password}
               onChange={onFieldChange('password')}

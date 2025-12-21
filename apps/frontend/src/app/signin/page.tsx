@@ -1,25 +1,12 @@
-'use client'
+'use server'
 
-import { SignInForm } from '@/view/components/SignInForm.js'
-import { useSignInForm } from '@/view/hooks/useSignInForm.js'
+import SignInFormWrapper from './SignInFormWrapper.js'
 
-/**
- * Sign-in page following DDD architecture.
- * This page is minimal and declarative - it only orchestrates the hook and component.
- * Business logic is in the hook, presentation is in the component.
- */
+// Server component that renders the client `SignInForm` via a small wrapper.
 export default function SignInPage() {
-  const { errors, formData, handleChange, handleGitHubSignIn, handleGoogleSignIn, handleSubmit } =
-    useSignInForm()
-
   return (
-    <SignInForm
-      formData={formData}
-      errors={errors}
-      onFieldChange={handleChange}
-      onSubmit={handleSubmit}
-      onGoogleSignIn={handleGoogleSignIn}
-      onGitHubSignIn={handleGitHubSignIn}
-    />
+    <div style={{ maxWidth: 960, margin: '0 auto', padding: '2rem' }}>
+      <SignInFormWrapper />
+    </div>
   )
 }
