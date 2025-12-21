@@ -145,7 +145,7 @@ Important: This in-memory limiter is process-local and not suitable for multi-in
 
 ## Headers Propagation
 
-To ensure rate-limit headers are included on redirects (e.g. unauthenticated -> `/login`), the middleware temporarily stores headers on `globalThis.__lastRateLimitHeaders` and attaches them to redirect responses before clearing the temporary store.
+To ensure rate-limit headers are included on all responses, including redirects (e.g. unauthenticated -> `/login`), the middleware computes the rate-limit result (via a local `rateLimitResult` variable) and attaches the `X-RateLimit-*` headers directly to the `NextResponse` instance before returning it.
 
 ## Testing
 

@@ -141,7 +141,6 @@ export async function middleware(request: Request) {
   const { pathname } = url
 
   // Authenticate using next-auth token in cookies
-  // Get token from cookies using next-auth
   // TypeScript workaround: next-auth's getToken expects a NextRequest/NextApiRequest-like type,
   // but in middleware we receive the native Fetch API Request. We intentionally cast to never here
   // to bypass this type mismatch, as documented in the middleware README and NextAuth docs.
