@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { UserSchema } from './user.js'
 
 export const LoginSchema = z.object({
   email: z
@@ -20,7 +21,7 @@ export const AuthResponseSchema = z.object({
   data: z
     .object({
       token: z.string().optional(),
-      user: z.any().optional(),
+      user: UserSchema.optional(),
     })
     .optional(),
   error: z.string().optional(),
