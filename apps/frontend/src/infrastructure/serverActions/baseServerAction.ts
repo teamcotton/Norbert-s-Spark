@@ -18,7 +18,11 @@ export interface BackendRequestOptions {
 }
 
 function normalizeUrl(apiUrl: string, endpoint: string) {
-  const base = apiUrl.replace(/\/+$/, '')
+  // Remove trailing slashes safely without ReDoS vulnerability
+  let base = apiUrl
+  while (base.endsWith('/')) {
+    base = base.slice(0, -1)
+  }
   const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`
   return `${base}${path}`
 }
