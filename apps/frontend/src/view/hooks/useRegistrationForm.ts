@@ -1,7 +1,6 @@
 import { obscured } from 'obscured'
 import { useState } from 'react'
 
-import type { RegisterUserData, RegisterUserResponse } from '@/domain/auth/index.js'
 import { EmailSchema, NameSchema, PasswordSchema } from '@/domain/auth/index.js'
 import { useRegisterUser } from '@/view/hooks/queries/useRegisterUser.js'
 

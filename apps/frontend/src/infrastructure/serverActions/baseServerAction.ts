@@ -74,7 +74,7 @@ export async function backendRequest<T>(options: BackendRequestOptions): Promise
   const url = normalizeUrl(apiUrl, options.endpoint)
   const headers = { 'Content-Type': 'application/json', ...(options.headers ?? {}) }
 
-  // short timeout helper
+  // Validate and clamp timeout to acceptable range
   const timeoutMs = options.timeoutMs ?? 15000
   const effectiveTimeoutMs = (() => {
     const value = Number(timeoutMs)
