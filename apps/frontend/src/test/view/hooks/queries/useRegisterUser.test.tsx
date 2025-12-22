@@ -4,7 +4,6 @@ import React from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { registerUser } from '@/application/actions/registerUser.js'
-import { registerUserAction } from '@/infrastructure/serverActions/registerUser.server.js'
 import { useRegisterUser } from '@/view/hooks/queries/useRegisterUser.js'
 
 vi.mock('@/infrastructure/serverActions/registerUser.server.js', () => ({
@@ -26,7 +25,10 @@ describe('useRegisterUser', () => {
 
     const sampleData = { email: 'a@b.com', name: 'A B', password: 'secret' }
 
-    vi.mocked(registerUserAction).mockResolvedValue({ success: true, status: 200, data: { id: 1 } })
+    // The runtime mutation uses the application-level `registerUser`.
+    // Ensure we mock that here so the hook's onSuccess receives the
+    // expected payload and can invalidate queries.
+    vi.mocked(registerUser).mockResolvedValue({ success: true, status: 200, data: { id: 1 } })
 
     function Wrapper({ children }: { children: React.ReactNode }) {
       return React.createElement(QueryClientProvider, { client: qc }, children)
@@ -38,7 +40,7 @@ describe('useRegisterUser', () => {
       await result.current.mutateAsync(sampleData)
     })
 
-    expect(vi.mocked(registerUserAction)).toHaveBeenCalledWith(sampleData)
+    expect(vi.mocked(registerUser)).toHaveBeenCalledWith(sampleData)
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['users'] })
   })
 
