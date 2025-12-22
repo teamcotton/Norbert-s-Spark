@@ -1,8 +1,10 @@
-AI NOTE: This document is a cut and past from the backend. Not all code will follow this
-architectural pattern yet. Some adaptation may be needed for frontend specifics.
+AI NOTE: This document is a cut and past from the backend. However, the architecture
+for Next.js / React 19 will never be exactly the same as a backend service. The goal is to
+keep the same principles and ideas but adapt them to the frontend world.
+// The main difference is that the frontend has a view layer that is not present in the backend.
 // ✓ Independence: Domain logic doesn't depend on frameworks or tools
 // ✓ Replaceability: Adapters can be replaced without changing core logic
-// - End-to-End: Full request-response cycle tests  xw
+// - End-to-End: Full request-response cycle tests
 
 HEXAGONAL ARCHITECTURE OVERVIEW (Ports and Adapters Pattern)
 
