@@ -26,6 +26,7 @@ CORE PRINCIPLES:
 DIRECTORY STRUCTURE:
 
 frotend/src/
+├── app/                 # This is Next.js specific code mostly for pages
 ├── domain/              # Core business logic (center of hexagon)
 │   ├── entities/        # Business objects with identity
 │   ├── value-objects/   # Immutable domain concepts
