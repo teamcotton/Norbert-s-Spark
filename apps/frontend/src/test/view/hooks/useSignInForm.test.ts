@@ -70,7 +70,7 @@ describe('useSignInForm', () => {
         } as React.FormEvent)
       })
 
-      expect(result.current.errors.email).toBe('Email is required')
+      expect(result.current.errors.email).toBe('Please enter a valid email address')
 
       // Then change the field
       act(() => {
@@ -113,7 +113,7 @@ describe('useSignInForm', () => {
         } as React.FormEvent)
       })
 
-      expect(result.current.errors.email).toBe('Email is required')
+      expect(result.current.errors.email).toBe('Please enter a valid email address')
     })
 
     it('should show error for invalid email format', () => {
@@ -451,7 +451,7 @@ describe('useSignInForm', () => {
         } as React.FormEvent)
       })
 
-      expect(result.current.errors.email).toBe('Email is required')
+      expect(result.current.errors.email).toBe('Please enter a valid email address')
       expect(result.current.errors.password).toBe('Password is required')
 
       // Fix only email
@@ -490,7 +490,7 @@ describe('useSignInForm', () => {
         } as React.FormEvent)
       })
 
-      expect(result.current.errors.email).toBe('Email is required')
+      expect(result.current.errors.email).toBe('Please enter a valid email address')
     })
   })
 

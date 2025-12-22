@@ -1358,66 +1358,19 @@ WebSocket/Server-Sent Events (real-time updates)
 
 **Option A: Server-Sent Events (SSE)**
 
-```typescript
-// apps/frontend/src/app/api/stream/route.ts
-export async function GET(request: Request) {
-  const encoder = new TextEncoder()
-  const token = request.headers.get('authorization')
+> Note: realtime updates are optional for this refactor.
 
-  const stream = new ReadableStream({
-    async start(controller) {
-      // Connect to backend WebSocket/SSE
-      const ws = new WebSocket(`${process.env.BACKEND_WS_URL}/stream?token=${token}`)
+The core migration focuses on moving mutation flows to Server Actions and centralizing DTOs in `packages/shared`. Real-time streaming (SSE/WebSocket) is not required for the refactor and adds operational complexity (connection management, scaling, and additional infra). Prefer simpler, deterministic approaches unless your product requires sub-second push updates.
 
-      ws.onmessage = (event) => {
-        const data = `data: ${event.data}\n\n`
-        controller.enqueue(encoder.encode(data))
-      }
+Recommended lightweight alternatives to realtime streaming:
 
-      ws.onerror = () => controller.close()
-    },
-  })
+- Polling via TanStack Query: use `refetchInterval` or background refetching for near-real-time data without managing sockets.
+- Webhooks or server-sent push from backend to a worker/service when external events trigger updates.
+- Add an optional SSE or WebSocket integration later behind a feature flag if/when true realtime is necessary.
 
-  return new Response(stream, {
-    headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      Connection: 'keep-alive',
-    },
-  })
-}
-
-// Client hook
-function useRealtimeUpdates() {
-  useEffect(() => {
-    const eventSource = new EventSource('/api/stream')
-    eventSource.onmessage = (event) => {
-      // Handle real-time update
-    }
-    return () => eventSource.close()
-  }, [])
-}
-```
-
-**Option B: WebSocket with Separate Service**
-
-- Keep WebSocket connection separate from Server Actions
-- Use Vercel's serverless functions with streaming
-- Or use a dedicated WebSocket service (Ably, Pusher, or self-hosted)
-
-**Recommended:** Use **Server Actions for mutations** + **SSE for real-time updates**
+These approaches keep the initial migration simple and maintainable while leaving the door open for realtime enhancements later.
 
 ### 3. Deployment Considerations (Vercel → AWS Migration)
-
-**Current (Vercel):**
-
-- Server Actions work natively
-- Edge Runtime available
-- Automatic scaling
-
-**Future (AWS Migration):**
-
-To ensure portability:
 
 1. **Use Standalone Output Mode:**
 

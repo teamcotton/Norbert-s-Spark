@@ -1,8 +1,8 @@
 import { obscured } from 'obscured'
 import { useState } from 'react'
 
-import { registerUser } from '@/application/actions/registerUser.js'
 import { EmailSchema, NameSchema, PasswordSchema } from '@/domain/auth/index.js'
+import { useRegisterUser } from '@/view/hooks/queries/useRegisterUser.js'
 
 interface FormData extends Record<string, string> {
   email: string
@@ -34,6 +34,7 @@ export function useRegistrationForm() {
   })
 
   const [generalError, setGeneralError] = useState<string>('')
+  const mutation = useRegisterUser()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleChange = (field: keyof FormData) => (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,11 +102,11 @@ export function useRegistrationForm() {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
     if (validateForm()) {
-      setIsSubmitting(true)
       setGeneralError('')
+      setIsSubmitting(true)
 
       try {
-        const result = await registerUser(formData)
+        const result = await mutation.mutateAsync(formData)
 
         if (result.success) {
           // Handle successful registration
@@ -132,8 +133,11 @@ export function useRegistrationForm() {
           // Other registration failures should appear in alert
           setGeneralError(result.error || 'Registration failed. Please try again.')
         }
-      } catch {
-        setGeneralError('An unexpected error occurred. Please try again.')
+      } catch (e) {
+        // If mutation throws an unexpected error, surface generic message
+        setGeneralError(
+          e instanceof Error ? e.message : 'An unexpected error occurred. Please try again.'
+        )
       } finally {
         setIsSubmitting(false)
       }
