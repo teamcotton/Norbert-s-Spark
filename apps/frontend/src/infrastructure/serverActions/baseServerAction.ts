@@ -19,6 +19,43 @@ function normalizeUrl(apiUrl: string, endpoint: string) {
   return `${base}${path}`
 }
 
+/**
+ * Parse and handle response from fetch or node-fetch
+ * Extracts JSON, handles errors, and throws with proper context
+ */
+async function handleResponse<T>(
+  res: Response | Awaited<ReturnType<typeof import('node-fetch').default>>,
+  url: string
+): Promise<T> {
+  const text = await res.text()
+  let parsed: unknown
+  try {
+    parsed = text ? JSON.parse(text) : undefined
+  } catch {
+    parsed = text
+  }
+
+  if (!res.ok) {
+    logger.error('[backendRequest] non-ok response', { url, status: res.status, body: parsed })
+    const extractedError = (() => {
+      if (!parsed || typeof parsed !== 'object') return undefined
+      if ('error' in parsed) {
+        const e = (parsed as { error?: unknown }).error
+        return typeof e === 'string' ? e : undefined
+      }
+      return undefined
+    })()
+
+    const message = extractedError ?? res.statusText ?? 'Backend error'
+    const err = new Error(message) as Error & { status?: number; body?: unknown }
+    err.status = res.status
+    err.body = parsed
+    throw err
+  }
+
+  return parsed as T
+}
+
 export async function backendRequest<T>(options: BackendRequestOptions): Promise<T> {
   const apiUrl = process.env.BACKEND_AI_CALLBACK_URL
   if (!apiUrl)
@@ -65,33 +102,7 @@ export async function backendRequest<T>(options: BackendRequestOptions): Promise
         signal: combinedSignal,
       })
 
-      const text = await res.text()
-      let parsed: unknown
-      try {
-        parsed = text ? JSON.parse(text) : undefined
-      } catch {
-        parsed = text
-      }
-
-      if (!res.ok) {
-        logger.error('[backendRequest] non-ok response', { url, status: res.status, body: parsed })
-        const extractedError = (() => {
-          if (!parsed || typeof parsed !== 'object') return undefined
-          if ('error' in parsed) {
-            const e = (parsed as { error?: unknown }).error
-            return typeof e === 'string' ? e : undefined
-          }
-          return undefined
-        })()
-
-        const message = extractedError ?? res.statusText ?? 'Backend error'
-        const err = new Error(message) as Error & { status?: number; body?: unknown }
-        err.status = res.status
-        err.body = parsed
-        throw err
-      }
-
-      return parsed as T
+      return await handleResponse<T>(res, url)
     } finally {
       clearTimeout(timeout)
     }
@@ -108,33 +119,7 @@ export async function backendRequest<T>(options: BackendRequestOptions): Promise
         signal: combinedSignal,
       })
 
-      const result = await res.text()
-      let parsed: unknown
-      try {
-        parsed = result ? JSON.parse(result) : undefined
-      } catch {
-        parsed = result
-      }
-
-      if (!res.ok) {
-        logger.error('[backendRequest] non-ok response', { url, status: res.status, body: parsed })
-        const extractedError = (() => {
-          if (!parsed || typeof parsed !== 'object') return undefined
-          if ('error' in parsed) {
-            const e = (parsed as { error?: unknown }).error
-            return typeof e === 'string' ? e : undefined
-          }
-          return undefined
-        })()
-
-        const message = extractedError ?? res.statusText ?? 'Backend error'
-        const err = new Error(message) as Error & { status?: number; body?: unknown }
-        err.status = res.status
-        err.body = parsed
-        throw err
-      }
-
-      return parsed as T
+      return await handleResponse<T>(res, url)
     } finally {
       clearTimeout(timeout)
     }
