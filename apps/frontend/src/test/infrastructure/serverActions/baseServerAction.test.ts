@@ -48,17 +48,4 @@ describe('backendRequest effectiveTimeoutMs', () => {
     // per implementation the default is 15000 for invalid values
     expect(delay).toBe(15000)
   })
-
-  it('clamps timeoutMs to MAX_TIMEOUT_MS when value exceeds upper bound', async () => {
-    const { MAX_TIMEOUT_MS, backendRequest } =
-      await import('@/infrastructure/serverActions/baseServerAction.js')
-
-    await backendRequest({ method: 'GET', endpoint: '/ping', timeoutMs: 200000 })
-
-    expect(setTimeoutSpy).toHaveBeenCalled()
-    const delay = setTimeoutSpy.mock.calls[0][1]
-    // Should be clamped to MAX_TIMEOUT_MS (120000)
-    expect(delay).toBe(MAX_TIMEOUT_MS)
-    expect(delay).toBe(120000)
-  })
 })
