@@ -22,7 +22,10 @@ const logger = new UnifiedLogger({ prefix: '[find-all-users]' })
  */
 export async function findAllUsers(params: FindAllUsersParams): Promise<FindAllUsersResult> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://localhost:4321'
+    const baseUrl =
+      process.env.NEXT_PUBLIC_BACKEND_URL ||
+      process.env.NEXT_PUBLIC_BASE_URL ||
+      'http://localhost:3000'
     const { limit, offset, signal } = params
 
     const response = await fetch(`${baseUrl}/api/users?limit=${limit}&offset=${offset}`, {

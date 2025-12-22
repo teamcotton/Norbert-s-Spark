@@ -35,7 +35,7 @@ describe('registerUser', () => {
       expect(result).toEqual(mockResponse)
       expect(global.fetch).toHaveBeenCalledTimes(1)
       expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/register'),
+        expect.stringContaining('/users/register'),
         expect.objectContaining({
           method: 'POST',
           headers: {
@@ -72,7 +72,10 @@ describe('registerUser', () => {
 
       await registerUser(userData)
 
-      expect(global.fetch).toHaveBeenCalledWith(`${customBaseUrl}/api/register`, expect.any(Object))
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${customBaseUrl}/users/register`,
+        expect.any(Object)
+      )
 
       delete process.env.NEXT_PUBLIC_BASE_URL
     })

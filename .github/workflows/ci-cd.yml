@@ -37,6 +37,9 @@ jobs:
     - name: Run lint
       run: pnpm run lint
 
+    - name: Build shared package
+      run: pnpm -C packages/shared run build
+
     - name: Run tests
       run: pnpm run test
 

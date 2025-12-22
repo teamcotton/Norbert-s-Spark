@@ -5,8 +5,12 @@ const logger = new UnifiedLogger({ prefix: '[registerUser]' })
 
 export async function registerUser(data: RegisterUserData): Promise<RegisterUserResponse> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://localhost:4321'
-    const response = await fetch(`${baseUrl}/api/register`, {
+    const baseUrl =
+      process.env.NEXT_PUBLIC_BACKEND_URL ||
+      process.env.NEXT_PUBLIC_BASE_URL ||
+      'http://localhost:3000'
+    // Call backend API directly instead of going through Next.js API route
+    const response = await fetch(`${baseUrl}/users/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -314,7 +314,8 @@ test.describe('Registration Page', () => {
     // Wait for the registration API response
     const firstRegistrationPromise = page.waitForResponse(
       (response) =>
-        response.url().includes('/api/register') && response.request().method() === 'POST',
+        (response.url().includes('/api/register') || response.url().includes('/users/register')) &&
+        response.request().method() === 'POST',
       { timeout: 10000 }
     )
 
@@ -344,7 +345,8 @@ test.describe('Registration Page', () => {
     // Wait for the duplicate registration API response
     const duplicateRegistrationPromise = page.waitForResponse(
       (response) =>
-        response.url().includes('/api/register') && response.request().method() === 'POST',
+        (response.url().includes('/api/register') || response.url().includes('/users/register')) &&
+        response.request().method() === 'POST',
       { timeout: 10000 }
     )
 
@@ -366,16 +368,23 @@ test.describe('Registration Page', () => {
     // - The API route catches real network failures and returns a 503 with a specific message
     // - This simulates what users actually see when the backend is down
     // - route.abort() would just throw a generic "Failed to fetch" error
-    await page.route('**/api/register', (route) => {
-      route.fulfill({
-        status: 503,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          success: false,
-          error:
-            'Unable to connect to backend service. Please ensure the backend server is running.',
-        }),
-      })
+    // Intercept either the app API route or direct backend call (some flows call /api/register, others /users/register)
+    await page.route('**/*/register', (route) => {
+      const url = route.request().url()
+      if (url.includes('/api/register') || url.includes('/users/register')) {
+        route.fulfill({
+          status: 503,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            success: false,
+            error:
+              'Unable to connect to backend service. Please ensure the backend server is running.',
+          }),
+        })
+        return
+      }
+
+      route.continue()
     })
 
     const uniqueEmail = `test-network-failure-${Date.now()}@example.com`
