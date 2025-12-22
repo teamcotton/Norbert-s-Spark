@@ -105,7 +105,9 @@ export async function backendRequest<T>(options: BackendRequestOptions): Promise
     const agent = new https.Agent({ rejectUnauthorized: false })
 
     const controller = new AbortController()
-    const combinedSignal = options.signal ?? controller.signal
+    const combinedSignal = options.signal
+      ? AbortSignal.any([options.signal, controller.signal])
+      : controller.signal
     const timeout = setTimeout(() => controller.abort(), effectiveTimeoutMs)
 
     try {
@@ -123,7 +125,9 @@ export async function backendRequest<T>(options: BackendRequestOptions): Promise
     }
   } else {
     const controller = new AbortController()
-    const combinedSignal = options.signal ?? controller.signal
+    const combinedSignal = options.signal
+      ? AbortSignal.any([options.signal, controller.signal])
+      : controller.signal
     const timeout = setTimeout(() => controller.abort(), effectiveTimeoutMs)
 
     try {

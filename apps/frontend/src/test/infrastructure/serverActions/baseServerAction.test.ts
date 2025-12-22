@@ -48,4 +48,47 @@ describe('backendRequest effectiveTimeoutMs', () => {
     // per implementation the default is 15000 for invalid values
     expect(delay).toBe(15000)
   })
+
+  it('combines external signal with timeout using AbortSignal.any()', async () => {
+    const { backendRequest } = await import('@/infrastructure/serverActions/baseServerAction.js')
+
+    // Create an external AbortController
+    const externalController = new AbortController()
+
+    // Spy on AbortSignal.any to verify it's called with both signals
+    const abortSignalAnySpy = vi.spyOn(AbortSignal, 'any')
+
+    await backendRequest({
+      method: 'GET',
+      endpoint: '/ping',
+      signal: externalController.signal,
+      timeoutMs: 5000,
+    })
+
+    // Verify AbortSignal.any was called
+    expect(abortSignalAnySpy).toHaveBeenCalled()
+
+    // Verify it was called with an array containing both signals
+    const callArgs = abortSignalAnySpy.mock.calls[0]?.[0]
+    expect(callArgs).toBeDefined()
+    expect(Array.isArray(callArgs)).toBe(true)
+    expect(callArgs).toHaveLength(2)
+    expect(callArgs?.[0]).toBe(externalController.signal)
+  })
+
+  it('uses only controller signal when no external signal provided', async () => {
+    const { backendRequest } = await import('@/infrastructure/serverActions/baseServerAction.js')
+
+    // Spy on AbortSignal.any to verify it's NOT called when no external signal
+    const abortSignalAnySpy = vi.spyOn(AbortSignal, 'any')
+
+    await backendRequest({
+      method: 'GET',
+      endpoint: '/ping',
+      timeoutMs: 5000,
+    })
+
+    // Verify AbortSignal.any was NOT called (no external signal to combine)
+    expect(abortSignalAnySpy).not.toHaveBeenCalled()
+  })
 })
