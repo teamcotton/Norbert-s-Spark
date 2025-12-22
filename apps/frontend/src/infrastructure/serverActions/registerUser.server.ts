@@ -11,7 +11,7 @@ type BackendError = Error & {
   cause?: unknown
 }
 
-export async function findAllUsersAction(data: RegisterUserData): Promise<RegisterUserResponse> {
+export async function registerUserAction(data: RegisterUserData): Promise<RegisterUserResponse> {
   try {
     const parsed = await backendRequest<RegisterUserResponse>({
       method: 'POST',
