@@ -13,9 +13,6 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
-    },
-    "paths": {
       "@/*": ["./src/*"],
       "@level-2-gym/shared": ["../../packages/shared/src/index.ts"],
       "@level-2-gym/shared/*": ["../../packages/shared/src/*"]
