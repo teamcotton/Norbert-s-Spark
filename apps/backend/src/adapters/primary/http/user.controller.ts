@@ -200,8 +200,17 @@ export class UserController {
    * ```
    */
   async getUser(request: FastifyRequest, reply: FastifyReply): Promise<void> {
-    // Extract and validate params with type guard
-    const params = request.params as { id: string }
+    // Extract and validate params with runtime type checking
+    const params = request.params as Record<string, unknown>
+    
+    if (typeof params.id !== 'string') {
+      reply.code(400).send({
+        success: false,
+        error: 'Invalid user ID parameter',
+      })
+      return
+    }
+    
     reply.send({ id: params.id })
   }
 }
