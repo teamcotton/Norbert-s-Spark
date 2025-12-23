@@ -95,6 +95,9 @@ export class RegisterUserUseCase {
     const email = new Email(dto.email)
     const password = await Password.create(dto.password)
     const role = new Role(dto.role)
+    // TODO: remove the generateId from the user entity and handle UUID V7
+    // generation in the native PostgreSQL uuidv7() function that is
+    // available from PostgreSQL 18 onwards.
     const userId = this.generateId() // Simplified
 
     // Create user entity
