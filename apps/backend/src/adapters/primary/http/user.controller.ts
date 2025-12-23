@@ -55,7 +55,13 @@ export class UserController {
       },
       this.getAllUsers.bind(this)
     )
-    app.get('/users/:id', this.getUser.bind(this))
+    app.get(
+      '/users/:id',
+      {
+        preHandler: [authMiddleware, requireRole(['admin', 'moderator'])],
+      },
+      this.getUser.bind(this) as any
+    )
   }
 
   /**
