@@ -1,10 +1,16 @@
-# Load nvm if available
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+# Check if Node version is already correct (22.x)
+NODE_VERSION=$(node --version 2>/dev/null | cut -d'v' -f2 | cut -d'.' -f1)
+if [ "$NODE_VERSION" = "22" ]; then
+  echo "Node 22 already available, skipping nvm setup"
+else
+  # Load nvm if available
+  export NVM_DIR="$HOME/.nvm"
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-# Use .nvmrc if present
-if [ -f .nvmrc ]; then
-  nvm use 2>/dev/null || true
+  # Use .nvmrc if present
+  if [ -f .nvmrc ]; then
+    nvm use 2>/dev/null || true
+  fi
 fi
 
 # Try to enable corepack if available
