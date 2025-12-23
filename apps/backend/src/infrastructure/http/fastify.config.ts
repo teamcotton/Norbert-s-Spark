@@ -29,7 +29,7 @@ export function createFastifyApp(options?: FastifyServerOptions): FastifyInstanc
       redact: ['req.headers.authorization'],
       level: 'info',
       serializers: {
-        req (req) {
+        req(req) {
           return {
             method: req.method,
             url: req.url,
@@ -38,8 +38,8 @@ export function createFastifyApp(options?: FastifyServerOptions): FastifyInstanc
             remoteAddress: req.ip,
             remotePort: req.socket?.remotePort,
           }
-        }
-      }
+        },
+      },
     },
     ...options,
   })
