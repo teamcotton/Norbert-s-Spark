@@ -25,7 +25,22 @@ import { dirname } from 'node:path'
  */
 export function createFastifyApp(options?: FastifyServerOptions): FastifyInstance {
   const fastify = Fastify({
-    logger: true,
+    logger: {
+      redact: ['req.headers.authorization'],
+      level: 'info',
+      serializers: {
+        req(req) {
+          return {
+            method: req.method,
+            url: req.url,
+            headers: req.headers,
+            hostname: req.hostname,
+            remoteAddress: req.ip,
+            remotePort: req.socket?.remotePort,
+          }
+        },
+      },
+    },
     ...options,
   })
 
