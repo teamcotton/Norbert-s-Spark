@@ -35,7 +35,7 @@ export class UserController {
    * Configures the following endpoints:
    * - POST /users/register - Register a new user
    * - GET /users - Retrieve all users with pagination
-   * - GET /users/:id - Retrieve a specific user by ID
+   * - GET /users/:id - Retrieve a specific user by ID (incomplete - returns stub response)
    *
    * @param {FastifyInstance} app - The Fastify application instance
    * @example
@@ -172,14 +172,17 @@ export class UserController {
   /**
    * Handles GET /users/:id endpoint to retrieve a specific user by ID
    *
+   * **Note:** This endpoint is currently incomplete and returns a minimal stub response.
+   * Full implementation is pending.
+   *
    * @param {FastifyRequest<{ Params: { id: string } }>} request - Fastify request with user ID in params
    * @param {FastifyReply} reply - Fastify reply object
-   * @returns {Promise<void>}
-   * @todo Implement full user retrieval logic
+   * @returns {Promise<void>} Currently returns only the user ID as a stub response
+   * @todo Implement full user retrieval logic with complete user data
    * @example
    * ```
    * GET /users/abc123
-   * Response: { id: 'abc123' }
+   * Current Response: { id: 'abc123' }  // Stub response only
    * ```
    */
   async getUser(
