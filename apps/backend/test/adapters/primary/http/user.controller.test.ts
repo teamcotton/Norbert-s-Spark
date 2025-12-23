@@ -1054,7 +1054,7 @@ describe('UserController', () => {
 
       await controller.getUser(mockRequestWithParams, mockReply)
 
-      expect(mockReply.send).toHaveBeenCalledWith({ id: 'user-123' })
+      expect(mockReply.send).toHaveBeenCalledWith({ data: { id: 'user-123' }, success: true })
     })
 
     it('should handle different user ids', async () => {
@@ -1064,7 +1064,7 @@ describe('UserController', () => {
 
       await controller.getUser(mockRequestWithParams, mockReply)
 
-      expect(mockReply.send).toHaveBeenCalledWith({ id: 'user-456-xyz' })
+      expect(mockReply.send).toHaveBeenCalledWith({ data: { id: 'user-456-xyz' }, success: true })
     })
 
     it('should extract id from request params', async () => {
@@ -1075,7 +1075,7 @@ describe('UserController', () => {
       await controller.getUser(mockRequestWithParams, mockReply)
 
       const sentResponse = vi.mocked(mockReply.send).mock.calls?.[0]?.[0]
-      expect(sentResponse).toEqual({ id: 'test-id-789' })
+      expect(sentResponse).toEqual({ data: { id: 'test-id-789' }, success: true })
     })
 
     it('should call reply.send once', async () => {

@@ -203,7 +203,7 @@ export class UserController {
     try {
       // Extract and validate params with runtime type checking
       const params = request.params as Record<string, unknown>
-      
+
       if (typeof params.id !== 'string') {
         reply.code(400).send({
           success: false,
@@ -211,9 +211,9 @@ export class UserController {
         })
         return
       }
-      
+
       const trimmedId = params.id.trim()
-      
+
       if (trimmedId === '') {
         reply.code(400).send({
           success: false,
@@ -221,7 +221,7 @@ export class UserController {
         })
         return
       }
-      
+
       reply.code(200).send({
         success: true,
         data: { id: trimmedId },
