@@ -4,18 +4,72 @@ import { GetAllUsersUseCase } from '../../../application/use-cases/get-all-users
 import { RegisterUserDto } from '../../../application/dtos/register-user.dto.js'
 import { BaseException } from '../../../shared/exceptions/base.exception.js'
 
+/**
+ * HTTP controller for user-related endpoints
+ *
+ * Handles user registration, retrieval, and management through RESTful API endpoints.
+ * Acts as the primary adapter in the hexagonal architecture, translating HTTP requests
+ * into use case executions and formatting responses.
+ *
+ * @class UserController
+ * @example
+ * ```typescript
+ * const controller = new UserController(registerUseCase, getAllUsersUseCase)
+ * controller.registerRoutes(fastifyApp)
+ * ```
+ */
 export class UserController {
+  /**
+   * Creates an instance of UserController
+   * @param {RegisterUserUseCase} registerUserUseCase - Use case for registering new users
+   * @param {GetAllUsersUseCase} getAllUsersUseCase - Use case for retrieving all users
+   */
   constructor(
     private readonly registerUserUseCase: RegisterUserUseCase,
     private readonly getAllUsersUseCase: GetAllUsersUseCase
   ) {}
 
+  /**
+   * Registers all user-related routes with the Fastify application
+   *
+   * Configures the following endpoints:
+   * - POST /users/register - Register a new user
+   * - GET /users - Retrieve all users with pagination
+   * - GET /users/:id - Retrieve a specific user by ID
+   *
+   * @param {FastifyInstance} app - The Fastify application instance
+   * @example
+   * ```typescript
+   * const app = fastify()
+   * userController.registerRoutes(app)
+   * ```
+   */
   registerRoutes(app: FastifyInstance): void {
     app.post('/users/register', this.register.bind(this))
     app.get('/users', this.getAllUsers.bind(this))
     app.get('/users/:id', this.getUser.bind(this))
   }
 
+  /**
+   * Handles GET /users endpoint to retrieve all users with pagination
+   *
+   * Accepts optional query parameters for pagination:
+   * - limit: Number of users per page (1-100, default varies by use case)
+   * - offset: Number of users to skip (0 or greater)
+   *
+   * @param {FastifyRequest} request - Fastify request with query parameters
+   * @param {FastifyReply} reply - Fastify reply object
+   * @returns {Promise<void>}
+   * @example
+   * ```
+   * GET /users?limit=20&offset=0
+   * Response: {
+   *   success: true,
+   *   data: [...],
+   *   pagination: { total: 150, limit: 20, offset: 0 }
+   * }
+   * ```
+   */
   async getAllUsers(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       // Extract pagination parameters from query string
@@ -62,6 +116,35 @@ export class UserController {
     }
   }
 
+  /**
+   * Handles POST /users/register endpoint to register a new user
+   *
+   * Validates the request body using RegisterUserDto, executes the registration
+   * use case, and returns the created user with authentication token.
+   *
+   * @param {FastifyRequest} request - Fastify request with user registration data in body
+   * @param {FastifyReply} reply - Fastify reply object
+   * @returns {Promise<void>}
+   * @example
+   * ```
+   * POST /users/register
+   * Body: {
+   *   email: 'user@example.com',
+   *   password: 'SecurePass123',
+   *   name: 'John Doe',
+   *   role: 'member'
+   * }
+   * Response: {
+   *   success: true,
+   *   data: {
+   *     userId: 'uuid',
+   *     access_token: 'jwt.token.here',
+   *     token_type: 'Bearer',
+   *     expires_in: 3600
+   *   }
+   * }
+   * ```
+   */
   async register(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       // Convert HTTP request to DTO
@@ -86,6 +169,19 @@ export class UserController {
     }
   }
 
+  /**
+   * Handles GET /users/:id endpoint to retrieve a specific user by ID
+   *
+   * @param {FastifyRequest<{ Params: { id: string } }>} request - Fastify request with user ID in params
+   * @param {FastifyReply} reply - Fastify reply object
+   * @returns {Promise<void>}
+   * @todo Implement full user retrieval logic
+   * @example
+   * ```
+   * GET /users/abc123
+   * Response: { id: 'abc123' }
+   * ```
+   */
   async getUser(
     request: FastifyRequest<{ Params: { id: string } }>,
     reply: FastifyReply
