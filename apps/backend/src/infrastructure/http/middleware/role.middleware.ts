@@ -40,7 +40,7 @@ import type { FastifyRequest, FastifyReply, preHandlerAsyncHookHandler } from 'f
  * 1. Checks if user is authenticated (request.user exists)
  * 2. Checks if user has roles array
  * 3. Verifies at least one user role matches required roles
- * 4. Allows request to proceed if authorized, returns 403 Forbidden response otherwise
+ * 4. Allows request to proceed if authorized, otherwise returns a 401/403 response via reply.code()
  *
  * **Error Responses:**
  * - 401 Unauthorized: User not authenticated (missing request.user)
