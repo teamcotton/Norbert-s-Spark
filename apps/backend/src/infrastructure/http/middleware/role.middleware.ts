@@ -51,7 +51,8 @@ import type { FastifyRequest, FastifyReply, preHandlerAsyncHookHandler } from 'f
  *
  * **Logging Behavior:**
  * - WARN: Missing authentication, missing roles, or insufficient permissions
- * - Context includes: method, route, userRoles, requiredRoles
+ * - INFO: Successful role checks
+ * - Context includes: method, route, userId, userRoles, requiredRoles
  *
  * @see {@link authMiddleware} for authentication middleware that must be used first
  */
