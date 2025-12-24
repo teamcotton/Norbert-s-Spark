@@ -20,7 +20,7 @@ function createWrapper(client?: QueryClient) {
     new QueryClient({
       defaultOptions: {
         queries: {
-          retry: false, // Disable retries in tests for predictable behavior
+          retry: false, // NOTE: This is overridden by useUsers hook which has retry: 2
         },
         mutations: {
           retry: false,
@@ -313,7 +313,8 @@ describe('useAdminPage', () => {
 
   describe('Data Fetching - Error Cases', () => {
     it('should handle fetch failure with error message', async () => {
-      // Mock failure for all retry attempts (initial + 2 retries = 3 total)
+      // Mock failure for all retry attempts - useUsers hook has retry: 2, so 3 total attempts
+      // We use mockResolvedValue (not mockResolvedValueOnce) to cover initial + 2 retry attempts
       mockFindAllUsers.mockResolvedValue({
         success: false,
         users: [],
@@ -323,7 +324,7 @@ describe('useAdminPage', () => {
 
       const { result } = renderHook(() => useAdminPage(), { wrapper: createWrapper() })
 
-      // Wait for the query to complete (either success or error)
+      // Wait for the query to complete all retries (5000ms timeout accounts for retry delays)
       await waitFor(
         () => {
           expect(result.current.loading).toBe(false)
