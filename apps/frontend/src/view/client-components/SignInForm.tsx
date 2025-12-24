@@ -2,6 +2,7 @@
 
 import { GitHub as GitHubIcon, Google as GoogleIcon } from '@mui/icons-material'
 import {
+  Alert,
   Box,
   Button,
   Container,
@@ -22,6 +23,7 @@ interface SignInFormProps {
   readonly errors: {
     readonly email: string
     readonly password: string
+    readonly general: string
   }
   readonly onFieldChange: (
     field: 'email' | 'password'
@@ -105,6 +107,12 @@ export function SignInForm({
               Or sign in with email
             </Typography>
           </Divider>
+
+          {errors.general && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {errors.general}
+            </Alert>
+          )}
 
           <Box component="form" onSubmit={onSubmit} noValidate>
             <TextField

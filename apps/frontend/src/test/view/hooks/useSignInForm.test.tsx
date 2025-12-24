@@ -60,6 +60,7 @@ describe('useSignInForm', () => {
       expect(result.current.errors).toEqual({
         email: '',
         password: '',
+        general: '',
       })
     })
 

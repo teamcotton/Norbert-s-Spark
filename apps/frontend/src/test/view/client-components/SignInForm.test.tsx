@@ -24,6 +24,7 @@ describe('SignInForm', () => {
     errors: {
       email: '',
       password: '',
+      general: '',
     },
     onFieldChange: mockOnFieldChange,
     onSubmit: mockOnSubmit,
@@ -137,12 +138,65 @@ describe('SignInForm', () => {
         errors: {
           email: 'Email is required',
           password: 'Password is required',
+          general: '',
         },
       }
       render(<SignInForm {...props} />)
 
       expect(screen.getByText('Email is required')).toBeInTheDocument()
       expect(screen.getByText('Password is required')).toBeInTheDocument()
+    })
+
+    it('should display general error message', () => {
+      const props = {
+        ...defaultProps,
+        errors: {
+          ...defaultProps.errors,
+          general: 'Invalid email or password',
+        },
+      }
+      render(<SignInForm {...props} />)
+
+      expect(screen.getByText('Invalid email or password')).toBeInTheDocument()
+    })
+
+    it('should display general error for network failures', () => {
+      const props = {
+        ...defaultProps,
+        errors: {
+          ...defaultProps.errors,
+          general: 'An unexpected error occurred. Please try again.',
+        },
+      }
+      render(<SignInForm {...props} />)
+
+      expect(
+        screen.getByText('An unexpected error occurred. Please try again.')
+      ).toBeInTheDocument()
+    })
+
+    it('should display general error along with field errors', () => {
+      const props = {
+        ...defaultProps,
+        errors: {
+          email: 'Email is required',
+          password: 'Password is required',
+          general: 'Server error occurred',
+        },
+      }
+      render(<SignInForm {...props} />)
+
+      expect(screen.getByText('Email is required')).toBeInTheDocument()
+      expect(screen.getByText('Password is required')).toBeInTheDocument()
+      expect(screen.getByText('Server error occurred')).toBeInTheDocument()
+    })
+
+    it('should not display general error when empty', () => {
+      const { container } = render(<SignInForm {...defaultProps} />)
+
+      // Check that no Alert component is rendered
+      const alertElement = container.querySelector('.MuiAlert-root')
+      expect(alertElement).not.toBeInTheDocument()
     })
 
     it('should display invalid email error', () => {
@@ -317,6 +371,7 @@ describe('SignInForm', () => {
         errors: {
           email: 'Email is required',
           password: 'Password is required',
+          general: '',
         },
       }
       render(<SignInForm {...props} />)
@@ -373,6 +428,7 @@ describe('SignInForm', () => {
         errors: {
           email: 'Please enter a valid email address',
           password: 'Password is required',
+          general: '',
         },
       }
       render(<SignInForm {...props} />)
