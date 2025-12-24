@@ -28,8 +28,3 @@ export type JwtUserClaims = {
   email: string
   roles?: string[]
 }
-
-export const LoginUser = z.object({
-  email: z.email(),
-  password: z.string(),
-})
