@@ -51,8 +51,8 @@ export async function loginUserAction(credentials: LoginDTO): Promise<LoginRespo
     }
 
     return result
-  } catch (errUnknown) {
-    const err = errUnknown as BackendError
+  } catch (error_) {
+    const err = error_ as BackendError
 
     // Log the error for debugging without leaking internals to the client
     logger.error('loginUserAction error', err)
