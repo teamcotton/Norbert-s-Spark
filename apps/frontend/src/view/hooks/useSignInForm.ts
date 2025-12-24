@@ -34,25 +34,25 @@ export function useSignInForm() {
         router.push('/dashboard')
       } else {
         // Handle backend error response
-        setErrors({
-          ...errors,
+        setErrors((prev) => ({
+          ...prev,
           password: response.error || 'Invalid email or password',
-        })
+        }))
       }
     },
     onError: (error: Error) => {
       // Handle unexpected errors
-      setErrors({
-        ...errors,
+      setErrors((prev) => ({
+        ...prev,
         password: error.message || 'An unexpected error occurred',
-      })
+      }))
     },
   })
 
   const handleChange = (field: keyof FormData) => (event: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [field]: event.target.value })
+    setFormData((prev) => ({ ...prev, [field]: event.target.value }))
     // Clear error when user starts typing
-    setErrors({ ...errors, [field]: '' })
+    setErrors((prev) => ({ ...prev, [field]: '' }))
   }
 
   const validateForm = (): boolean => {
