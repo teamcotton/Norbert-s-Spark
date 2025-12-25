@@ -4,7 +4,7 @@ import { act, renderHook, waitFor } from '@testing-library/react'
 import React from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { findAllUsers } from '@/application/actions/findAllUsers.js'
+import { findAllUsers, type FindAllUsersResult } from '@/application/actions/findAllUsers.js'
 import type { User } from '@/domain/user/user.js'
 import { useAdminPage } from '@/view/hooks/useAdminPage.js'
 
@@ -568,12 +568,12 @@ describe('useAdminPage', () => {
         },
       })
 
-      let resolvePromise!: (value: any) => void
-      const promise = new Promise((resolve) => {
+      let resolvePromise!: (value: FindAllUsersResult) => void
+      const promise = new Promise<FindAllUsersResult>((resolve) => {
         resolvePromise = resolve
       })
 
-      vi.mocked(findAllUsers).mockReturnValue(promise as any)
+      vi.mocked(findAllUsers).mockReturnValue(promise)
 
       const { result } = renderHook(() => useAdminPage(), {
         wrapper: createWrapper(qc),
@@ -647,12 +647,12 @@ describe('useAdminPage', () => {
         expect(result.current.loading).toBe(false)
       })
 
-      let resolvePromise!: (value: any) => void
-      const promise = new Promise((resolve) => {
+      let resolvePromise!: (value: FindAllUsersResult) => void
+      const promise = new Promise<FindAllUsersResult>((resolve) => {
         resolvePromise = resolve
       })
 
-      vi.mocked(findAllUsers).mockReturnValue(promise as any)
+      vi.mocked(findAllUsers).mockReturnValue(promise)
 
       act(() => {
         result.current.handlePaginationChange({ page: 1, pageSize: 10 })
@@ -683,11 +683,6 @@ describe('useAdminPage', () => {
             retry: false,
           },
         },
-        logger: {
-          log: () => {},
-          warn: () => {},
-          error: () => {},
-        },
       })
 
       vi.mocked(findAllUsers).mockRejectedValue(new Error('Network error'))
@@ -715,11 +710,6 @@ describe('useAdminPage', () => {
             retry: false,
           },
         },
-        logger: {
-          log: () => {},
-          warn: () => {},
-          error: () => {},
-        },
       })
 
       vi.mocked(findAllUsers).mockRejectedValue(new Error('Internal server error'))
@@ -745,11 +735,6 @@ describe('useAdminPage', () => {
           queries: {
             retry: false,
           },
-        },
-        logger: {
-          log: () => {},
-          warn: () => {},
-          error: () => {},
         },
       })
 
@@ -1035,11 +1020,6 @@ describe('useAdminPage', () => {
           queries: {
             retry: false,
           },
-        },
-        logger: {
-          log: () => {},
-          warn: () => {},
-          error: () => {},
         },
       })
 
