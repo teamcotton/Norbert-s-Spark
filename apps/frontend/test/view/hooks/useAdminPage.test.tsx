@@ -413,6 +413,60 @@ describe('useAdminPage', () => {
 
       expect(result.current.paginationModel.pageSize).toBe(25)
     })
+
+    it('should successfully fetch data for different pages', async () => {
+      const qc = new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: false,
+          },
+        },
+      })
+
+      // Mock successful responses for different pages
+      vi.mocked(findAllUsers).mockImplementation(async (params) => {
+        if (params.offset === 0) {
+          return {
+            success: true,
+            users: mockUsers.slice(0, 1),
+            total: 30,
+            status: 200,
+          }
+        }
+        // Page 1
+        return {
+          success: true,
+          users: mockUsers.slice(1, 2),
+          total: 30,
+          status: 200,
+        }
+      })
+
+      const { result } = renderHook(() => useAdminPage(), {
+        wrapper: createWrapper(qc),
+      })
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
+
+      // First page should have first user
+      expect(result.current.users).toEqual(mockUsers.slice(0, 1))
+
+      // Change to page 1
+      act(() => {
+        result.current.handlePaginationChange({ page: 1, pageSize: 10 })
+      })
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
+
+      // Should now have second user
+      expect(result.current.error).toBeNull()
+      expect(result.current.users).toEqual(mockUsers.slice(1, 2))
+      expect(findAllUsers).toHaveBeenCalledTimes(2)
+    })
   })
 
   describe('Search Functionality', () => {
@@ -753,60 +807,6 @@ describe('useAdminPage', () => {
 
       expect(result.current.error).toBeNull()
       expect(result.current.users).toEqual([])
-    })
-
-    it('should successfully fetch data after pagination change', async () => {
-      const qc = new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: false,
-          },
-        },
-      })
-
-      // Mock successful responses for different pages
-      vi.mocked(findAllUsers).mockImplementation(async (params) => {
-        if (params.offset === 0) {
-          return {
-            success: true,
-            users: [mockUsers[0] as User],
-            total: 30,
-            status: 200,
-          }
-        }
-        // Page 1
-        return {
-          success: true,
-          users: [mockUsers[1] as User],
-          total: 30,
-          status: 200,
-        }
-      })
-
-      const { result } = renderHook(() => useAdminPage(), {
-        wrapper: createWrapper(qc),
-      })
-
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false)
-      })
-
-      // First page should have first user
-      expect(result.current.users).toEqual([mockUsers[0]])
-
-      // Change to page 1
-      act(() => {
-        result.current.handlePaginationChange({ page: 1, pageSize: 10 })
-      })
-
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false)
-      })
-
-      // Should now have second user
-      expect(result.current.error).toBeNull()
-      expect(result.current.users).toEqual([mockUsers[1]])
-      expect(findAllUsers).toHaveBeenCalledTimes(2)
     })
   })
 
