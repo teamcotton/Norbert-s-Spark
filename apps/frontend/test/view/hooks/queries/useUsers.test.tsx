@@ -154,204 +154,49 @@ describe('useUsers', () => {
       vi.resetAllMocks()
     })
 
-    it('should call mapBackendError when findAllUsers returns non-success with 404 status', async () => {
-      const qc = new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: false,
+    it.each([
+      { status: 404, errorMessage: 'User not found', description: 'Not Found' },
+      { status: 400, errorMessage: 'Invalid parameters', description: 'Bad Request' },
+      { status: 401, errorMessage: 'Unauthorized access', description: 'Unauthorized' },
+      { status: 403, errorMessage: 'Forbidden access', description: 'Forbidden' },
+      { status: 409, errorMessage: 'Resource conflict', description: 'Conflict' },
+      { status: 500, errorMessage: 'Internal server error', description: 'Internal Server Error' },
+    ])(
+      'should call mapBackendError when findAllUsers returns non-success with $status status ($description)',
+      async ({ errorMessage, status }) => {
+        const qc = new QueryClient({
+          defaultOptions: {
+            queries: {
+              retry: false,
+            },
           },
-        },
-      })
+        })
 
-      const notFoundError = new Error('User not found')
-      vi.mocked(mapBackendError).mockReturnValue(notFoundError)
+        const error = new Error(errorMessage)
+        vi.mocked(mapBackendError).mockReturnValue(error)
 
-      vi.mocked(findAllUsers).mockResolvedValue({
-        success: false,
-        users: [],
-        total: 0,
-        status: 404,
-        error: 'User not found',
-      })
+        vi.mocked(findAllUsers).mockResolvedValue({
+          success: false,
+          users: [],
+          total: 0,
+          status,
+          error: errorMessage,
+        })
 
-      const { result } = renderHook(() => useUsers({ limit: 10, offset: 0 }), {
-        wrapper: createWrapper(qc),
-      })
+        const { result } = renderHook(() => useUsers({ limit: 10, offset: 0 }), {
+          wrapper: createWrapper(qc),
+        })
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false)
-      })
+        await waitFor(() => {
+          expect(result.current.isLoading).toBe(false)
+        })
 
-      // Verify mapBackendError was called with correct parameters
-      expect(mapBackendError).toHaveBeenCalledWith(404, 'User not found')
-      expect(result.current.users).toEqual([])
-      expect(result.current.total).toBe(0)
-    })
-
-    it('should call mapBackendError when findAllUsers returns non-success with 400 status', async () => {
-      const qc = new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: false,
-          },
-        },
-      })
-
-      const validationError = new Error('Invalid parameters')
-      vi.mocked(mapBackendError).mockReturnValue(validationError)
-
-      vi.mocked(findAllUsers).mockResolvedValue({
-        success: false,
-        users: [],
-        total: 0,
-        status: 400,
-        error: 'Invalid parameters',
-      })
-
-      const { result } = renderHook(() => useUsers({ limit: 10, offset: 0 }), {
-        wrapper: createWrapper(qc),
-      })
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false)
-      })
-
-      expect(mapBackendError).toHaveBeenCalledWith(400, 'Invalid parameters')
-      expect(result.current.users).toEqual([])
-      expect(result.current.total).toBe(0)
-    })
-
-    it('should call mapBackendError when findAllUsers returns non-success with 401 status', async () => {
-      const qc = new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: false,
-          },
-        },
-      })
-
-      const unauthorizedError = new Error('Unauthorized access')
-      vi.mocked(mapBackendError).mockReturnValue(unauthorizedError)
-
-      vi.mocked(findAllUsers).mockResolvedValue({
-        success: false,
-        users: [],
-        total: 0,
-        status: 401,
-        error: 'Unauthorized access',
-      })
-
-      const { result } = renderHook(() => useUsers({ limit: 10, offset: 0 }), {
-        wrapper: createWrapper(qc),
-      })
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false)
-      })
-
-      expect(mapBackendError).toHaveBeenCalledWith(401, 'Unauthorized access')
-      expect(result.current.users).toEqual([])
-      expect(result.current.total).toBe(0)
-    })
-
-    it('should call mapBackendError when findAllUsers returns non-success with 403 status', async () => {
-      const qc = new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: false,
-          },
-        },
-      })
-
-      const forbiddenError = new Error('Forbidden access')
-      vi.mocked(mapBackendError).mockReturnValue(forbiddenError)
-
-      vi.mocked(findAllUsers).mockResolvedValue({
-        success: false,
-        users: [],
-        total: 0,
-        status: 403,
-        error: 'Forbidden access',
-      })
-
-      const { result } = renderHook(() => useUsers({ limit: 10, offset: 0 }), {
-        wrapper: createWrapper(qc),
-      })
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false)
-      })
-
-      expect(mapBackendError).toHaveBeenCalledWith(403, 'Forbidden access')
-      expect(result.current.users).toEqual([])
-      expect(result.current.total).toBe(0)
-    })
-
-    it('should call mapBackendError when findAllUsers returns non-success with 409 status', async () => {
-      const qc = new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: false,
-          },
-        },
-      })
-
-      const conflictError = new Error('Resource conflict')
-      vi.mocked(mapBackendError).mockReturnValue(conflictError)
-
-      vi.mocked(findAllUsers).mockResolvedValue({
-        success: false,
-        users: [],
-        total: 0,
-        status: 409,
-        error: 'Resource conflict',
-      })
-
-      const { result } = renderHook(() => useUsers({ limit: 10, offset: 0 }), {
-        wrapper: createWrapper(qc),
-      })
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false)
-      })
-
-      expect(mapBackendError).toHaveBeenCalledWith(409, 'Resource conflict')
-      expect(result.current.users).toEqual([])
-      expect(result.current.total).toBe(0)
-    })
-
-    it('should call mapBackendError when findAllUsers returns non-success with 500 status', async () => {
-      const qc = new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: false,
-          },
-        },
-      })
-
-      const serverError = new Error('Internal server error')
-      vi.mocked(mapBackendError).mockReturnValue(serverError)
-
-      vi.mocked(findAllUsers).mockResolvedValue({
-        success: false,
-        users: [],
-        total: 0,
-        status: 500,
-        error: 'Internal server error',
-      })
-
-      const { result } = renderHook(() => useUsers({ limit: 10, offset: 0 }), {
-        wrapper: createWrapper(qc),
-      })
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false)
-      })
-
-      expect(mapBackendError).toHaveBeenCalledWith(500, 'Internal server error')
-      expect(result.current.users).toEqual([])
-      expect(result.current.total).toBe(0)
-    })
+        // Verify mapBackendError was called with correct parameters
+        expect(mapBackendError).toHaveBeenCalledWith(status, errorMessage)
+        expect(result.current.users).toEqual([])
+        expect(result.current.total).toBe(0)
+      }
+    )
 
     it('should use default error message when error field is undefined', async () => {
       const qc = new QueryClient({
