@@ -41,7 +41,7 @@ describe('useUsers', () => {
     vi.resetAllMocks()
   })
 
-  describe.todo('Successful data fetching', () => {
+  describe('Successful data fetching', () => {
     it('should fetch users with default pagination parameters', async () => {
       const qc = new QueryClient({
         defaultOptions: {
@@ -144,7 +144,7 @@ describe('useUsers', () => {
     })
   })
 
-  describe.todo('Error handling', () => {
+  describe('Error handling', () => {
     it.todo('should handle error when findAllUsers throws with error message')
   })
 
@@ -191,7 +191,11 @@ describe('useUsers', () => {
   })
 })
 
-describe.todo('Loading states', () => {
+describe('Loading states', () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+  })
+
   it('should show isLoading true initially', async () => {
     const qc = new QueryClient({
       defaultOptions: {
@@ -261,7 +265,11 @@ describe.todo('Loading states', () => {
   })
 })
 
-describe.todo('Query key generation', () => {
+describe('Query key generation', () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+  })
+
   it('should generate unique query keys for different pagination parameters', async () => {
     const qc = new QueryClient({
       defaultOptions: {
@@ -349,7 +357,11 @@ describe.todo('Query key generation', () => {
   })
 })
 
-describe.todo('Retry behavior', () => {
+describe('Retry behavior', () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+  })
+
   it('should retry failed requests up to 2 times', async () => {
     const qc = new QueryClient({
       defaultOptions: {
@@ -418,7 +430,11 @@ describe.todo('Retry behavior', () => {
   })
 })
 
-describe.todo('Caching behavior', () => {
+describe('Caching behavior', () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+  })
+
   it('should consider data fresh within staleTime', async () => {
     const qc = new QueryClient({
       defaultOptions: {
@@ -520,7 +536,11 @@ describe.todo('Caching behavior', () => {
   })
 })
 
-describe.todo('Refetch on window focus', () => {
+describe('Refetch on window focus', () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+  })
+
   it('should have refetchOnWindowFocus enabled', async () => {
     const qc = new QueryClient({
       defaultOptions: {
