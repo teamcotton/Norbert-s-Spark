@@ -2,7 +2,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { QueryProvider } from '../../../app/providers/QueryProvider.js'
+import { QueryProvider } from '@/app/providers/QueryProvider.js'
 
 describe('QueryProvider', () => {
   beforeEach(() => {

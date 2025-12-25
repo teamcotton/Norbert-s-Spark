@@ -5,7 +5,7 @@ import {
   checkAndUpdateRate,
   extractClientIp,
   nowSeconds,
-} from '../middleware.js'
+} from '@/middleware.js'
 
 describe('nowSeconds', () => {
   beforeEach(() => {

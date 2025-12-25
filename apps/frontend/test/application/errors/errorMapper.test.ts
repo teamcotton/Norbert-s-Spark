@@ -7,8 +7,8 @@ import {
   NotFoundError,
   UnauthorizedError,
   ValidationError,
-} from './apiErrors.js'
-import { mapBackendError } from './errorMapper.js'
+} from '@/application/errors/apiErrors.js'
+import { mapBackendError } from '@/application/errors/errorMapper.js'
 
 describe('errorMapper', () => {
   describe('mapBackendError', () => {

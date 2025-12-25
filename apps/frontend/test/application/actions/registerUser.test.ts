@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { registerUser } from '../../../application/actions/registerUser.js'
+import { registerUser } from '@/application/actions/registerUser.js'
 
 describe('registerUser', () => {
   beforeEach(() => {

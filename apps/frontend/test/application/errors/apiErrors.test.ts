@@ -7,7 +7,7 @@ import {
   NotFoundError,
   UnauthorizedError,
   ValidationError,
-} from './apiErrors.js'
+} from '@/application/errors/apiErrors.js'
 
 describe('apiErrors', () => {
   describe('ConflictError', () => {

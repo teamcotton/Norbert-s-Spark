@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { Dashboard } from '../../../view/client-components/Dashboard.js'
+import { Dashboard } from '@/view/client-components/Dashboard.js'
 
 describe('Dashboard', () => {
   const mockOnNavigate = vi.fn()

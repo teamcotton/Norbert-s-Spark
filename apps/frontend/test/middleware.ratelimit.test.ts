@@ -2,8 +2,8 @@
 import { getToken } from 'next-auth/jwt'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import * as middlewareModule from '../middleware.js'
-import { __getRateLimiterSize, __resetRateLimiter, middleware } from '../middleware.js'
+import * as middlewareModule from '@/middleware.js'
+import { __getRateLimiterSize, __resetRateLimiter, middleware } from '@/middleware.js'
 
 vi.mock('next-auth/jwt', () => ({ getToken: vi.fn() }))
 

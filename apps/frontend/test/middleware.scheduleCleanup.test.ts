@@ -24,7 +24,7 @@ describe('scheduleRateMapCleanup', () => {
   it('cleans up expired keys after the configured cleanup interval', async () => {
     // Import the middleware module after setting env and fake timers so its
     // `scheduleRateMapCleanup()` call is under our control.
-    const middlewareModule = await import('../middleware.js')
+    const middlewareModule = await import('@/middleware.js')
     const { __getRateLimiterSize, __resetRateLimiter, checkAndUpdateRate } = middlewareModule
 
     // Start from a clean state

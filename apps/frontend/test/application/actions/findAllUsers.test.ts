@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { findAllUsers } from '../../../application/actions/findAllUsers.js'
+import { findAllUsers } from '@/application/actions/findAllUsers.js'
 
 describe('findAllUsers', () => {
   beforeEach(() => {
