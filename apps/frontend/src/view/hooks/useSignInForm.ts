@@ -62,6 +62,12 @@ export function useSignInForm() {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
+    
+    // Prevent race condition: return early if already processing
+    if (isLoading) {
+      return
+    }
+    
     if (!validateForm()) {
       return
     }
