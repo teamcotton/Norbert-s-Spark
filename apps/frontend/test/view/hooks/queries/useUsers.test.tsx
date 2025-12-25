@@ -4,11 +4,16 @@ import React from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { findAllUsers, type FindAllUsersResult } from '@/application/actions/findAllUsers.js'
+import { mapBackendError } from '@/application/errors/errorMapper.js'
 import type { User } from '@/domain/user/user.js'
 import { useUsers } from '@/view/hooks/queries/useUsers.js'
 
 vi.mock('@/application/actions/findAllUsers.js', () => ({
   findAllUsers: vi.fn(),
+}))
+
+vi.mock('@/application/errors/errorMapper.js', () => ({
+  mapBackendError: vi.fn(),
 }))
 
 // Helper function to create a QueryClientProvider wrapper
@@ -145,7 +150,87 @@ describe('useUsers', () => {
   })
 
   describe('Error handling', () => {
-    it.todo('should handle error when findAllUsers throws with error message')
+    beforeEach(() => {
+      vi.resetAllMocks()
+    })
+
+    it.each([
+      { status: 404, errorMessage: 'User not found', description: 'Not Found' },
+      { status: 400, errorMessage: 'Invalid parameters', description: 'Bad Request' },
+      { status: 401, errorMessage: 'Unauthorized access', description: 'Unauthorized' },
+      { status: 403, errorMessage: 'Forbidden access', description: 'Forbidden' },
+      { status: 409, errorMessage: 'Resource conflict', description: 'Conflict' },
+      { status: 500, errorMessage: 'Internal server error', description: 'Internal Server Error' },
+    ])(
+      'should call mapBackendError when findAllUsers returns non-success with $status status ($description)',
+      async ({ errorMessage, status }) => {
+        const qc = new QueryClient({
+          defaultOptions: {
+            queries: {
+              retry: false,
+            },
+          },
+        })
+
+        const error = new Error(errorMessage)
+        vi.mocked(mapBackendError).mockReturnValue(error)
+
+        vi.mocked(findAllUsers).mockResolvedValue({
+          success: false,
+          users: [],
+          total: 0,
+          status,
+          error: errorMessage,
+        })
+
+        const { result } = renderHook(() => useUsers({ limit: 10, offset: 0 }), {
+          wrapper: createWrapper(qc),
+        })
+
+        await waitFor(() => {
+          expect(result.current.isLoading).toBe(false)
+        })
+
+        // Verify mapBackendError was called with correct parameters
+        expect(mapBackendError).toHaveBeenCalledWith(status, errorMessage)
+        expect(result.current.users).toEqual([])
+        expect(result.current.total).toBe(0)
+      }
+    )
+
+    it('should use default error message when error field is undefined', async () => {
+      const qc = new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: false,
+          },
+        },
+      })
+
+      const defaultError = new Error('Failed to fetch users')
+      vi.mocked(mapBackendError).mockReturnValue(defaultError)
+
+      vi.mocked(findAllUsers).mockResolvedValue({
+        success: false,
+        users: [],
+        total: 0,
+        status: 500,
+        // error field is undefined
+      })
+
+      const { result } = renderHook(() => useUsers({ limit: 10, offset: 0 }), {
+        wrapper: createWrapper(qc),
+      })
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false)
+      })
+
+      // Verify mapBackendError was called with default message
+      expect(mapBackendError).toHaveBeenCalledWith(500, 'Failed to fetch users')
+      expect(result.current.users).toEqual([])
+      expect(result.current.total).toBe(0)
+    })
   })
 
   it('should handle network error', async () => {
