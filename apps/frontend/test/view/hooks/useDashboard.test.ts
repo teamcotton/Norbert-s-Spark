@@ -26,13 +26,15 @@ describe('useDashboard', () => {
   })
 
   describe('Initial State', () => {
-    it('should return canAccessAdmin and handleNavigate', () => {
+    it('should return canAccessAdmin, handleNavigate, and handleSignOut', () => {
       const { result } = renderHook(() => useDashboard({ userRoles: ['user'] }))
 
       expect(result.current).toHaveProperty('canAccessAdmin')
       expect(result.current).toHaveProperty('handleNavigate')
+      expect(result.current).toHaveProperty('handleSignOut')
       expect(typeof result.current.canAccessAdmin).toBe('boolean')
       expect(typeof result.current.handleNavigate).toBe('function')
+      expect(typeof result.current.handleSignOut).toBe('function')
     })
 
     it('should call useRouter hook', () => {
@@ -326,13 +328,14 @@ describe('useDashboard', () => {
   })
 
   describe('Return Value Structure', () => {
-    it('should return an object with exactly 2 properties', () => {
+    it('should return an object with exactly 3 properties', () => {
       const { result } = renderHook(() => useDashboard({ userRoles: ['user'] }))
 
       const keys = Object.keys(result.current)
-      expect(keys).toHaveLength(2)
+      expect(keys).toHaveLength(3)
       expect(keys).toContain('canAccessAdmin')
       expect(keys).toContain('handleNavigate')
+      expect(keys).toContain('handleSignOut')
     })
 
     it('should return consistent types across different role configurations', () => {
@@ -343,7 +346,61 @@ describe('useDashboard', () => {
 
         expect(typeof result.current.canAccessAdmin).toBe('boolean')
         expect(typeof result.current.handleNavigate).toBe('function')
+        expect(typeof result.current.handleSignOut).toBe('function')
       })
+    })
+  })
+
+  describe('handleSignOut - Sign Out Function', () => {
+    it('should call router.push with /api/auth/signout', () => {
+      const { result } = renderHook(() => useDashboard({ userRoles: ['user'] }))
+
+      act(() => {
+        result.current.handleSignOut()
+      })
+
+      expect(mockPush).toHaveBeenCalledWith('/api/auth/signout')
+      expect(mockPush).toHaveBeenCalledTimes(1)
+    })
+
+    it('should navigate to sign out endpoint', () => {
+      const { result } = renderHook(() => useDashboard({ userRoles: ['admin'] }))
+
+      act(() => {
+        result.current.handleSignOut()
+      })
+
+      expect(mockPush).toHaveBeenCalledWith('/api/auth/signout')
+    })
+
+    it('should handle multiple sign out calls', () => {
+      const { result } = renderHook(() => useDashboard({ userRoles: ['user'] }))
+
+      act(() => {
+        result.current.handleSignOut()
+        result.current.handleSignOut()
+        result.current.handleSignOut()
+      })
+
+      expect(mockPush).toHaveBeenCalledTimes(3)
+      expect(mockPush).toHaveBeenNthCalledWith(1, '/api/auth/signout')
+      expect(mockPush).toHaveBeenNthCalledWith(2, '/api/auth/signout')
+      expect(mockPush).toHaveBeenNthCalledWith(3, '/api/auth/signout')
+    })
+
+    it('should work independently from handleNavigate', () => {
+      const { result } = renderHook(() => useDashboard({ userRoles: ['user'] }))
+
+      act(() => {
+        result.current.handleNavigate('/profile')
+        result.current.handleSignOut()
+        result.current.handleNavigate('/ai')
+      })
+
+      expect(mockPush).toHaveBeenCalledTimes(3)
+      expect(mockPush).toHaveBeenNthCalledWith(1, '/profile')
+      expect(mockPush).toHaveBeenNthCalledWith(2, '/api/auth/signout')
+      expect(mockPush).toHaveBeenNthCalledWith(3, '/ai')
     })
   })
 })
