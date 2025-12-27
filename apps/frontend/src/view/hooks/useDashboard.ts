@@ -7,6 +7,7 @@ interface UseDashboardProps {
 interface UseDashboardReturn {
   canAccessAdmin: boolean
   handleNavigate: (path: string) => void
+  handleSignOut: () => void
 }
 
 /**
@@ -19,7 +20,7 @@ interface UseDashboardReturn {
  *
  * @example
  * ```tsx
- * const { canAccessAdmin, handleNavigate } = useDashboard({ userRoles: ['user', 'admin'] })
+ * const { canAccessAdmin, handleNavigate, handleSignOut } = useDashboard({ userRoles: ['user', 'admin'] })
  * ```
  */
 export function useDashboard({ userRoles }: UseDashboardProps): UseDashboardReturn {
@@ -36,8 +37,16 @@ export function useDashboard({ userRoles }: UseDashboardProps): UseDashboardRetu
     router.push(path)
   }
 
+  /**
+   * Navigate to the sign out page
+   */
+  const handleSignOut = () => {
+    router.push('/api/auth/signout')
+  }
+
   return {
     canAccessAdmin,
     handleNavigate,
+    handleSignOut,
   }
 }

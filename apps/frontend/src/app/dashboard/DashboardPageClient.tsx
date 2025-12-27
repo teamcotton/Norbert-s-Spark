@@ -13,7 +13,13 @@ interface DashboardPageClientProps {
  * Business logic is in the hook, presentation is in the component.
  */
 export function DashboardPageClient({ userRoles }: DashboardPageClientProps) {
-  const { canAccessAdmin, handleNavigate } = useDashboard({ userRoles })
+  const { canAccessAdmin, handleNavigate, handleSignOut } = useDashboard({ userRoles })
 
-  return <Dashboard canAccessAdmin={canAccessAdmin} onNavigate={handleNavigate} />
+  return (
+    <Dashboard
+      canAccessAdmin={canAccessAdmin}
+      onNavigate={handleNavigate}
+      onSignOut={handleSignOut}
+    />
+  )
 }
