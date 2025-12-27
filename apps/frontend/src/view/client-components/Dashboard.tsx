@@ -16,6 +16,7 @@ import {
 interface DashboardProps {
   canAccessAdmin: boolean
   onNavigate: (path: string) => void
+  onSignOut: () => void
 }
 
 /**
@@ -28,16 +29,18 @@ interface DashboardProps {
  * @param {DashboardProps} props - Component properties
  * @param {boolean} props.canAccessAdmin - Whether the user can access the admin page
  * @param {(path: string) => void} props.onNavigate - Callback to navigate to a specific path
+ * @param {() => void} props.onSignOut - Callback to handle sign out
  *
  * @example
  * ```tsx
  * <Dashboard
  *   canAccessAdmin={true}
  *   onNavigate={(path) => router.push(path)}
+ *   onSignOut={() => router.push('/api/auth/signout')}
  * />
  * ```
  */
-export function Dashboard({ canAccessAdmin, onNavigate }: DashboardProps) {
+export function Dashboard({ canAccessAdmin, onNavigate, onSignOut }: DashboardProps) {
   return (
     <Container maxWidth="lg" sx={{ py: 8 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 6 }}>
@@ -48,7 +51,7 @@ export function Dashboard({ canAccessAdmin, onNavigate }: DashboardProps) {
           variant="outlined"
           color="primary"
           startIcon={<LogoutIcon />}
-          href="/api/auth/signout"
+          onClick={onSignOut}
           sx={{ textTransform: 'none' }}
         >
           Sign Out

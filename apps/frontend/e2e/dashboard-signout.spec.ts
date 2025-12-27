@@ -23,7 +23,7 @@ test.describe('Dashboard Sign Out', () => {
     await expect(page.getByRole('heading', { name: /dashboard/i })).toBeVisible()
 
     // Verify Sign Out button is visible
-    const signOutButton = page.getByRole('link', { name: /sign out/i })
+    const signOutButton = page.getByRole('button', { name: /sign out/i })
     await expect(signOutButton).toBeVisible()
 
     // Click the Sign Out button
@@ -56,7 +56,7 @@ test.describe('Dashboard Sign Out', () => {
     await expect(page.getByRole('heading', { name: /dashboard/i })).toBeVisible()
 
     // Click Sign Out button
-    const signOutButton = page.getByRole('link', { name: /sign out/i })
+    const signOutButton = page.getByRole('button', { name: /sign out/i })
     await signOutButton.click()
 
     // Wait for navigation to NextAuth signout page
@@ -86,7 +86,7 @@ test.describe('Dashboard Sign Out', () => {
 
   test('should not allow access to protected routes after sign out', async ({ page }) => {
     // Sign out
-    const signOutButton = page.getByRole('link', { name: /sign out/i })
+    const signOutButton = page.getByRole('button', { name: /sign out/i })
     await signOutButton.click()
 
     // Wait for signout flow
