@@ -39,7 +39,7 @@ export function useUsers(params: UseUsersParams): UseUsersResult {
       })
 
       if (!result.success) {
-        mapBackendError(result.status, result.error || 'Failed to fetch users')
+        throw mapBackendError(result.status, result.error || 'Failed to fetch users')
       }
 
       return {

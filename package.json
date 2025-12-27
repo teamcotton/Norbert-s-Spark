@@ -15,7 +15,7 @@
     "test:e2e": "turbo test:e2e",
     "lint:api": "pnpm --filter @norberts-spark/shared lint:api",
     "typecheck": "turbo typecheck",
-    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\" --check --cache",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\" --cache",
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md}\"",
     "prepare": "husky"
   },

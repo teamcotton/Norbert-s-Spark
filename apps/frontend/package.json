@@ -14,7 +14,7 @@
     "build": "next build",
     "start": "next start -p 4321",
     "bundle:analyze": "pnpm run build && next experimental-analyze",
-    "lint": "eslint . --cache --exit-on-fatal-error",
+    "lint": "eslint . --cache",
     "lint:fix": "eslint . --fix --cache",
     "test:unit": "vitest run --hideSkippedTests",
     "test:unit:coverage": "vitest run --coverage --hideSkippedTests",

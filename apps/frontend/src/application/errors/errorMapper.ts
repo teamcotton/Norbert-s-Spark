@@ -11,7 +11,7 @@ import {
 
 export function mapBackendError(status: number, message: string) {
   if (!isNumber(status)) {
-    return new Error(message)
+    throw new Error(message)
   }
   switch (status) {
     case 409:
