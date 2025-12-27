@@ -129,6 +129,13 @@ export class LoginUserUseCase {
       throw new UnauthorizedException('Invalid email or password')
     }
 
+    if (!user.id) {
+      this.logger.error('User found but has no ID', new Error('Missing user ID'), {
+        email: dto.email,
+      })
+      throw new UnauthorizedException('Invalid user data')
+    }
+
     const isPasswordValid = await user.verifyPassword(dto.password)
 
     if (!isPasswordValid) {

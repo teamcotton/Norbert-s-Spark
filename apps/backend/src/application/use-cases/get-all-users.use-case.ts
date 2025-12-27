@@ -72,13 +72,18 @@ export class GetAllUsersUseCase {
     try {
       const result = await this.userRepository.findAll(params)
 
-      const userDtos = result.data.map((user) => ({
-        userId: user.id,
-        email: user.getEmail(),
-        name: user.getName(),
-        role: user.getRole(),
-        createdAt: user.getCreatedAt(),
-      }))
+      const userDtos = result.data.map((user) => {
+        if (!user.id) {
+          throw new Error('User ID is missing')
+        }
+        return {
+          userId: user.id,
+          email: user.getEmail(),
+          name: user.getName(),
+          role: user.getRole(),
+          createdAt: user.getCreatedAt(),
+        }
+      })
 
       this.logger.info('Successfully fetched all users', {
         count: userDtos.length,
