@@ -18,7 +18,7 @@
     "lint:fix": "eslint . --fix --cache",
     "test:unit": "vitest run --hideSkippedTests",
     "test:unit:coverage": "vitest run --coverage --hideSkippedTests",
-    "test:e2e": "playwright test --last-failed",
+    "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "typecheck": "tsc --noEmit"
   },
