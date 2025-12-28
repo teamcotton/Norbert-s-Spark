@@ -51,6 +51,10 @@ export const AIUsageListSchema = z.array(AIUsageSchema)
 
 export const AIModelsSchema = z.array(z.string())
 
+export const AIRequestSchema = z.object({
+  prompt: z.string().min(1, { message: 'Prompt is required' }),
+})
+
 const MessagePartSchema = z.object({
   type: z.enum(['text', 'step-start']),
   text: z.string().optional(),
@@ -64,7 +68,16 @@ const MessageSchema = z.object({
 })
 
 export const AIReturnedResponse = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   messages: z.array(MessageSchema),
   trigger: z.string(),
 })
+
+export type AISchemaType = z.infer<typeof AISchema>
+export type CreateAISchemaType = z.infer<typeof CreateAISchema>
+export type UpdateAISchemaType = z.infer<typeof UpdateAISchema>
+export type AISummarySchemaType = z.infer<typeof AISummarySchema>
+export type AIListSchemaType = z.infer<typeof AIListSchema>
+export type AIUsageSchemaType = z.infer<typeof AIUsageSchema>
+export type AIUsageListSchemaType = z.infer<typeof AIUsageListSchema>
+export type AIReturnedResponseType = z.infer<typeof AIReturnedResponse>
