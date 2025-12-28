@@ -15,12 +15,16 @@ CREATE TABLE "ai_options" (
 	"message_id" uuid NOT NULL,
 	"prompt" text NOT NULL,
 	"max_tokens" integer NOT NULL,
-	"temperature" double precision NOT NULL,
-	"top_p" double precision NOT NULL,
-	"frequency_penalty" double precision NOT NULL,
-	"presence_penalty" double precision NOT NULL,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "max_tokens_check" CHECK ("ai_options"."max_tokens" > 0)
+    "temperature" numeric NOT NULL,
+    "top_p" numeric NOT NULL,
+    "frequency_penalty" numeric NOT NULL,
+    "presence_penalty" numeric NOT NULL,
+    "created_at" timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT "max_tokens_check" CHECK ("ai_options"."max_tokens" > 0),
+    CONSTRAINT "temperature_range" CHECK ("ai_options"."temperature" >= 0 AND "ai_options"."temperature" <= 2),
+    CONSTRAINT "top_p_range" CHECK ("ai_options"."top_p" >= 0 AND "ai_options"."top_p" <= 1),
+    CONSTRAINT "frequency_penalty_range" CHECK ("ai_options"."frequency_penalty" >= -2 AND "ai_options"."frequency_penalty" <= 2),
+    CONSTRAINT "presence_penalty_range" CHECK ("ai_options"."presence_penalty" >= -2 AND "ai_options"."presence_penalty" <= 2)
 );
 --> statement-breakpoint
 CREATE TABLE "chats" (
