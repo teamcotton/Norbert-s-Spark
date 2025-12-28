@@ -284,7 +284,10 @@ export const messagesRelations = relations(messages, ({ one, many }) => ({
     references: [chats.id],
   }),
   parts: many(parts),
-  aiOptions: many(aiOptions),
+  aiOptions: one(aiOptions, {
+    fields: [messages.id],
+    references: [aiOptions.messageId],
+  }),
 }))
 
 export const partsRelations = relations(parts, ({ one }) => ({
