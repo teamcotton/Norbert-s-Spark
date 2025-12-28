@@ -462,9 +462,14 @@ describe('RegisterUserUseCase', () => {
 
         const savedUser = vi.mocked(mockUserRepository.save).mock.calls[0]?.[0]
         expect(savedUser).toBeDefined()
-        // User entity is created without ID (undefined), database generates it
+        // The User entity passed into the repository represents a new aggregate,
+        // so it must not have an ID yet. The persistence layer (repository/DB)
+        // is responsible for generating and assigning the ID during the save
+        // operation, therefore the entity we pass into save() is expected to
+        // have an undefined id.
         expect(savedUser!.id).toBeUndefined()
-        // But the returned result should have the ID from the database
+        // The use case must then expose the ID returned by the repository back
+        // to the caller, so the result.userId should match the generated ID.
         expect(result.userId).toBe(mockUserId)
       })
 
