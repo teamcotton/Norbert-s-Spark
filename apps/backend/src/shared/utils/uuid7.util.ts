@@ -76,7 +76,7 @@ export class Uuid7Util {
    * console.log(id1 < id2) // true
    * ```
    */
-  createUuidv7(): string {
+  static createUuidv7(): string {
     return uuidv7()
   }
 }

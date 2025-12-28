@@ -5,8 +5,7 @@ import { Uuid7Util } from '../../../src/shared/utils/uuid7.util.js'
 describe('Uuid7Util', () => {
   describe('uuidVersionValidation', () => {
     it('should return v7 for a valid UUIDv7', () => {
-      const uuid7Util = new Uuid7Util()
-      const testUuid = uuid7Util.createUuidv7()
+      const testUuid = Uuid7Util.createUuidv7()
 
       const result = Uuid7Util.uuidVersionValidation(testUuid)
 
@@ -39,8 +38,7 @@ describe('Uuid7Util', () => {
 
   describe('isValidUUID', () => {
     it('should return true for valid UUIDv7', () => {
-      const uuid7Util = new Uuid7Util()
-      const testUuid = uuid7Util.createUuidv7()
+      const testUuid = Uuid7Util.createUuidv7()
 
       const result = Uuid7Util.isValidUUID(testUuid)
 
@@ -76,9 +74,7 @@ describe('Uuid7Util', () => {
 
   describe('createUuidv7', () => {
     it('should generate a valid UUIDv7', () => {
-      const uuid7Util = new Uuid7Util()
-
-      const result = uuid7Util.createUuidv7()
+      const result = Uuid7Util.createUuidv7()
 
       expect(result).toBeDefined()
       expect(typeof result).toBe('string')
@@ -88,11 +84,9 @@ describe('Uuid7Util', () => {
     })
 
     it('should generate unique UUIDs on multiple calls', () => {
-      const uuid7Util = new Uuid7Util()
-
-      const uuid1 = uuid7Util.createUuidv7()
-      const uuid2 = uuid7Util.createUuidv7()
-      const uuid3 = uuid7Util.createUuidv7()
+      const uuid1 = Uuid7Util.createUuidv7()
+      const uuid2 = Uuid7Util.createUuidv7()
+      const uuid3 = Uuid7Util.createUuidv7()
 
       expect(uuid1).not.toBe(uuid2)
       expect(uuid2).not.toBe(uuid3)
@@ -100,9 +94,7 @@ describe('Uuid7Util', () => {
     })
 
     it('should return string type', () => {
-      const uuid7Util = new Uuid7Util()
-
-      const result = uuid7Util.createUuidv7()
+      const result = Uuid7Util.createUuidv7()
 
       expect(typeof result).toBe('string')
     })
@@ -110,8 +102,7 @@ describe('Uuid7Util', () => {
 
   describe('integration scenarios', () => {
     it('should validate generated UUID from createUuidv7', () => {
-      const uuid7Util = new Uuid7Util()
-      const generatedUuid = uuid7Util.createUuidv7()
+      const generatedUuid = Uuid7Util.createUuidv7()
 
       const isValid = Uuid7Util.isValidUUID(generatedUuid)
 
@@ -119,8 +110,7 @@ describe('Uuid7Util', () => {
     })
 
     it('should validate version of generated UUID', () => {
-      const uuid7Util = new Uuid7Util()
-      const generatedUuid = uuid7Util.createUuidv7()
+      const generatedUuid = Uuid7Util.createUuidv7()
 
       const validation = Uuid7Util.uuidVersionValidation(generatedUuid)
 
@@ -128,11 +118,9 @@ describe('Uuid7Util', () => {
     })
 
     it('should generate chronologically ordered UUIDs', () => {
-      const uuid7Util = new Uuid7Util()
-
-      const uuid1 = uuid7Util.createUuidv7()
-      const uuid2 = uuid7Util.createUuidv7()
-      const uuid3 = uuid7Util.createUuidv7()
+      const uuid1 = Uuid7Util.createUuidv7()
+      const uuid2 = Uuid7Util.createUuidv7()
+      const uuid3 = Uuid7Util.createUuidv7()
 
       // UUIDv7 should be lexicographically sortable
       const sorted = [uuid1, uuid2, uuid3].sort()
