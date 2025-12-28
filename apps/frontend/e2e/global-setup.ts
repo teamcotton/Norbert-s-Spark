@@ -21,7 +21,7 @@ async function globalSetup() {
     // Start PostgreSQL container
     console.warn('📦 Starting PostgreSQL container...')
     postgresContainer = await new PostgreSqlContainer('postgres:18-alpine')
-      .withDatabase('level2gym_test')
+      .withDatabase('norbertsSpark_test')
       .withUsername('test')
       .withPassword('test')
       .withExposedPorts(5432)
@@ -31,7 +31,7 @@ async function globalSetup() {
     const port = postgresContainer.getMappedPort(5432)
     const username = postgresContainer.getUsername()
     const password = postgresContainer.getPassword()
-    const connectionString = `postgresql://${username}:${password}@${host}:${port}/level2gym_test`
+    const connectionString = `postgresql://${username}:${password}@${host}:${port}/norbertsSpark_test`
     console.warn(`✅ PostgreSQL container started at ${host}:${port}`)
 
     // Create required PostgreSQL extensions
@@ -107,7 +107,7 @@ async function globalSetup() {
         NODE_ENV: 'test',
         USE_HTTPS: 'false', // Use HTTP for E2E tests
         JWT_SECRET: 'test-jwt-secret-for-e2e-tests-minimum-256-bits',
-        JWT_ISSUER: 'level2gym-test',
+        JWT_ISSUER: 'norbertsSpark-test',
         JWT_EXPIRATION: '1h',
         GOOGLE_GENERATIVE_AI_API_KEY: 'test-google-api-key-for-e2e',
         MODEL_NAME: 'gemini-1.5-flash',

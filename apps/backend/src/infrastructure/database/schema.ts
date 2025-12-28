@@ -11,6 +11,7 @@ import {
   index,
   check,
   customType,
+  numeric,
 } from 'drizzle-orm/pg-core'
 
 // Define CITEXT custom type for case-insensitive text
@@ -111,6 +112,50 @@ export const messages = pgTable(
 
 export type DBMessage = typeof messages.$inferInsert
 export type DBMessageSelect = typeof messages.$inferSelect
+
+/**
+ * AI Options table: Stores AI generation parameters for each message
+ */
+export const aiOptions = pgTable(
+  'ai_options',
+  {
+    id: uuid('id')
+      .primaryKey()
+      .default(sql`uuidv7()`),
+    messageId: uuid('message_id')
+      .notNull()
+      .references(() => messages.id, { onDelete: 'cascade' }),
+    prompt: text('prompt').notNull(),
+    maxTokens: integer('max_tokens').notNull(),
+    temperature: numeric('temperature').notNull(),
+    topP: numeric('top_p').notNull(),
+    frequencyPenalty: numeric('frequency_penalty').notNull(),
+    presencePenalty: numeric('presence_penalty').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (table) => ({
+    messageIdIdx: index('ai_options_message_id_idx').on(table.messageId),
+    maxTokensCheck: check('max_tokens_check', sql`${table.maxTokens} > 0`),
+    temperatureRange: check(
+      'temperature_range',
+      sql`${table.temperature} >= 0 AND ${table.temperature} <= 2`
+    ),
+    topPRange: check('top_p_range', sql`${table.topP} >= 0 AND ${table.topP} <= 1`),
+    frequencyPenaltyRange: check(
+      'frequency_penalty_range',
+      sql`${table.frequencyPenalty} >= -2 AND ${table.frequencyPenalty} <= 2`
+    ),
+    presencePenaltyRange: check(
+      'presence_penalty_range',
+      sql`${table.presencePenalty} >= -2 AND ${table.presencePenalty} <= 2`
+    ),
+  })
+)
+
+export type DBAIOptions = typeof aiOptions.$inferInsert
+export type DBAIOptionsSelect = typeof aiOptions.$inferSelect
 
 /**
  * Parts table: Stores message parts with polymorphic structure based on type field
@@ -239,11 +284,22 @@ export const messagesRelations = relations(messages, ({ one, many }) => ({
     references: [chats.id],
   }),
   parts: many(parts),
+  aiOptions: one(aiOptions, {
+    fields: [messages.id],
+    references: [aiOptions.messageId],
+  }),
 }))
 
 export const partsRelations = relations(parts, ({ one }) => ({
   message: one(messages, {
     fields: [parts.messageId],
+    references: [messages.id],
+  }),
+}))
+
+export const aiOptionsRelations = relations(aiOptions, ({ one }) => ({
+  message: one(messages, {
+    fields: [aiOptions.messageId],
     references: [messages.id],
   }),
 }))

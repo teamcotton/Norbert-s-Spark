@@ -3,12 +3,12 @@ version: '3.8'
 services:
   postgres:
     image: postgres:18.1-alpine
-    container_name: level2gym-postgres
+    container_name: norbertsSpark-postgres
     restart: unless-stopped
     
     # Network configuration for isolation
     networks:
-      - level2gym-network
+      - norbertsSpark-network
     
     ports:
       - '5432:5432'

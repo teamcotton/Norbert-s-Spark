@@ -5,7 +5,7 @@
 CREATE SCHEMA IF NOT EXISTS app;
 
 -- Set search path to include app schema
-ALTER DATABASE level2gym SET search_path TO app, public;
+ALTER DATABASE norbertsSpark SET search_path TO app, public;
 
 -- Create basic audit columns function
 CREATE OR REPLACE FUNCTION app.set_updated_at()
