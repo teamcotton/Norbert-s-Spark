@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { UserController } from '../../../src/adapters/primary/http/user.controller.js'
 import { PostgresUserRepository } from '../../../src/adapters/secondary/repositories/user.repository.js'
+import { AIRepository } from '../../../src/adapters/secondary/repositories/ai.repository.js'
 import { ResendService } from '../../../src/adapters/secondary/services/email.service.js'
 import { PinoLoggerService } from '../../../src/adapters/secondary/services/logger.service.js'
 import { RegisterUserUseCase } from '../../../src/application/use-cases/register-user.use-case.js'
@@ -57,6 +58,12 @@ vi.mock('../../../src/adapters/secondary/repositories/user.repository.js', () =>
     this.update = vi.fn()
     this.delete = vi.fn()
     this.existsByEmail = vi.fn()
+  }),
+}))
+
+vi.mock('../../../src/adapters/secondary/repositories/ai.repository.js', () => ({
+  AIRepository: vi.fn(function (this: any) {
+    this.getChatResponse = vi.fn()
   }),
 }))
 
@@ -141,6 +148,9 @@ describe('Container', () => {
       expect(typeof container.userRepository.save).toBe('function')
       expect(typeof container.userRepository.findById).toBe('function')
       expect(typeof container.userRepository.findByEmail).toBe('function')
+
+      expect(container.aiRepository).toBeDefined()
+      expect(typeof container.aiRepository.getChatResponse).toBe('function')
     })
 
     it('should initialize all use cases', () => {
@@ -367,6 +377,7 @@ describe('Container', () => {
       expect(container).toHaveProperty('emailService')
       expect(container).toHaveProperty('tokenGenerator')
       expect(container).toHaveProperty('userRepository')
+      expect(container).toHaveProperty('aiRepository')
       expect(container).toHaveProperty('registerUserUseCase')
       expect(container).toHaveProperty('userController')
     })
