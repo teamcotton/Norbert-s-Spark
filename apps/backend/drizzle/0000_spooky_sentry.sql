@@ -26,6 +26,8 @@ CREATE TABLE "ai_options" (
     CONSTRAINT "frequency_penalty_range" CHECK ("ai_options"."frequency_penalty" >= -2 AND "ai_options"."frequency_penalty" <= 2),
     CONSTRAINT "presence_penalty_range" CHECK ("ai_options"."presence_penalty" >= -2 AND "ai_options"."presence_penalty" <= 2)
 );
+COMMENT ON TABLE "ai_options" IS 'Per-message AI request options (e.g. max_tokens, temperature, penalties) stored for auditing/observability. This is intentionally separate from the higher-level AISchema in packages/shared/src/schemas/ai.ts, which models AI configuration (name, description, model) rather than per-request options.';
+COMMENT ON COLUMN "ai_options"."prompt" IS 'Full prompt text associated with a message. Stored intentionally for audit/debugging and traceability, even though it may be large. Consider normalizing or de-duplicating at the application level if storage becomes a concern.';
 --> statement-breakpoint
 CREATE TABLE "chats" (
 	"id" uuid PRIMARY KEY NOT NULL,

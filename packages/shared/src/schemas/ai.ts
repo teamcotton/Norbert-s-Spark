@@ -14,7 +14,7 @@ export const AISchema = z.object({
     .number()
     .min(-2, { message: 'presencePenalty must be at least -2' })
     .max(2, { message: 'presencePenalty must be at most 2' }),
-  createdAt: z.string().optional(),
+  createdAt: z.coerce.date(),
 })
 
 export const CreateAISchema = AISchema.pick({
@@ -51,24 +51,25 @@ export const AIRequestSchema = z.object({
   prompt: z.string().min(1, { message: 'Prompt is required' }),
 })
 
-const MessagePartSchema = z.object({
+export const MessagePartSchema = z.object({
   type: z.enum(['text', 'step-start']),
   text: z.string().optional(),
   state: z.enum(['done']).optional(),
 })
 
-const MessageSchema = z.object({
+export const MessageSchema = z.object({
   id: z.string(),
   role: z.enum(['user', 'assistant']),
   parts: z.array(MessagePartSchema),
 })
 
-export const AIReturnedResponse = z.object({
+export const AIReturnedResponseSchema = z.object({
   id: z.uuid(),
   messages: z.array(MessageSchema),
   trigger: z.string(),
 })
 
+export type AISummaryWithUsageSchemaType = z.infer<typeof AISummaryWithUsageSchema>
 export type AISchemaType = z.infer<typeof AISchema>
 export type CreateAISchemaType = z.infer<typeof CreateAISchema>
 export type UpdateAISchemaType = z.infer<typeof UpdateAISchema>
@@ -76,4 +77,9 @@ export type AISummarySchemaType = z.infer<typeof AISummarySchema>
 export type AIListSchemaType = z.infer<typeof AIListSchema>
 export type AIUsageSchemaType = z.infer<typeof AIUsageSchema>
 export type AIUsageListSchemaType = z.infer<typeof AIUsageListSchema>
-export type AIReturnedResponseType = z.infer<typeof AIReturnedResponse>
+export type AIReturnedResponseSchemaType = z.infer<typeof AIReturnedResponseSchema>
+export type AIListWithUsageSchemaType = z.infer<typeof AIListWithUsageSchema>
+export type AIModelsSchemaType = z.infer<typeof AIModelsSchema>
+export type AIRequestSchemaType = z.infer<typeof AIRequestSchema>
+export type MessagePartSchemaType = z.infer<typeof MessagePartSchema>
+export type MessageSchemaType = z.infer<typeof MessageSchema>
