@@ -60,8 +60,20 @@ vi.mock('../../../src/adapters/secondary/repositories/user.repository.js', () =>
   }),
 }))
 
+vi.mock('../../../src/adapters/secondary/repositories/ai.repository.js', () => ({
+  AIRepository: vi.fn(function (this: any) {
+    this.getChatResponse = vi.fn()
+  }),
+}))
+
 vi.mock('../../../src/application/use-cases/register-user.use-case.js', () => ({
   RegisterUserUseCase: vi.fn(function (this: any) {
+    this.execute = vi.fn()
+  }),
+}))
+
+vi.mock('../../../src/application/use-cases/get-chat.use-case.js', () => ({
+  GetChatUseCase: vi.fn(function (this: any) {
     this.execute = vi.fn()
   }),
 }))
