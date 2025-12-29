@@ -5,6 +5,7 @@ import { createFastifyApp } from '../http/fastify.config.js'
 import { RegisterUserUseCase } from '../../application/use-cases/register-user.use-case.js'
 import { GetAllUsersUseCase } from '../../application/use-cases/get-all-users.use-case.js'
 import { LoginUserUseCase } from '../../application/use-cases/login-user.use-case.js'
+import { GetChatUseCase } from '../../application/use-cases/get-chat.use-case.js'
 
 // Adapters
 import { PostgresUserRepository } from '../../adapters/secondary/repositories/user.repository.js'
@@ -68,6 +69,7 @@ export class Container {
   public readonly registerUserUseCase: RegisterUserUseCase
   public readonly getAllUsersUseCase: GetAllUsersUseCase
   public readonly loginUserUseCase: LoginUserUseCase
+  public readonly getChatUseCase: GetChatUseCase
 
   // Controllers
   public readonly userController: UserController
@@ -163,11 +165,12 @@ cd apps/backend/certs && mkcert -key-file key.pem -cert-file cert.pem \\
       this.logger,
       this.tokenGenerator
     )
+    this.getChatUseCase = new GetChatUseCase(this.aiRepository, this.logger)
 
     // Initialize controllers (primary adapters)
     this.userController = new UserController(this.registerUserUseCase, this.getAllUsersUseCase)
     this.authController = new AuthController(this.loginUserUseCase)
-    this.aiController = new AIController(this.logger)
+    this.aiController = new AIController(this.getChatUseCase)
 
     // Register routes
     this.registerRoutes()

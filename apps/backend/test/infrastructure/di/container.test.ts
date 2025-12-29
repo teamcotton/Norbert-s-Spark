@@ -73,6 +73,12 @@ vi.mock('../../../src/application/use-cases/register-user.use-case.js', () => ({
   }),
 }))
 
+vi.mock('../../../src/application/use-cases/get-chat.use-case.js', () => ({
+  GetChatUseCase: vi.fn(function (this: any) {
+    this.execute = vi.fn()
+  }),
+}))
+
 vi.mock('../../../src/adapters/primary/http/user.controller.js', () => ({
   UserController: vi.fn(function (this: any) {
     this.registerRoutes = vi.fn()
