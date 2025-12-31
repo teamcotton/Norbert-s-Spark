@@ -2,7 +2,7 @@
 import { Container } from '@mui/material'
 import React from 'react'
 
-export const Wrapper = (props: { children: React.ReactNode }) => {
+export const Wrapper = (props: Readonly<{ children: React.ReactNode }>) => {
   return (
     <Container
       maxWidth="md"

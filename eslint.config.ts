@@ -4,6 +4,7 @@ import js from '@eslint/js'
 import tseslint from '@typescript-eslint/eslint-plugin'
 import tsParser from '@typescript-eslint/parser'
 import codegen from 'eslint-plugin-codegen'
+import functionalPlugin from 'eslint-plugin-functional'
 import importPlugin from 'eslint-plugin-import'
 import jsdoc from 'eslint-plugin-jsdoc'
 import promisePlugin from 'eslint-plugin-promise'
@@ -17,6 +18,7 @@ const config: Linter.Config[] = [
     plugins: {
       '@typescript-eslint': tseslint as any,
       codegen: codegen as any,
+      functional: functionalPlugin,
       import: importPlugin,
       jsdoc,
       promise: promisePlugin,
@@ -28,6 +30,10 @@ const config: Linter.Config[] = [
       ecmaVersion: 'latest',
       sourceType: 'module',
       parser: tsParser,
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
       globals: {
         console: 'readonly',
         process: 'readonly',
@@ -49,6 +55,8 @@ const config: Linter.Config[] = [
       'import/newline-after-import': 'error',
       'import/no-duplicates': 'error',
       ...promisePlugin.configs.recommended.rules,
+      // Functional plugin disabled - too restrictive even with lite config
+      // ...functionalPlugin.configs.lite.rules,
       'security/detect-object-injection': 'warn',
       'security/detect-non-literal-regexp': 'warn',
       'security/detect-unsafe-regex': 'error',
@@ -62,6 +70,35 @@ const config: Linter.Config[] = [
       'jsdoc/check-types': 'warn',
       'jsdoc/require-param-description': 'warn',
       'jsdoc/require-returns-description': 'warn',
+    },
+  },
+  {
+    files: [
+      '**/*.test.ts',
+      '**/*.test.tsx',
+      '**/*.spec.ts',
+      '**/*.spec.tsx',
+      '**/test/**',
+      '**/tests/**',
+      '**/e2e/**',
+    ],
+    rules: {
+      'functional/no-return-void': 'off',
+      'functional/no-expression-statements': 'off',
+      'functional/functional-parameters': 'off',
+      'functional/no-class-inheritance': 'off',
+      'functional/no-classes': 'off',
+      'functional/no-this-expressions': 'off',
+      'functional/no-let': 'off',
+      'functional/no-loop-statements': 'off',
+      'functional/immutable-data': 'off',
+      'functional/prefer-immutable-types': 'off',
+      'functional/type-declaration-immutability': 'off',
+      'functional/prefer-tacit': 'off',
+      'functional/no-mixed-types': 'off',
+      'functional/no-conditional-statements': 'off',
+      'functional/no-try-statements': 'off',
+      'functional/no-throw-statements': 'off',
     },
   },
   {

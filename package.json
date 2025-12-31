@@ -31,6 +31,7 @@
     "eslint-config-turbo": "^2.7.2",
     "eslint-plugin-codegen": "^0.34.1",
     "eslint-plugin-drizzle": "^0.2.3",
+    "eslint-plugin-functional": "^9.0.2",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jsdoc": "^61.5.0",
     "eslint-plugin-playwright": "^2.4.0",

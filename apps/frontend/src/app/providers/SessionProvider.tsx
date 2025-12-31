@@ -4,8 +4,8 @@ import type { Session } from 'next-auth'
 import { SessionProvider as NextAuthSessionProvider } from 'next-auth/react'
 
 interface SessionProviderProps {
-  children: React.ReactNode
-  session?: Session | null
+  readonly children: React.ReactNode
+  readonly session?: Session | null
 }
 
 /**
@@ -19,6 +19,6 @@ interface SessionProviderProps {
  * </SessionProvider>
  * ```
  */
-export function SessionProvider({ children, session }: SessionProviderProps) {
+export function SessionProvider({ children, session }: Readonly<SessionProviderProps>) {
   return <NextAuthSessionProvider session={session}>{children}</NextAuthSessionProvider>
 }

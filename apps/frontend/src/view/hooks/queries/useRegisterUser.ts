@@ -12,7 +12,7 @@ export function useRegisterUser() {
     // Use the application-level `registerUser` in the browser so the
     // client performs a fetch to `/api/register`. This preserves the
     // observable network request shape expected by existing E2E tests.
-    mutationFn: (data: RegisterUserData) => registerUserAppAction(data),
+    mutationFn: (data: Readonly<RegisterUserData>) => registerUserAppAction(data),
     onSuccess: (result) => {
       if (result && (result as { success?: boolean }).success) {
         // Invalidate users list if needed

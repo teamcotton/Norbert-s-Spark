@@ -45,6 +45,9 @@ importers:
       eslint-plugin-drizzle:
         specifier: ^0.2.3
         version: 0.2.3(eslint@9.39.2(jiti@2.6.1))
+      eslint-plugin-functional:
+        specifier: ^9.0.2
+        version: 9.0.2(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
       eslint-plugin-import:
         specifier: ^2.32.0
         version: 2.32.0(@typescript-eslint/parser@8.50.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.2(jiti@2.6.1))
@@ -3944,6 +3947,10 @@ packages:
   deep-is@0.1.4:
     resolution: {integrity: sha512-oIPzksmTg4/MriiaYGO+okXDT7ztn/w3Eptv/+gSIdMdKsJo0u4CfYNFJPy+4SKMuCqGw2wxnA+URMg3t8a/bQ==}
 
+  deepmerge-ts@7.1.5:
+    resolution: {integrity: sha512-HOJkrhaYsweh+W+e74Yn7YStZOilkoPb6fycpwNLKzSPtruFs48nYis0zy5yJz1+ktUhHxoRDJ27RQAWLIJVJw==}
+    engines: {node: '>=16.0.0'}
+
   define-data-property@1.1.4:
     resolution: {integrity: sha512-rBMvIzlpA8v6E+SJZoo++HAYqsLrkg7MSfIinMPFhmkorw7X+dOXVJQs+QT69zGkzMyfDnIMN2Wid1+NbL3T+A==}
     engines: {node: '>= 0.4'}
@@ -4361,6 +4368,16 @@ packages:
     resolution: {integrity: sha512-BO+ymHo33IUNoJlC0rbd7HP9EwwpW4VIp49R/tWQF/d2E1K2kgTf0tCXT0v9MSiBr6gGR1LtPwMLapTKEWSg9A==}
     peerDependencies:
       eslint: '>=8.0.0'
+
+  eslint-plugin-functional@9.0.2:
+    resolution: {integrity: sha512-N8kP9HX1CJ2HrufPHLzsKNJ81O1IB25jw2mxOc1H1z3CamEu8MYTn9dOo/FPfQwsqHZVuf7wyDCBcL8r8H7N0w==}
+    engines: {node: '>=v18.18.0'}
+    peerDependencies:
+      eslint: ^9.0.0
+      typescript: '>=4.7.4'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
 
   eslint-plugin-import@2.32.0:
     resolution: {integrity: sha512-whOE1HFo/qJDyX4SnXzP4N6zOWn79WhnCUY/iDR0mPfQZO8wcYE4JClzI2oZrhBnnMUCBCHZhO6VQyoBU95mZA==}
@@ -5126,6 +5143,12 @@ packages:
 
   is-hexadecimal@2.0.1:
     resolution: {integrity: sha512-DgZQp241c8oO6cA1SbTEWiXeoxV42vlcJxgH+B3hi1AiqqKruZR3ZGF8In3fj4+/y/7rHvlOZLZtgJ/4ttYGZg==}
+
+  is-immutable-type@5.0.1:
+    resolution: {integrity: sha512-LkHEOGVZZXxGl8vDs+10k3DvP++SEoYEAJLRk6buTFi6kD7QekThV7xHS0j6gpnUCQ0zpud/gMDGiV4dQneLTg==}
+    peerDependencies:
+      eslint: '*'
+      typescript: '>=4.7.4'
 
   is-map@2.0.3:
     resolution: {integrity: sha512-1Qed0/Hr2m+YqxnM09CjA2d/i6YZNfF6R2oRAOj36eUdS6qIV/huPJNSEpKbupewFs+ZsJlxsjjPbc0/afW6Lw==}
@@ -7413,6 +7436,11 @@ packages:
     engines: {node: '>=18.12'}
     peerDependencies:
       typescript: '>=4.8.4'
+
+  ts-declaration-location@1.0.7:
+    resolution: {integrity: sha512-EDyGAwH1gO0Ausm9gV6T2nUvBgXT5kGoCMJPllOaooZ+4VvJiKBdZE7wK18N1deEowhcUptS+5GXZK8U/fvpwA==}
+    peerDependencies:
+      typescript: '>=4.0.0'
 
   ts-dedent@2.2.0:
     resolution: {integrity: sha512-q5W7tVM71e2xjHZTlgfTDoPF/SmqKG5hddq9SzR49CH2hayqRKJtQ4mtRlSxKaJlR/+9rEM+mnBHf7I2/BQcpQ==}
@@ -11778,6 +11806,8 @@ snapshots:
 
   deep-is@0.1.4: {}
 
+  deepmerge-ts@7.1.5: {}
+
   define-data-property@1.1.4:
     dependencies:
       es-define-property: 1.0.1
@@ -12299,6 +12329,20 @@ snapshots:
   eslint-plugin-drizzle@0.2.3(eslint@9.39.2(jiti@2.6.1)):
     dependencies:
       eslint: 9.39.2(jiti@2.6.1)
+
+  eslint-plugin-functional@9.0.2(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3):
+    dependencies:
+      '@typescript-eslint/utils': 8.50.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      deepmerge-ts: 7.1.5
+      escape-string-regexp: 5.0.0
+      eslint: 9.39.2(jiti@2.6.1)
+      is-immutable-type: 5.0.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      ts-api-utils: 2.1.0(typescript@5.9.3)
+      ts-declaration-location: 1.0.7(typescript@5.9.3)
+    optionalDependencies:
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - supports-color
 
   eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.50.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.2(jiti@2.6.1)):
     dependencies:
@@ -13251,6 +13295,16 @@ snapshots:
   is-hexadecimal@1.0.4: {}
 
   is-hexadecimal@2.0.1: {}
+
+  is-immutable-type@5.0.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3):
+    dependencies:
+      '@typescript-eslint/type-utils': 8.50.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      eslint: 9.39.2(jiti@2.6.1)
+      ts-api-utils: 2.1.0(typescript@5.9.3)
+      ts-declaration-location: 1.0.7(typescript@5.9.3)
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - supports-color
 
   is-map@2.0.3: {}
 
@@ -16143,6 +16197,11 @@ snapshots:
 
   ts-api-utils@2.1.0(typescript@5.9.3):
     dependencies:
+      typescript: 5.9.3
+
+  ts-declaration-location@1.0.7(typescript@5.9.3):
+    dependencies:
+      picomatch: 4.0.3
       typescript: 5.9.3
 
   ts-dedent@2.2.0: {}
