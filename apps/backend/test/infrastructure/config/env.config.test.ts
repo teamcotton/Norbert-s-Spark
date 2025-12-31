@@ -357,7 +357,106 @@ describe('EnvConfig', () => {
       expect(typeof EnvConfig.USE_HTTPS).toBe('string')
     })
   })
+  describe('API_VERSION', () => {
+    it('should be a static readonly property', async () => {
+      process.env.API_VERSION = 'v1'
+      process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
 
+      const { EnvConfig } = await import('../../../src/infrastructure/config/env.config.js')
+
+      const descriptor = Object.getOwnPropertyDescriptor(EnvConfig, 'API_VERSION')
+      expect(descriptor).toBeDefined()
+      expect(descriptor?.configurable).toBe(true)
+      expect(descriptor?.enumerable).toBe(true)
+    })
+
+    it('should use API_VERSION from environment when set', async () => {
+      process.env.API_VERSION = 'v1'
+      process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
+
+      vi.resetModules()
+      const { EnvConfig } = await import('../../../src/infrastructure/config/env.config.js')
+
+      expect(EnvConfig.API_VERSION).toBe('v1')
+    })
+
+    it('should be undefined when API_VERSION is not set (no default)', async () => {
+      delete process.env.API_VERSION
+      process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
+
+      vi.resetModules()
+      
+      // Mock dotenv to not load API_VERSION from .env file
+      vi.doMock('dotenv', () => ({
+        default: {
+          config: vi.fn(() => ({ parsed: {} }))
+        }
+      }))
+
+      const { EnvConfig } = await import('../../../src/infrastructure/config/env.config.js')
+
+      expect(EnvConfig.API_VERSION).toBeUndefined()
+      
+      vi.doUnmock('dotenv')
+    })
+
+    it('should have type string when set', async () => {
+      process.env.API_VERSION = 'v2'
+      process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
+
+      vi.resetModules()
+      const { EnvConfig } = await import('../../../src/infrastructure/config/env.config.js')
+
+      expect(typeof EnvConfig.API_VERSION).toBe('string')
+      expect(EnvConfig.API_VERSION).toBe('v2')
+    })
+
+    it('should not be obscured (plain string value)', async () => {
+      process.env.API_VERSION = 'v1'
+      process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
+
+      vi.resetModules()
+      const { EnvConfig } = await import('../../../src/infrastructure/config/env.config.js')
+
+      // API_VERSION should be a plain string, not obscured
+      expect(typeof EnvConfig.API_VERSION).toBe('string')
+      expect(EnvConfig.API_VERSION).toBe('v1')
+      // Should not have obscured behavior
+      expect(String(EnvConfig.API_VERSION)).toBe('v1')
+    })
+
+    it('should accept "v1" value', async () => {
+      process.env.API_VERSION = 'v1'
+      process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
+
+      vi.resetModules()
+      const { EnvConfig } = await import('../../../src/infrastructure/config/env.config.js')
+
+      expect(EnvConfig.API_VERSION).toBe('v1')
+    })
+
+    it('should accept "v2" value', async () => {
+      process.env.API_VERSION = 'v2'
+      process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
+
+      vi.resetModules()
+      const { EnvConfig } = await import('../../../src/infrastructure/config/env.config.js')
+
+      expect(EnvConfig.API_VERSION).toBe('v2')
+    })
+
+    it('should accept any string value for version', async () => {
+      process.env.API_VERSION = '2024.1'
+      process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
+
+      vi.resetModules()
+      const { EnvConfig } = await import('../../../src/infrastructure/config/env.config.js')
+
+      // API_VERSION is a string, so it accepts any version format
+      expect(EnvConfig.API_VERSION).toBe('2024.1')
+      expect(typeof EnvConfig.API_VERSION).toBe('string')
+    })
+  })
   describe('validate()', () => {
     it('should have DATABASE_URL validation logic', async () => {
       const { EnvConfig } = await import('../../../src/infrastructure/config/env.config.js')
@@ -478,6 +577,18 @@ describe('EnvConfig', () => {
       expect(EnvConfig.USE_HTTPS).toBeDefined()
       expect(typeof EnvConfig.USE_HTTPS).toBe('string')
       expect(EnvConfig.USE_HTTPS).toBe('false')
+    })
+
+    it('should have static API_VERSION property accessible without instantiation', async () => {
+      process.env.API_VERSION = 'v2'
+      process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
+
+      vi.resetModules()
+      const { EnvConfig } = await import('../../../src/infrastructure/config/env.config.js')
+
+      expect(EnvConfig.API_VERSION).toBeDefined()
+      expect(typeof EnvConfig.API_VERSION).toBe('string')
+      expect(EnvConfig.API_VERSION).toBe('v2')
     })
 
     it('should have static validate method accessible without instantiation', async () => {

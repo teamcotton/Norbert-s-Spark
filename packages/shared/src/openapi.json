@@ -3,7 +3,7 @@
   "info": {
     "title": "Norbert's Spark API",
     "description": "API for Norbert's Spark AI CRM application",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "contact": {
       "name": "Norbert's Spark API",
       "email": "api@example.com"
@@ -15,12 +15,20 @@
   },
   "servers": [
     {
-      "url": "http://localhost:3000",
-      "description": "Development server (HTTP)"
+      "url": "http://localhost:3001/api/v1",
+      "description": "Development server (HTTP) - API v1"
     },
     {
-      "url": "https://localhost:3000",
-      "description": "Development server (HTTPS)"
+      "url": "https://127.0.0.1:3001/api/v1",
+      "description": "Development server (HTTPS) - API v1"
+    },
+    {
+      "url": "http://localhost:3001",
+      "description": "Development server (HTTP) - Root"
+    },
+    {
+      "url": "https://127.0.0.1:3001",
+      "description": "Development server (HTTPS) - Root"
     }
   ],
   "tags": [

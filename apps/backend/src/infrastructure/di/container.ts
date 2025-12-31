@@ -186,14 +186,21 @@ cd apps/backend/certs && mkcert -key-file key.pem -cert-file cert.pem \\
    * Registers all HTTP routes from controllers with the Fastify app
    *
    * Called automatically during container initialization. Controllers register
-   * their respective endpoints with the Fastify instance.
+   * their respective endpoints with the Fastify instance under the /api/v1 prefix.
    *
    * @private
    */
   private registerRoutes(): void {
-    this.userController.registerRoutes(this.app)
-    this.authController.registerRoutes(this.app)
-    this.aiController.registerRoutes(this.app)
+    // Register all API routes under /api/v1 prefix
+    this.app.register(
+      (instance, _opts, done) => {
+        this.userController.registerRoutes(instance)
+        this.authController.registerRoutes(instance)
+        this.aiController.registerRoutes(instance)
+        done()
+      },
+      { prefix: `/api/${EnvConfig.API_VERSION}` }
+    )
   }
 
   /**

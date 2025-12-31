@@ -38,6 +38,7 @@
     "@vitest/coverage-v8": "^4.0.16",
     "jsdom": "^27.4.0",
     "redoc-cli": "^0.13.21",
+    "typescript": "^5.9.3",
     "vitest": "^4.0.16"
   }
 }

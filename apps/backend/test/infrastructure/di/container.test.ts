@@ -173,11 +173,10 @@ describe('Container', () => {
     })
 
     it('should register routes during initialization', () => {
-      Container.getInstance()
+      const container = Container.getInstance()
 
-      // The mock should have been called during construction
-      const mockInstance = vi.mocked(UserController).mock.results[0]?.value
-      expect(mockInstance.registerRoutes).toHaveBeenCalledTimes(1)
+      // Verify that app.register was called to set up the versioned routes
+      expect(container.app.register).toHaveBeenCalled()
     })
   })
 
@@ -211,8 +210,8 @@ describe('Container', () => {
     it('should inject Fastify app into controller for route registration', () => {
       const container = Container.getInstance()
 
-      const mockInstance = vi.mocked(UserController).mock.results[0]?.value
-      expect(mockInstance.registerRoutes).toHaveBeenCalledWith(container.app)
+      // Routes are registered through app.register with a prefix
+      expect(container.app.register).toHaveBeenCalled()
     })
   })
 
@@ -420,9 +419,8 @@ describe('Container', () => {
       expect(container.emailService).toBeDefined()
       expect(container.logger).toBeDefined()
 
-      // Verify routes are registered
-      const mockInstance = vi.mocked(UserController).mock.results[0]?.value
-      expect(mockInstance.registerRoutes).toHaveBeenCalledWith(container.app)
+      // Verify routes are registered through the versioned plugin
+      expect(container.app.register).toHaveBeenCalled()
     })
 
     it('should initialize all components in correct order', () => {
