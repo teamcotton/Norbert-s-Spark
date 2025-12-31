@@ -167,9 +167,10 @@ export class AIController {
         // 'messages' is the full message history, including the original messages
         // Includes original user message and assistant's response with all parts
         // Ideal for persisting entire conversations
-        this.logger.info('toUIMessageStreamResponse.onFinish')
-        this.logger.info('  messages')
-        this.logger.info(JSON.stringify(messages), { depth: null })
+        this.logger.info('toUIMessageStreamResponse.onFinish', {
+          chatId: id,
+          messageCount: Array.isArray(messages) ? messages.length : undefined,
+        })
 
         // Single message
         // Just the newly generated assistant message
