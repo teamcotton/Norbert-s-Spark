@@ -34,6 +34,7 @@ export class AIController {
     return reply.status(200).send({
       id,
       messages,
+      data,
     })
   }
 }

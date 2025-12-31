@@ -71,5 +71,5 @@ export class HeartOfDarknessTool {
   }
 }
 
-export type getLocationInput = InferToolInput<ReturnType<HeartOfDarknessTool['getTool']>>
-export type getLocationOutput = InferToolOutput<ReturnType<HeartOfDarknessTool['getTool']>>
+export type HeartOfDarknessInput = InferToolInput<ReturnType<HeartOfDarknessTool['getTool']>>
+export type HeartOfDarknessOutput = InferToolOutput<ReturnType<HeartOfDarknessTool['getTool']>>

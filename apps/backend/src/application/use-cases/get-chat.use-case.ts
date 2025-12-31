@@ -3,7 +3,6 @@ import type { LoggerPort } from '../ports/logger.port.js'
 import type { ChatResponseResult } from '../../adapters/secondary/repositories/ai.repository.js'
 import { Uuid7Util } from '../../shared/utils/uuid7.util.js'
 import { ValidationException } from '../../shared/exceptions/validation.exception.js'
-
 /**
  * Use case for retrieving chat messages for a specific user
  *
