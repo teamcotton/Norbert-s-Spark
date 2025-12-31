@@ -14,10 +14,10 @@ export class CreateChatUseCase {
     private readonly aiRepository: AIRepository
   ) {}
   //(id: string, initialMessages: UIMessage[] = []
-  async execute(user_id: string, messages: UIMessage[] = []): Promise<CreateChatResult> {
-    this.logger.info('Appending chat messages', { user_id, messageCount: messages.length })
+  async execute(userId: string, messages: UIMessage[] = []): Promise<CreateChatResult> {
+    this.logger.info('Appending chat messages', { userId, messageCount: messages.length })
 
-    const chatId = await this.aiRepository.createChat(user_id, messages)
+    const chatId = await this.aiRepository.createChat(userId, messages)
 
     // This is a placeholder return value
     return {
