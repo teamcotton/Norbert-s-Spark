@@ -28,3 +28,17 @@ export type JwtUserClaims = {
   email: string
   roles?: string[]
 }
+
+export namespace DB {
+  // Types for our persistence layer
+  export interface Chat {
+    id: string
+    messages: UIMessage[]
+    createdAt: string
+    updatedAt: string
+  }
+
+  export interface PersistenceData {
+    chats: DB.Chat[]
+  }
+}

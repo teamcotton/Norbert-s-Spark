@@ -50,7 +50,25 @@ export class GetChatUseCase {
    * }
    * ```
    */
-  async execute(userId: string): Promise<ChatResponseResult | null> {
+  async execute(
+    userId: string,
+    messages: {
+      id: string
+      role: 'user' | 'assistant'
+      parts: {
+        type:
+          | 'text'
+          | 'reasoning'
+          | 'file'
+          | 'source_url'
+          | 'source_document'
+          | 'step-start'
+          | 'data'
+        text?: string | undefined
+        state?: 'done' | undefined
+      }[]
+    }[]
+  ): Promise<ChatResponseResult | null> {
     this.logger.info('Getting chat for user', { userId })
 
     if (!Uuid7Util.isValidUUID(userId)) {
@@ -64,7 +82,7 @@ export class GetChatUseCase {
       throw new ValidationException(`Invalid userId provided: expected v7, got ${uuidVersion}`)
     }
 
-    // Retrieve chat data from repository
+    // Retrieve chat data from DB
     const chatData = await this.aiService.getChatResponse(userId)
 
     if (chatData) {

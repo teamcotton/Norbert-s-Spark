@@ -6,6 +6,7 @@ import { RegisterUserUseCase } from '../../application/use-cases/register-user.u
 import { GetAllUsersUseCase } from '../../application/use-cases/get-all-users.use-case.js'
 import { LoginUserUseCase } from '../../application/use-cases/login-user.use-case.js'
 import { GetChatUseCase } from '../../application/use-cases/get-chat.use-case.js'
+import { CreateChatUseCase } from '../../application/use-cases/create-chat.use-case.js'
 
 // Adapters
 import { PostgresUserRepository } from '../../adapters/secondary/repositories/user.repository.js'
@@ -70,6 +71,7 @@ export class Container {
   public readonly getAllUsersUseCase: GetAllUsersUseCase
   public readonly loginUserUseCase: LoginUserUseCase
   public readonly getChatUseCase: GetChatUseCase
+  private readonly createChatUseCase: CreateChatUseCase
 
   // Controllers
   public readonly userController: UserController
@@ -166,6 +168,7 @@ cd apps/backend/certs && mkcert -key-file key.pem -cert-file cert.pem \\
       this.tokenGenerator
     )
     this.getChatUseCase = new GetChatUseCase(this.aiRepository, this.logger)
+    this.createChatUseCase = new CreateChatUseCase(this.logger, this.aiRepository)
 
     // Initialize controllers (primary adapters)
     this.userController = new UserController(this.registerUserUseCase, this.getAllUsersUseCase)
