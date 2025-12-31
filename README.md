@@ -2,7 +2,7 @@
 
 Nobert's Spark ( named after Norbert Wiener, the father of cybernetics) is a cutting-edge AI tools CRM designed to help users manage and leverage AI technologies effectively. Built with modern web technologies, it offers a seamless experience for integrating AI capabilities into everyday workflows.
 
-It is hihgly optimized for Next.js 16 and React 19, utilizing the latest features of these frameworks to deliver a fast and responsive user interface. The application employs Material UI 7 with Emotion for styling, ensuring a funtional look.
+It is hihgly optimized for Next.js 16 and React 19, utilizing the latest features of these frameworks to deliver a fast and responsive user interface. The application employs Material UI 7 with Emotion for styling, functional and cohesive look and feel..
 
 The API is documented in the backend folder using Fastify and TypeScript, providing a robust and scalable backend solution. The database layer is powered by PostgreSQL 18.1, managed through Docker for easy setup and deployment.
 
@@ -18,13 +18,12 @@ The pattern promotes testability, scalability, and ease of understanding, making
 
 For ease of working with AI tools, there are three parts to the codebase"
 
-- The architecture is written in text fiels throughout the codebase
+- The architecture is written in text fields throughout the codebase
 - There are extensive JSDocs comments. Previously, it was best practice to write JSDocs comments only for JavaScript code, but with the rise of TypeScript, they have become equally important for TypeScript codebases. They provide valuable context and explanations for complex logic, making it easier for AI to understand and maintain the code.
-- There is a highly opionated code quality pipeline including ESLint, Prettier, and TypeScript configurations to ensure consistent code style and quality across the project.
-- There is a strong empthasis on testing, with unit tests using Vitest and end-to-end tests using Playwright to ensure the reliability and stability of the application.
--
+- There is a highly opinionated code quality pipeline including ESLint, Prettier, and TypeScript configurations to ensure consistent code style and quality across the project.
+- There is a strong emphasis on testing, with unit tests using Vitest and end-to-end tests using Playwright to ensure the reliability and stability of the application.
 
-[Tech Stack](#tech-stack)
+- [Tech Stack](#tech-stack)
 
 The tech stack choices are listed as belowe.
 
