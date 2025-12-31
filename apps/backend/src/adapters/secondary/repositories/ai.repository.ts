@@ -34,7 +34,28 @@ export class AIRepository implements AIServicePort {
         role: msg.role,
       }))
 
-      await db.insert(messages).values(messageRecords)
+      // Insert messages and get their IDs back so we can link parts
+      const insertedMessages = await db.insert(messages).values(messageRecords).returning()
+
+      // Insert message parts linked to the corresponding messages
+      const partsRecords = insertedMessages.flatMap((insertedMessage, index) => {
+        const uiMessage = initialMessages[index]
+
+        // UIMessage.content is typically an array of structured parts (e.g. { type: 'text', text: string })
+        const content = Array.isArray((uiMessage as any).content) ? (uiMessage as any).content : []
+
+        return content
+          .filter((part: any) => part && typeof part.type === 'string' && typeof part.text === 'string')
+          .map((part: any) => ({
+            messageId: insertedMessage.id,
+            type: part.type,
+            text: part.text,
+          }))
+      })
+
+      if (partsRecords.length > 0) {
+        await db.insert(parts).values(partsRecords)
+      }
     }
 
     return chatId
