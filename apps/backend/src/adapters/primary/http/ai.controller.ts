@@ -1,0 +1,55 @@
+import type { LoggerPort } from '../../../application/ports/logger.port.js'
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
+import type { GetChatUseCase } from '../../../application/use-cases/get-chat.use-case.js'
+import { AIReturnedResponseSchema } from '@norberts-spark/shared'
+
+import { z } from 'zod'
+
+export class AIController {
+  constructor(
+    private readonly getChatUseCase: GetChatUseCase,
+    private readonly logger: LoggerPort
+  ) {}
+
+  registerRoutes(app: FastifyInstance): void {
+    app.post('/ai/chat', this.chat.bind(this))
+  }
+
+  async chat(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+    let parsed
+    try {
+      const body = request.body
+      parsed = AIReturnedResponseSchema.parse(body)
+      this.logger.debug('Parsed AI chat request body', { parsed })
+    } catch (e) {
+      return reply.status(400).send({
+        error: 'Invalid request body',
+        details: e instanceof z.ZodError ? e.issues : e,
+      })
+    }
+    const { messages, id } = parsed
+
+    const data = await this.getChatUseCase.execute(id)
+
+    return reply.status(200).send({
+      id,
+      messages,
+      data,
+    })
+  }
+}
+
+/**
+ * const UIMessageSchema = z.object({
+ *     id: z.string(),
+ *     role: z.string(),
+ *     content: z.string().optional(),
+ *     name: z.string().optional(),
+ *     parts: z.array(z.any()).optional(),
+ *     trigger: z.string().optional(),
+ *   })
+ *   const RequestBodySchema = z.object({
+ *     messages: z.array(UIMessageSchema),
+ *     id: z.string(),
+ *   })
+ */

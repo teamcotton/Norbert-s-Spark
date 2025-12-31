@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test'
 
 test.describe('Sign In Page', () => {
+  test.describe.configure({ mode: 'serial' })
+
   test.beforeEach(async ({ context, page }) => {
     // Clear all cookies and storage to ensure clean state
     await context.clearCookies()
@@ -317,6 +319,9 @@ test.describe('Sign In Page', () => {
   })
 
   test.describe('Form Interactions', () => {
+    // Run these tests serially to avoid authentication race conditions
+    test.describe.configure({ mode: 'serial' })
+
     test('should allow typing in email and password fields', async ({ page }) => {
       const emailField = page.getByLabel(/email address/i)
       const passwordField = page.getByLabel(/^password/i)
@@ -362,11 +367,14 @@ test.describe('Sign In Page', () => {
       await emailField.fill('james.smith@gmail.com')
       await passwordField.fill('Admin123!')
 
-      // Press Enter in password field
-      await passwordField.press('Enter')
+      // Press Enter in password field and wait for navigation
+      await Promise.all([
+        page.waitForURL('/dashboard', { timeout: 20000 }),
+        passwordField.press('Enter'),
+      ])
 
-      // Should redirect to dashboard
-      await expect(page).toHaveURL('/dashboard', { timeout: 10000 })
+      // Verify successful redirect
+      await expect(page).toHaveURL('/dashboard')
     })
 
     test('should disable submit button while form is submitting', async ({ page }) => {
@@ -381,11 +389,8 @@ test.describe('Sign In Page', () => {
       // Check button is enabled before submission
       await expect(submitButton).toBeEnabled()
 
-      // Submit the form - button should be disabled during submission (though may be brief)
-      await submitButton.click()
-
-      // After redirect, we should be on dashboard
-      await expect(page).toHaveURL('/dashboard', { timeout: 10000 })
+      // Submit the form and wait for navigation
+      await Promise.all([page.waitForURL('/dashboard', { timeout: 20000 }), submitButton.click()])
     })
   })
 

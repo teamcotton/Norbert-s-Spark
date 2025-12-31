@@ -5,14 +5,17 @@ import { createFastifyApp } from '../http/fastify.config.js'
 import { RegisterUserUseCase } from '../../application/use-cases/register-user.use-case.js'
 import { GetAllUsersUseCase } from '../../application/use-cases/get-all-users.use-case.js'
 import { LoginUserUseCase } from '../../application/use-cases/login-user.use-case.js'
+import { GetChatUseCase } from '../../application/use-cases/get-chat.use-case.js'
 
 // Adapters
 import { PostgresUserRepository } from '../../adapters/secondary/repositories/user.repository.js'
+import { AIRepository } from '../../adapters/secondary/repositories/ai.repository.js'
 import { ResendService } from '../../adapters/secondary/services/email.service.js'
 import { PinoLoggerService } from '../../adapters/secondary/services/logger.service.js'
 import { JwtTokenGeneratorService } from '../../adapters/secondary/services/jwt-token-generator.service.js'
 import { UserController } from '../../adapters/primary/http/user.controller.js'
 import { AuthController } from '../../adapters/primary/http/auth.controller.js'
+import { AIController } from '../../adapters/primary/http/ai.controller.js'
 
 import { EnvConfig } from '../config/env.config.js'
 import { fileURLToPath } from 'node:url'
@@ -26,7 +29,7 @@ import { readFileSync } from 'node:fs'
  * in the correct order:
  * 1. Infrastructure (logger, Fastify app with optional HTTPS)
  * 2. Services (email, token generation)
- * 3. Repositories (user data access)
+ * 3. Repositories (user data access, AI data access)
  * 4. Use cases (application logic)
  * 5. Controllers (HTTP adapters)
  * 6. Route registration
@@ -57,6 +60,7 @@ export class Container {
 
   // Repositories
   public readonly userRepository: PostgresUserRepository
+  public readonly aiRepository: AIRepository
 
   // Domain Services
   // public readonly workoutCalculator: WorkoutCalculator
@@ -65,10 +69,12 @@ export class Container {
   public readonly registerUserUseCase: RegisterUserUseCase
   public readonly getAllUsersUseCase: GetAllUsersUseCase
   public readonly loginUserUseCase: LoginUserUseCase
+  public readonly getChatUseCase: GetChatUseCase
 
   // Controllers
   public readonly userController: UserController
   public readonly authController: AuthController
+  public readonly aiController: AIController
 
   /**
    * Private constructor to enforce Singleton pattern
@@ -141,6 +147,7 @@ cd apps/backend/certs && mkcert -key-file key.pem -cert-file cert.pem \\
 
     // Initialize repositories (secondary adapters)
     this.userRepository = new PostgresUserRepository()
+    this.aiRepository = new AIRepository()
 
     // Initialize domain services
     // this.workoutCalculator = new WorkoutCalculator()
@@ -158,10 +165,12 @@ cd apps/backend/certs && mkcert -key-file key.pem -cert-file cert.pem \\
       this.logger,
       this.tokenGenerator
     )
+    this.getChatUseCase = new GetChatUseCase(this.aiRepository, this.logger)
 
     // Initialize controllers (primary adapters)
     this.userController = new UserController(this.registerUserUseCase, this.getAllUsersUseCase)
     this.authController = new AuthController(this.loginUserUseCase)
+    this.aiController = new AIController(this.getChatUseCase, this.logger)
 
     // Register routes
     this.registerRoutes()
@@ -178,6 +187,7 @@ cd apps/backend/certs && mkcert -key-file key.pem -cert-file cert.pem \\
   private registerRoutes(): void {
     this.userController.registerRoutes(this.app)
     this.authController.registerRoutes(this.app)
+    this.aiController.registerRoutes(this.app)
   }
 
   /**

@@ -60,8 +60,20 @@ vi.mock('../../../src/adapters/secondary/repositories/user.repository.js', () =>
   }),
 }))
 
+vi.mock('../../../src/adapters/secondary/repositories/ai.repository.js', () => ({
+  AIRepository: vi.fn(function (this: any) {
+    this.getChatResponse = vi.fn()
+  }),
+}))
+
 vi.mock('../../../src/application/use-cases/register-user.use-case.js', () => ({
   RegisterUserUseCase: vi.fn(function (this: any) {
+    this.execute = vi.fn()
+  }),
+}))
+
+vi.mock('../../../src/application/use-cases/get-chat.use-case.js', () => ({
+  GetChatUseCase: vi.fn(function (this: any) {
     this.execute = vi.fn()
   }),
 }))
@@ -141,6 +153,9 @@ describe('Container', () => {
       expect(typeof container.userRepository.save).toBe('function')
       expect(typeof container.userRepository.findById).toBe('function')
       expect(typeof container.userRepository.findByEmail).toBe('function')
+
+      expect(container.aiRepository).toBeDefined()
+      expect(typeof container.aiRepository.getChatResponse).toBe('function')
     })
 
     it('should initialize all use cases', () => {
@@ -367,6 +382,7 @@ describe('Container', () => {
       expect(container).toHaveProperty('emailService')
       expect(container).toHaveProperty('tokenGenerator')
       expect(container).toHaveProperty('userRepository')
+      expect(container).toHaveProperty('aiRepository')
       expect(container).toHaveProperty('registerUserUseCase')
       expect(container).toHaveProperty('userController')
     })
