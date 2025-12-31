@@ -385,18 +385,18 @@ describe('EnvConfig', () => {
       process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
 
       vi.resetModules()
-      
+
       // Mock dotenv to not load API_VERSION from .env file
       vi.doMock('dotenv', () => ({
         default: {
-          config: vi.fn(() => ({ parsed: {} }))
-        }
+          config: vi.fn(() => ({ parsed: {} })),
+        },
       }))
 
       const { EnvConfig } = await import('../../../src/infrastructure/config/env.config.js')
 
       expect(EnvConfig.API_VERSION).toBeUndefined()
-      
+
       vi.doUnmock('dotenv')
     })
 
