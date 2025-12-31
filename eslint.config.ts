@@ -6,6 +6,7 @@ import tsParser from '@typescript-eslint/parser'
 import codegen from 'eslint-plugin-codegen'
 import importPlugin from 'eslint-plugin-import'
 import jsdoc from 'eslint-plugin-jsdoc'
+import promisePlugin from 'eslint-plugin-promise'
 import security from 'eslint-plugin-security'
 import simpleImportSort from 'eslint-plugin-simple-import-sort'
 import sortDestructureKeys from 'eslint-plugin-sort-destructure-keys'
@@ -18,6 +19,7 @@ const config: Linter.Config[] = [
       codegen: codegen as any,
       import: importPlugin,
       jsdoc,
+      promise: promisePlugin,
       security,
       'simple-import-sort': simpleImportSort,
       'sort-destructure-keys': sortDestructureKeys,
@@ -46,6 +48,7 @@ const config: Linter.Config[] = [
       'import/first': 'error',
       'import/newline-after-import': 'error',
       'import/no-duplicates': 'error',
+      ...promisePlugin.configs.recommended.rules,
       'security/detect-object-injection': 'warn',
       'security/detect-non-literal-regexp': 'warn',
       'security/detect-unsafe-regex': 'error',
