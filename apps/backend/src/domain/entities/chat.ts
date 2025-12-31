@@ -15,18 +15,62 @@ export class Chat {
     private readonly updatedAt: Date = new Date()
   ) {}
 
+  /**
+   * Gets the chat's unique identifier.
+   *
+   * @returns The chat's UUID
+   *
+   * @example
+   * ```typescript
+   * const chat = new Chat('user-123')
+   * const id = chat.getId() // '01234567-89ab-cdef-0123-456789abcdef'
+   * ```
+   */
   getId(): string {
     return this.id
   }
 
+  /**
+   * Gets the user ID associated with this chat.
+   *
+   * @returns The user's UUID who owns this chat
+   *
+   * @example
+   * ```typescript
+   * const chat = new Chat('user-123')
+   * const userId = chat.getUserId() // 'user-123'
+   * ```
+   */
   getUserId(): string {
     return this.user_id
   }
 
+  /**
+   * Gets the chat's creation timestamp.
+   *
+   * @returns The date when the chat was created
+   *
+   * @example
+   * ```typescript
+   * const chat = new Chat('user-123')
+   * const createdAt = chat.getCreatedAt() // Date object
+   * ```
+   */
   getCreatedAt(): Date {
     return this.createdAt
   }
 
+  /**
+   * Gets the chat's last update timestamp.
+   *
+   * @returns The date when the chat was last updated
+   *
+   * @example
+   * ```typescript
+   * const chat = new Chat('user-123')
+   * const updatedAt = chat.getUpdatedAt() // Date object
+   * ```
+   */
   getUpdatedAt(): Date {
     return this.updatedAt
   }
