@@ -39,7 +39,7 @@ export class AIController {
    * @param reply
    */
   async chat(request: FastifyRequest, reply: FastifyReply) {
-    this.logger.debug('Sending message to chat')
+    this.logger.debug('Received chat request')
     let parsed
     try {
       const body = request.body
