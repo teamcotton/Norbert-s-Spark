@@ -218,9 +218,9 @@ test.describe('Chat Interaction', () => {
     const chatInput = page.getByTestId('chat-text-input').locator('textarea').first()
     await chatInput.press('Enter')
 
-    // Wait for potential message to appear (it shouldn't)
-    // eslint-disable-next-line playwright/no-wait-for-timeout
-    await page.waitForTimeout(1000)
+    // Verify that the empty state is still visible (no message was sent)
+    const emptyState = page.getByTestId('chat-text-output-empty')
+    await expect(emptyState).toBeVisible()
 
     // Verify no "User:" message was added
     const userMessages = page.locator('text=/^User:/')
