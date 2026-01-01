@@ -37,7 +37,8 @@ export function useAIChat({ id }: UseAIChatProps = {}) {
   const disabled = !id
 
   const handleNewChat = () => {
-    router.push('/ai')
+    const newId = uuidv7()
+    router.push(`/ai/${newId}`)
   }
 
   const { messages, sendMessage, stop } = useChat({
