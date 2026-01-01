@@ -28,13 +28,19 @@ const ALLOWED_FILE_TYPES = [
 ]
 
 interface UseAIChatProps {
-  id: string
+  id?: string
 }
 
-export function useAIChat({ id }: UseAIChatProps) {
+export function useAIChat({ id }: UseAIChatProps = {}) {
   const router = useRouter()
 
-  const { messages, sendMessage } = useChat({
+  const disabled = !id
+
+  const handleNewChat = () => {
+    router.push('/ai')
+  }
+
+  const { messages, sendMessage, stop } = useChat({
     id: id || uuidv7(),
     transport: new DefaultChatTransport({
       api: process.env.NEXT_PUBLIC_POST_AI_CALLBACK_URL,
@@ -43,6 +49,10 @@ export function useAIChat({ id }: UseAIChatProps) {
       logger.error('Chat transport error', error)
     },
   })
+
+  if (disabled) {
+    stop().catch(console.error)
+  }
 
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -117,10 +127,6 @@ export function useAIChat({ id }: UseAIChatProps) {
     setMobileOpen(!mobileOpen)
   }
 
-  const handleNewChat = () => {
-    router.push('/ai')
-  }
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value)
   }
@@ -138,6 +144,7 @@ export function useAIChat({ id }: UseAIChatProps) {
     errorMessage,
     mobileOpen,
     messagesEndRef,
+    disabled,
 
     // Handlers
     handleSubmit,

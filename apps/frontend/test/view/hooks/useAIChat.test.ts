@@ -61,6 +61,7 @@ describe('useAIChat', () => {
     ;(useChat as Mock).mockReturnValue({
       messages: mockMessages,
       sendMessage: mockSendMessage,
+      stop: vi.fn().mockResolvedValue(undefined),
     })
     ;(fileToDataURL as Mock).mockResolvedValue('data:image/png;base64,abc123')
   })
@@ -108,6 +109,18 @@ describe('useAIChat', () => {
       renderHook(() => useAIChat({ id: 'test-id' }))
 
       expect(useRouter).toHaveBeenCalled()
+    })
+
+    it('should set disabled to false when id is provided', () => {
+      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+
+      expect(result.current.disabled).toBe(false)
+    })
+
+    it('should set disabled to true when no id is provided', () => {
+      const { result } = renderHook(() => useAIChat())
+
+      expect(result.current.disabled).toBe(true)
     })
   })
 
