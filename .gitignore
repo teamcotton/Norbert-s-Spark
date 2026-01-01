@@ -180,3 +180,4 @@ playwright/.cache/
 apps/frontend/certificates/*
 # Ignore local e2e test DB config
 apps/frontend/e2e/.test-db-config.json
+.DS_Store
