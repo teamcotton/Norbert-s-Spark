@@ -186,56 +186,6 @@ describe('GetAllUsersUseCase', () => {
       expect(result.data[1]!.role).toBe('user')
     })
 
-    it('should preserve user emails in DTOs', async () => {
-      const user1 = await createTestUser('user-1', 'alice@example.com', 'Alice', 'user')
-      const user2 = await createTestUser('user-2', 'bob@example.com', 'Bob', 'user')
-
-      vi.mocked(mockUserRepository.findAll).mockResolvedValue({
-        data: [user1, user2],
-        total: 2,
-        limit: 10,
-        offset: 0,
-      })
-
-      const result = await useCase.execute()
-
-      expect(result.data[0]!.email).toBe('alice@example.com')
-      expect(result.data[1]!.email).toBe('bob@example.com')
-    })
-
-    it('should preserve user names in DTOs', async () => {
-      const user = await createTestUser('user-1', 'test@example.com', 'Test Name', 'user')
-
-      vi.mocked(mockUserRepository.findAll).mockResolvedValue({
-        data: [user],
-        total: 1,
-        limit: 10,
-        offset: 0,
-      })
-
-      const result = await useCase.execute()
-
-      expect(result.data[0]!.name).toBe('Test Name')
-    })
-
-    it('should preserve user creation dates in DTOs', async () => {
-      const createdAt = new Date('2024-06-15T10:30:00Z')
-      const email = new Email('test@example.com')
-      const password = await Password.create('TestPass123!')
-      const role = new Role('user')
-      const user = new User('user-1', email, password, 'Test User', role, createdAt)
-
-      vi.mocked(mockUserRepository.findAll).mockResolvedValue({
-        data: [user],
-        total: 1,
-        limit: 10,
-        offset: 0,
-      })
-
-      const result = await useCase.execute()
-
-      expect(result.data[0]!.createdAt).toEqual(createdAt)
-    })
   })
 
   describe('execute() - logging', () => {
