@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     // Get the session to access the JWT token
     const session = await getServerSession(authOptions)
 
-    if (!session?.accessToken) {
+    if (!session) {
       return Response.json(
         {
           success: false,
