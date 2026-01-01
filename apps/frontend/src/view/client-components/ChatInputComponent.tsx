@@ -54,6 +54,8 @@ export const ChatInput = ({
         onChange={onChange}
         placeholder="Type your message..."
         disabled={isLoading || disabled}
+        // eslint-disable-next-line jsx-a11y/no-autofocus
+        autoFocus={!disabled}
         variant="outlined"
         size="small"
         data-testid="chat-text-input"
@@ -70,9 +72,11 @@ export const ChatInput = ({
           color="default"
           disabled={isLoading || disabled}
           sx={{ alignSelf: 'flex-end' }}
+          data-testid="file-upload-button"
         >
           <AttachFileIcon />
           <input
+            data-testid="file-input"
             type="file"
             hidden
             onChange={(e) => onFileSelect(e.target.files?.[0] || null)}
@@ -85,6 +89,7 @@ export const ChatInput = ({
         color="primary"
         disabled={!input.trim() || isLoading || disabled}
         sx={{ alignSelf: 'flex-end' }}
+        data-testid="send-button"
       >
         <SendIcon />
       </IconButton>
