@@ -83,8 +83,15 @@ export class AIController {
 
     const logger = this.logger
 
+    if (!EnvConfig.MODEL_NAME) {
+      this.logger.error('MODEL_NAME environment variable is not configured')
+      return reply
+        .status(500)
+        .send(FastifyUtil.createResponse('AI service configuration error', 500))
+    }
+
     const result = streamText({
-      model: google(EnvConfig.MODEL_NAME as string),
+      model: google(EnvConfig.MODEL_NAME),
       messages: convertToModelMessages(messages as UIMessage[]),
       system: ` ${SYSTEM_PROMPT}
       You have access to the following tools:
