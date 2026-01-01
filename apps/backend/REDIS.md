@@ -2,12 +2,12 @@
 
 ## Overview
 
-This guide explains how to integrate Redis as a caching and session management solution into the existing backend architecture, following the Clean Architecture and Domain-Driven Design principles already established in the project.
+This guide explains how to integrate Redis as a caching and session management solution into the existing backend architecture, following the backend's Hexagonal Architecture (Ports & Adapters pattern) and the overall project conventions already established in the project.
 
 ## Prerequisites
 
 - Docker installed (for running Redis locally)
-- Understanding of the backend's Clean Architecture structure
+- Understanding of the backend's Hexagonal Architecture (Ports & Adapters) structure
 - Familiarity with the existing ports and adapters pattern
 
 ---
