@@ -5,6 +5,7 @@ import { createLogger } from '@/adapters/secondary/services/logger.service.js'
 import type { PaginatedUsersResponse } from '@/domain/user/user.js'
 import { createLogger } from '@/infrastructure/logging/logger.js'
 import { authOptions } from '@/lib/auth-config.js'
+import { createLogger } from '@/infrastructure/logging/logger.js'
 import { getAuthToken } from '@/lib/auth.js'
 
 const logger = createLogger({ prefix: 'UsersAPI' })
