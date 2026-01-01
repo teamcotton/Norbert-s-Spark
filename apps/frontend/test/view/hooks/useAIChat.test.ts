@@ -122,6 +122,16 @@ describe('useAIChat', () => {
 
       expect(result.current.disabled).toBe(true)
     })
+
+    it('should call useChat with undefined id when no id is provided', () => {
+      renderHook(() => useAIChat())
+
+      expect(useChat).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: undefined,
+        })
+      )
+    })
   })
 
   describe('handleInputChange', () => {

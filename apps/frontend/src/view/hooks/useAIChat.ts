@@ -42,7 +42,7 @@ export function useAIChat({ id }: UseAIChatProps = {}) {
   }
 
   const { messages, sendMessage, stop } = useChat({
-    id: id || uuidv7(),
+    id: id,
     transport: new DefaultChatTransport({
       api: process.env.NEXT_PUBLIC_POST_AI_CALLBACK_URL,
     }),
