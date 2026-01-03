@@ -135,7 +135,7 @@ describe('ChatId Value Object', () => {
 
     it('should maintain type brand for compile-time safety', () => {
       const chatIdObj = new ChatId(validUuid)
-      chatIdObj.getValue() as ChatIdType<string>
+      const chatId = chatIdObj.getValue() as ChatIdType<string>
 
       expect(chatId).toBe(validUuid)
       // This test verifies that the branded type works at compile-time
