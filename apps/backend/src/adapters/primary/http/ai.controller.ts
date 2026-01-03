@@ -72,7 +72,9 @@ export class AIController {
     }
 
     // Convert string id to ChatIdType branded type
-    const chatId = new ChatId(id) as ChatIdType
+    const chatId = new ChatId(id).getValue()
+
+    this.logger.debug(`chatId: ${chatId}`)
 
     const chat = await this.getChatUseCase.execute(userId, messages)
 
