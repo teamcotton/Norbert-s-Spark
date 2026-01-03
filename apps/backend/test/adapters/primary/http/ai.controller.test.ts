@@ -94,7 +94,7 @@ describe('AIController', () => {
       params: {},
       query: {},
       user: {
-        sub: new UserId(uuidv7()) as UserIdType,
+        sub: new UserId(uuidv7()).getValue(),
         email: 'user@example.com',
       },
     } as any
@@ -282,7 +282,7 @@ describe('AIController', () => {
           trigger: 'user-input',
         }
         mockRequest.user = {
-          sub: new UserId(userId) as UserIdType,
+          sub: new UserId(userId).getValue(),
           email: 'user@example.com',
         }
 
@@ -294,14 +294,11 @@ describe('AIController', () => {
 
         await controller.chat(mockRequest, mockReply)
 
-        expect(mockGetChatUseCase.execute).toHaveBeenCalledWith(
-          expect.objectContaining({ value: userId }),
-          [
-            expect.objectContaining({ id: '1', role: 'user' }),
-            expect.objectContaining({ id: '2', role: 'assistant' }),
-            expect.objectContaining({ id: '3', role: 'user' }),
-          ]
-        )
+        expect(mockGetChatUseCase.execute).toHaveBeenCalledWith(userId, [
+          expect.objectContaining({ id: '1', role: 'user' }),
+          expect.objectContaining({ id: '2', role: 'assistant' }),
+          expect.objectContaining({ id: '3', role: 'user' }),
+        ])
         expect(mockAppendChatUseCase.execute).toHaveBeenCalledWith(chatId, [
           expect.objectContaining({ id: '3', role: 'user' }),
         ])
@@ -316,7 +313,7 @@ describe('AIController', () => {
           trigger: 'user-input',
         }
         mockRequest.user = {
-          sub: new UserId(userId) as UserIdType,
+          sub: new UserId(userId).getValue(),
           email: 'user@example.com',
         }
 
@@ -324,10 +321,9 @@ describe('AIController', () => {
 
         await controller.chat(mockRequest, mockReply)
 
-        expect(mockGetChatUseCase.execute).toHaveBeenCalledWith(
-          expect.objectContaining({ value: userId }),
-          [expect.objectContaining({ id: '1', role: 'user' })]
-        )
+        expect(mockGetChatUseCase.execute).toHaveBeenCalledWith(userId, [
+          expect.objectContaining({ id: '1', role: 'user' }),
+        ])
       })
 
       it('should log debug message when sending to chat', async () => {
@@ -364,7 +360,7 @@ describe('AIController', () => {
           trigger: 'user-input',
         }
         mockRequest.user = {
-          sub: new UserId(uuidv7()) as UserIdType,
+          sub: new UserId(uuidv7()).getValue(),
           email: 'user@example.com',
         }
 

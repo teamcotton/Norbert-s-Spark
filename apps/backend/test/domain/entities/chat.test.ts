@@ -11,7 +11,7 @@ describe('Chat Entity', () => {
   let testChat: Chat
 
   beforeEach(() => {
-    testUserId = new UserId(uuidv7()) as UserIdType
+    testUserId = new UserId(uuidv7()).getValue()
     testChatId = new ChatId(uuidv7()).getValue()
     testChat = new Chat(testUserId, testChatId)
   })
@@ -24,7 +24,7 @@ describe('Chat Entity', () => {
     })
 
     it('should accept userId and id parameters', () => {
-      const customUserId = new UserId(uuidv7()) as UserIdType
+      const customUserId = new UserId(uuidv7()).getValue()
       const customChatId = new ChatId(uuidv7()).getValue()
       const chat = new Chat(customUserId, customChatId)
 
@@ -55,7 +55,7 @@ describe('Chat Entity', () => {
     })
 
     it('should return the custom id when provided', () => {
-      const customUserId = new UserId(uuidv7()) as UserIdType
+      const customUserId = new UserId(uuidv7()).getValue()
       const customChatId = new ChatId(uuidv7()).getValue()
       const chat = new Chat(customUserId, customChatId)
 
@@ -67,7 +67,7 @@ describe('Chat Entity', () => {
     it('should return the user id', () => {
       const userId = testChat.getUserId()
       expect(userId).toBe(testUserId)
-      expect(userId).toBeInstanceOf(UserId)
+      expect(typeof userId).toBe('string')
     })
 
     it('should return the same user id on multiple calls', () => {
@@ -78,11 +78,11 @@ describe('Chat Entity', () => {
     })
 
     it('should return different user ids for different chat instances', () => {
-      const userId1 = new UserId(uuidv7()) as UserIdType
+      const userId1 = new UserId(uuidv7()).getValue()
       const chatId1 = new ChatId(uuidv7()).getValue()
       const chat1 = new Chat(userId1, chatId1)
 
-      const userId2 = new UserId(uuidv7()) as UserIdType
+      const userId2 = new UserId(uuidv7()).getValue()
       const chatId2 = new ChatId(uuidv7()).getValue()
       const chat2 = new Chat(userId2, chatId2)
 
@@ -113,50 +113,50 @@ describe('Chat Entity', () => {
   describe('Edge Cases', () => {
     it('should handle empty string userId', () => {
       expect(() => {
-        const userId = new UserId('') as UserIdType
+        const userId = new UserId('').getValue()
         const chatId = new ChatId(uuidv7()).getValue()
         new Chat(userId, chatId)
-      }).toThrow('Invalid UUID format provided')
+      }).toThrow('Invalid userID UUID format provided')
     })
 
     it('should handle very long userId', () => {
       expect(() => {
-        const longUserId = new UserId('user-' + 'x'.repeat(1000)) as UserIdType
+        const longUserId = new UserId('user-' + 'x'.repeat(1000)).getValue()
         const chatId = new ChatId(uuidv7()).getValue()
         return new Chat(longUserId, chatId)
-      }).toThrow('Invalid UUID format provided')
+      }).toThrow('Invalid userID UUID format provided')
     })
 
     it('should handle special characters in userId', () => {
       expect(() => {
-        const specialUserId = new UserId('user@#$%^&*()-_=+[]{}|;:,.<>?') as UserIdType
+        const specialUserId = new UserId('user@#$%^&*()-_=+[]{}|;:,.<>?').getValue()
         const chatId = new ChatId(uuidv7()).getValue()
         return new Chat(specialUserId, chatId)
-      }).toThrow('Invalid UUID format provided')
+      }).toThrow('Invalid userID UUID format provided')
     })
 
     it('should handle empty string chatId', () => {
       expect(() => {
-        const userId = new UserId(uuidv7()) as UserIdType
+        const userId = new UserId(uuidv7()).getValue()
         const chatId = new ChatId('').getValue()
         return new Chat(userId, chatId)
-      }).toThrow('Invalid UUID format provided')
+      }).toThrow('Invalid chatId UUID format provided')
     })
 
     it('should handle very long chatId', () => {
       expect(() => {
-        const userId = new UserId(uuidv7()) as UserIdType
+        const userId = new UserId(uuidv7()).getValue()
         const longChatId = new ChatId('chat-' + 'x'.repeat(1000)).getValue()
         return new Chat(userId, longChatId)
-      }).toThrow('Invalid UUID format provided')
+      }).toThrow('Invalid chatId UUID format provided')
     })
 
     it('should handle special characters in chatId', () => {
       expect(() => {
-        const userId = new UserId(uuidv7()) as UserIdType
+        const userId = new UserId(uuidv7()).getValue()
         const specialChatId = new ChatId('chat@#$%^&*()-_=+[]{}|;:,.<>?').getValue()
         return new Chat(userId, specialChatId)
-      }).toThrow('Invalid UUID format provided')
+      }).toThrow('Invalid chatId UUID format provided')
     })
   })
 })

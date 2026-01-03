@@ -120,13 +120,13 @@ export class RegisterUserUseCase {
       await this.emailService.sendWelcomeEmail(dto.email, dto.name)
     } catch (error) {
       this.logger.error('Failed to send welcome email', error as Error, {
-        userId: userId.getValue(),
+        userId: userId,
         email: dto.email,
       })
       // Don't fail registration if email fails
     }
 
-    this.logger.info('User registered successfully', { userId: userId.getValue() })
+    this.logger.info('User registered successfully', { userId: userId })
 
     // Generate JWT access token
     const accessToken = this.tokenGenerator.generateToken({
@@ -139,7 +139,7 @@ export class RegisterUserUseCase {
     const safeExpiresIn = Number.isNaN(expiresIn) ? 3600 : expiresIn
 
     return {
-      userId: userId.getValue(),
+      userId: userId,
       access_token: accessToken,
       token_type: 'Bearer',
       expires_in: safeExpiresIn,

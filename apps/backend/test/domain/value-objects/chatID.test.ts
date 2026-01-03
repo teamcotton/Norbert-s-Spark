@@ -49,22 +49,22 @@ describe('ChatId Value Object', () => {
       vi.mocked(Uuid7Util.isValidUUID).mockReturnValue(false)
       const invalidUuid = 'not-a-valid-uuid'
 
-      expect(() => new ChatId(invalidUuid)).toThrow('Invalid UUID format provided')
+      expect(() => new ChatId(invalidUuid)).toThrow('Invalid chatId UUID format provided')
     })
 
     it('should throw error for non-UUID strings', () => {
       vi.mocked(Uuid7Util.isValidUUID).mockReturnValue(false)
 
-      expect(() => new ChatId('chat-123')).toThrow('Invalid UUID format provided')
-      expect(() => new ChatId('12345')).toThrow('Invalid UUID format provided')
-      expect(() => new ChatId('')).toThrow('Invalid UUID format provided')
+      expect(() => new ChatId('chat-123')).toThrow('Invalid chatId UUID format provided')
+      expect(() => new ChatId('12345')).toThrow('Invalid chatId UUID format provided')
+      expect(() => new ChatId('')).toThrow('Invalid chatId UUID format provided')
     })
 
     it('should throw error for UUID with incorrect format structure', () => {
       vi.mocked(Uuid7Util.isValidUUID).mockReturnValue(false)
       const malformedUuid = '018d3f78-1234-7abc-def0' // Missing part
 
-      expect(() => new ChatId(malformedUuid)).toThrow('Invalid UUID format provided')
+      expect(() => new ChatId(malformedUuid)).toThrow('Invalid chatId UUID format provided')
     })
 
     it('should accept different valid UUIDv7 strings', () => {
@@ -192,7 +192,7 @@ describe('ChatId Value Object', () => {
     it('should throw error when Uuid7Util.isValidUUID returns false', () => {
       vi.mocked(Uuid7Util.isValidUUID).mockReturnValue(false)
 
-      expect(() => new ChatId(validUuid)).toThrow('Invalid UUID format provided')
+      expect(() => new ChatId(validUuid)).toThrow('Invalid chatId UUID format provided')
       expect(Uuid7Util.isValidUUID).toHaveBeenCalledWith(validUuid)
     })
 
@@ -238,7 +238,7 @@ describe('ChatId Value Object', () => {
     it('should provide clear error message for invalid UUID', () => {
       vi.mocked(Uuid7Util.isValidUUID).mockReturnValue(false)
 
-      expect(() => new ChatId('invalid')).toThrow('Invalid UUID format provided')
+      expect(() => new ChatId('invalid')).toThrow('Invalid chatId UUID format provided')
     })
 
     it('should throw immediately on invalid UUID before version validation', () => {

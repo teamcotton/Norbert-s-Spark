@@ -10,7 +10,7 @@ import { ValidationException } from '../../../src/shared/exceptions/validation.e
 
 // Helper function to create UserIdType from string
 function createUserId(id?: string): UserIdType {
-  return new UserId(id || uuidv7()) as UserIdType
+  return new UserId(id || uuidv7()).getValue()
 }
 
 describe('User Entity', () => {
@@ -29,7 +29,7 @@ describe('User Entity', () => {
   describe('Constructor', () => {
     it('should create a user with all required fields', () => {
       expect(testUser).toBeInstanceOf(User)
-      expect(testUser.id).toBeInstanceOf(UserId)
+      expect(typeof testUser.id).toBe('string')
       expect(testUser.getName()).toBe('John Doe')
       expect(testUser.getEmail()).toBe('test@example.com')
     })
@@ -58,7 +58,7 @@ describe('User Entity', () => {
 
     it('should have id property accessible', () => {
       // TypeScript readonly is compile-time only, property is still accessible
-      expect(testUser.id).toBeInstanceOf(UserId)
+      expect(typeof testUser.id).toBe('string')
       expect(testUser.id).toBeDefined()
     })
   })
@@ -273,7 +273,7 @@ describe('User Entity', () => {
     })
 
     it('should have id as readonly branded type', () => {
-      expect(testUser.id).toBeInstanceOf(UserId)
+      expect(typeof testUser.id).toBe('string')
 
       // TypeScript readonly is compile-time only
       // The id value is accessible
@@ -370,7 +370,7 @@ describe('User Entity', () => {
     it('should have readonly id property (TypeScript compile-time)', () => {
       // TypeScript readonly is compile-time only, not runtime
       // The id property is accessible but TypeScript prevents reassignment
-      expect(testUser.id).toBeInstanceOf(UserId)
+      expect(typeof testUser.id).toBe('string')
       expect(testUser.id).toBeDefined()
     })
 

@@ -49,34 +49,36 @@ describe('UserId Value Object', () => {
       vi.mocked(Uuid7Util.isValidUUID).mockReturnValue(false)
       const invalidUuid = 'not-a-valid-uuid'
 
-      expect(() => new UserId(invalidUuid)).toThrow('Invalid UUID format provided')
+      expect(() => new UserId(invalidUuid)).toThrow('Invalid userID UUID format provided')
     })
 
     it('should throw error for non-UUID strings', () => {
       vi.mocked(Uuid7Util.isValidUUID).mockReturnValue(false)
 
-      expect(() => new UserId('user-123')).toThrow('Invalid UUID format provided')
-      expect(() => new UserId('12345')).toThrow('Invalid UUID format provided')
-      expect(() => new UserId('')).toThrow('Invalid UUID format provided')
+      expect(() => new UserId('user-123')).toThrow('Invalid userID UUID format provided')
+      expect(() => new UserId('12345')).toThrow('Invalid userID UUID format provided')
+      expect(() => new UserId('')).toThrow('Invalid userID UUID format provided')
     })
 
     it('should throw error for UUID with incorrect format structure', () => {
       vi.mocked(Uuid7Util.isValidUUID).mockReturnValue(false)
       const malformedUuid = '018d3f78-1234-7abc-def0' // Missing part
 
-      expect(() => new UserId(malformedUuid)).toThrow('Invalid UUID format provided')
+      expect(() => new UserId(malformedUuid)).toThrow('Invalid userID UUID format provided')
     })
 
     it('should throw error when version validation returns undefined', () => {
       vi.mocked(Uuid7Util.uuidVersionValidation).mockReturnValue(undefined)
 
-      expect(() => new UserId(validUuid)).toThrow('Invalid UUID version: undefined')
+      expect(() => new UserId(validUuid)).toThrow('Invalid userID UUID version: undefined')
     })
 
     it('should throw error when version validation indicates wrong version', () => {
       vi.mocked(Uuid7Util.uuidVersionValidation).mockReturnValue('Expected v7, but got v4')
 
-      expect(() => new UserId(validUuid)).toThrow('Invalid UUID version: Expected v7, but got v4')
+      expect(() => new UserId(validUuid)).toThrow(
+        'Invalid userID UUID version: Expected v7, but got v4'
+      )
     })
 
     it('should accept different valid UUIDv7 strings', () => {
@@ -138,18 +140,22 @@ describe('UserId Value Object', () => {
 
   describe('Type Safety with UserIdType', () => {
     it('should be assignable to UserIdType with type assertion', () => {
-      const userId = new UserId(validUuid) as UserIdType
+      const userIdObj = new UserId(validUuid)
+      const userId: UserIdType = userIdObj.getValue()
 
-      expect(userId).toBeInstanceOf(UserId)
-      expect(userId.getValue()).toBe(validUuid)
+      expect(userIdObj).toBeInstanceOf(UserId)
+      expect(userId).toBe(validUuid)
     })
 
     it('should maintain type brand for compile-time safety', () => {
-      const userId = new UserId(validUuid) as UserIdType<string>
+      const userIdObj = new UserId(validUuid)
+      const userId: UserIdType<string> = userIdObj.getValue()
 
       // This test verifies that the branded type works at compile-time
-      // At runtime, UserIdType is just UserId
-      expect(userId).toBeInstanceOf(UserId)
+      // At runtime, UserIdType is just a branded string
+      expect(userIdObj).toBeInstanceOf(UserId)
+      // At runtime, UserIdType is just a branded string
+      expect(typeof userId).toBe('string')
     })
   })
 
@@ -190,25 +196,27 @@ describe('UserId Value Object', () => {
     it('should reject when version validation returns null', () => {
       vi.mocked(Uuid7Util.uuidVersionValidation).mockReturnValue(null as any)
 
-      expect(() => new UserId(validUuid)).toThrow('Invalid UUID version: null')
+      expect(() => new UserId(validUuid)).toThrow('Invalid userID UUID version: null')
     })
 
     it('should reject when version validation returns empty string', () => {
       vi.mocked(Uuid7Util.uuidVersionValidation).mockReturnValue('')
 
-      expect(() => new UserId(validUuid)).toThrow('Invalid UUID version: ')
+      expect(() => new UserId(validUuid)).toThrow('Invalid userID UUID version: ')
     })
 
     it('should reject when version indicates mismatch', () => {
       vi.mocked(Uuid7Util.uuidVersionValidation).mockReturnValue('Expected v7, but got v1')
 
-      expect(() => new UserId(validUuid)).toThrow('Invalid UUID version: Expected v7, but got v1')
+      expect(() => new UserId(validUuid)).toThrow(
+        'Invalid userID UUID version: Expected v7, but got v1'
+      )
     })
 
     it('should call version validation after format validation', () => {
       vi.mocked(Uuid7Util.isValidUUID).mockReturnValue(false)
 
-      expect(() => new UserId(validUuid)).toThrow('Invalid UUID format provided')
+      expect(() => new UserId(validUuid)).toThrow('Invalid userID UUID format provided')
       expect(Uuid7Util.isValidUUID).toHaveBeenCalled()
       expect(Uuid7Util.uuidVersionValidation).not.toHaveBeenCalled()
     })
@@ -235,7 +243,7 @@ describe('UserId Value Object', () => {
     it('should throw error when Uuid7Util.isValidUUID returns false', () => {
       vi.mocked(Uuid7Util.isValidUUID).mockReturnValue(false)
 
-      expect(() => new UserId(validUuid)).toThrow('Invalid UUID format provided')
+      expect(() => new UserId(validUuid)).toThrow('Invalid userID UUID format provided')
       expect(Uuid7Util.isValidUUID).toHaveBeenCalledWith(validUuid)
     })
 
@@ -282,26 +290,28 @@ describe('UserId Value Object', () => {
     it('should provide clear error message for invalid UUID format', () => {
       vi.mocked(Uuid7Util.isValidUUID).mockReturnValue(false)
 
-      expect(() => new UserId('invalid')).toThrow('Invalid UUID format provided')
+      expect(() => new UserId('invalid')).toThrow('Invalid userID UUID format provided')
     })
 
     it('should provide clear error message for invalid version', () => {
       vi.mocked(Uuid7Util.uuidVersionValidation).mockReturnValue('Expected v7, but got v5')
 
-      expect(() => new UserId(validUuid)).toThrow('Invalid UUID version: Expected v7, but got v5')
+      expect(() => new UserId(validUuid)).toThrow(
+        'Invalid userID UUID version: Expected v7, but got v5'
+      )
     })
 
     it('should throw immediately on invalid UUID before version validation', () => {
       vi.mocked(Uuid7Util.isValidUUID).mockReturnValue(false)
 
-      expect(() => new UserId('invalid')).toThrow('Invalid UUID format provided')
+      expect(() => new UserId('invalid')).toThrow('Invalid userID UUID format provided')
       expect(Uuid7Util.uuidVersionValidation).not.toHaveBeenCalled()
     })
 
     it('should include version details in error message', () => {
       vi.mocked(Uuid7Util.uuidVersionValidation).mockReturnValue(undefined)
 
-      expect(() => new UserId(validUuid)).toThrow(/Invalid UUID version/)
+      expect(() => new UserId(validUuid)).toThrow(/Invalid userID UUID version/)
     })
   })
 
@@ -343,7 +353,7 @@ describe('UserId Value Object', () => {
     it('should throw errors in the same way for invalid inputs', () => {
       vi.mocked(Uuid7Util.isValidUUID).mockReturnValue(false)
 
-      expect(() => new UserId('invalid')).toThrow('Invalid UUID format provided')
+      expect(() => new UserId('invalid')).toThrow('Invalid userID UUID format provided')
     })
   })
 })

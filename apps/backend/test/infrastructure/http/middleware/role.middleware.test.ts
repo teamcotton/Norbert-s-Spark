@@ -9,7 +9,7 @@ import type { JwtUserClaims } from '../../../../src/shared/types/index.js'
 // Helper function to create mock user claims with proper UserIdType
 function createMockUserClaims(email: string, roles?: string[], userId?: string): JwtUserClaims {
   return {
-    sub: new UserId(userId || uuidv7()) as UserIdType,
+    sub: new UserId(userId || uuidv7()).getValue(),
     email,
     roles,
   }

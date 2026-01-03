@@ -38,7 +38,7 @@ describe('PostgresUserRepository', () => {
     testEmail = new Email('test@example.com')
     testPassword = await Password.create('password123')
     testRole = new Role('user')
-    const testUserId = new UserId(uuidv7()) as UserIdType
+    const testUserId = new UserId(uuidv7()).getValue()
     testUser = new User(testUserId, testEmail, testPassword, 'John Doe', testRole)
 
     // Valid bcrypt hash for testing (hash of "password123")
@@ -47,7 +47,7 @@ describe('PostgresUserRepository', () => {
 
   describe('save', () => {
     it('should insert a new user into the database', async () => {
-      const userIdValue = testUser.id?.getValue()
+      const userIdValue = testUser.id
       const mockReturning = vi.fn().mockResolvedValue([{ userId: userIdValue }])
       const mockValues = vi.fn().mockReturnValue({ returning: mockReturning })
       const mockInsert = vi.fn().mockReturnValue({ values: mockValues })
@@ -55,7 +55,7 @@ describe('PostgresUserRepository', () => {
 
       const userId = await repository.save(testUser)
 
-      expect(userId?.getValue()).toBe(userIdValue)
+      expect(userId).toBe(userIdValue)
       expect(db.insert).toHaveBeenCalledTimes(1)
       expect(mockValues).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -71,7 +71,7 @@ describe('PostgresUserRepository', () => {
     })
 
     it('should save user password hash', async () => {
-      const userIdValue = testUser.id?.getValue()
+      const userIdValue = testUser.id
       const mockReturning = vi.fn().mockResolvedValue([{ userId: userIdValue }])
       const mockValues = vi.fn().mockReturnValue({ returning: mockReturning })
       const mockInsert = vi.fn().mockReturnValue({ values: mockValues })
@@ -84,8 +84,8 @@ describe('PostgresUserRepository', () => {
     })
 
     it('should save user with correct email', async () => {
-      const userId = new UserId(uuidv7()) as UserIdType
-      const userIdValue = userId.getValue()
+      const userId = new UserId(uuidv7()).getValue()
+      const userIdValue = userId
       const mockReturning = vi.fn().mockResolvedValue([{ userId: userIdValue }])
       const mockValues = vi.fn().mockReturnValue({ returning: mockReturning })
       const mockInsert = vi.fn().mockReturnValue({ values: mockValues })
@@ -98,7 +98,7 @@ describe('PostgresUserRepository', () => {
 
       const returnedUserId = await repository.save(user)
 
-      expect(returnedUserId).toBeInstanceOf(UserId)
+      expect(typeof returnedUserId).toBe('string')
       const callArgs = mockValues.mock.calls?.[0]?.[0]
       expect(callArgs.email).toBe('newemail@example.com')
       expect(callArgs.name).toBe('Jane Doe')
@@ -250,7 +250,7 @@ describe('PostgresUserRepository', () => {
       const result = await repository.findById(userId)
 
       expect(result).toBeInstanceOf(User)
-      expect(result?.id?.getValue()).toBe(userId)
+      expect(result?.id).toBe(userId)
       expect(result?.getEmail()).toBe('test@example.com')
       expect(result?.getName()).toBe('John Doe')
       expect(result?.getRole()).toBe('user')
@@ -331,7 +331,7 @@ describe('PostgresUserRepository', () => {
       const result = await repository.findByEmail('duplicate@example.com')
 
       expect(result).toBeInstanceOf(User)
-      expect(result?.id?.getValue()).toBe(userId1)
+      expect(result?.id).toBe(userId1)
     })
   })
 
@@ -362,7 +362,7 @@ describe('PostgresUserRepository', () => {
       vi.mocked(db.update).mockReturnValue(mockUpdate() as any)
 
       const newEmail = new Email('updated@example.com')
-      const userId = new UserId(uuidv7()) as UserIdType
+      const userId = new UserId(uuidv7()).getValue()
       const updatedUser = new User(userId, newEmail, testPassword, 'Updated Name', testRole)
 
       await repository.update(updatedUser)
@@ -455,7 +455,7 @@ describe('PostgresUserRepository', () => {
       const result = await repository.findById(userId)
 
       expect(result).toBeInstanceOf(User)
-      expect(result?.id?.getValue()).toBe(userId)
+      expect(result?.id).toBe(userId)
       expect(result?.getEmail()).toBe('convert@example.com')
       expect(result?.getName()).toBe('Convert User')
     })

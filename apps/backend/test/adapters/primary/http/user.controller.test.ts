@@ -18,7 +18,7 @@ function createMockUser(
   userId?: string
 ) {
   return {
-    userId: new UserId(userId || uuidv7()) as UserIdType,
+    userId: new UserId(userId || uuidv7()).getValue(),
     email,
     name,
     role,
@@ -315,7 +315,7 @@ describe('UserController', () => {
           },
         })
         expect(sentData.data[0]).toHaveProperty('userId')
-        expect(sentData.data[0]?.userId).toBeInstanceOf(UserId)
+        expect(typeof sentData.data[0]?.userId).toBe('string')
         expect(sentData.data[0]).toHaveProperty('email', 'test@example.com')
         expect(sentData.data[0]).toHaveProperty('name', 'Test User')
         expect(sentData.data[0]).toHaveProperty('role', 'moderator')

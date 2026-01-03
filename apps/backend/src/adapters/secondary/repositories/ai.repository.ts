@@ -27,7 +27,7 @@ export class AIRepository implements AIServicePort {
     initialMessages: UIMessage[] = []
   ): Promise<string> {
     const newChat = {
-      userId: userId.getValue()!,
+      userId: userId,
       id: chatId,
     }
     this.logger.info('createChat', newChat)

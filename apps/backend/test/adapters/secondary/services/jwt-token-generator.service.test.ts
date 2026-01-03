@@ -16,7 +16,7 @@ vi.mock('../../../../src/infrastructure/security/jwt.util.js', () => ({
 // Helper function to create mock claims with proper UserIdType
 function createMockClaims(email: string, roles?: string[], userId?: string): JwtUserClaims {
   return {
-    sub: new UserId(userId || uuidv7()) as UserIdType,
+    sub: new UserId(userId || uuidv7()).getValue(),
     email,
     roles,
   }

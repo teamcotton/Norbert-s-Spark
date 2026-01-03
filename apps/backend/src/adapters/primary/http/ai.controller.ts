@@ -66,10 +66,14 @@ export class AIController {
     }
 
     const { messages, id } = parsed
-    const userId = request.user?.sub
-    if (!userId) {
+
+    if (!request.user?.sub) {
       return reply.status(401).send(FastifyUtil.createResponse('User not authenticated', 401))
     }
+
+    // Conversion of string request.user.sub id to UserIdType branded type
+    // happens in middleware so no need to instantiate a new UserId here
+    const userId = request.user.sub
 
     // Convert string id to ChatIdType branded type
     const chatId = new ChatId(id).getValue()

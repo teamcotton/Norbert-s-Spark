@@ -100,9 +100,7 @@ export class PostgresUserRepository implements UserRepositoryPort {
       }
 
       const insertValues =
-        userEntity.id !== undefined
-          ? { ...baseValues, userId: userEntity.id.getValue()! }
-          : baseValues
+        userEntity.id !== undefined ? { ...baseValues, userId: userEntity.id } : baseValues
 
       const result = await db.insert(user).values(insertValues).returning({ userId: user.userId })
 
@@ -110,7 +108,7 @@ export class PostgresUserRepository implements UserRepositoryPort {
         throw new DatabaseException('Failed to retrieve generated user ID', {})
       }
 
-      return new UserId(result[0].userId) as UserIdType
+      return new UserId(result[0].userId).getValue()
     } catch (error) {
       if (DatabaseUtil.isDuplicateKeyError(error)) {
         throw new ConflictException('User with this email already exists', {
@@ -302,7 +300,7 @@ export class PostgresUserRepository implements UserRepositoryPort {
           name: userEntity.getName(),
           role: userEntity.getRole(),
         })
-        .where(eq(user.userId, userEntity.id.getValue()!))
+        .where(eq(user.userId, userEntity.id))
     } catch (error) {
       if (DatabaseUtil.isDuplicateKeyError(error)) {
         throw new ConflictException('User with this email already exists', {
@@ -405,7 +403,7 @@ export class PostgresUserRepository implements UserRepositoryPort {
     const email = new Email(record.email)
     const password = Password.fromHash(record.password)
     const role = new Role(record.role)
-    const userId = new UserId(record.userId) as UserIdType
+    const userId = new UserId(record.userId).getValue()
     return new User(userId, email, password, record.name, role, record.createdAt)
   }
 }

@@ -14,7 +14,7 @@ import { ValidationException } from '../../../src/shared/exceptions/validation.e
 
 // Helper function to create mock UserIdType from UUID string
 function createMockUserId(uuid?: string): UserIdType {
-  return new UserId(uuid || uuidv7()) as UserIdType
+  return new UserId(uuid || uuidv7()).getValue()
 }
 
 describe('RegisterUserUseCase', () => {
@@ -480,7 +480,7 @@ describe('RegisterUserUseCase', () => {
         expect(savedUser!.id).toBeUndefined()
         // The use case must then expose the ID returned by the repository back
         // to the caller, so the result.userId should match the generated ID.
-        expect(result.userId).toBe(mockUserId.getValue())
+        expect(result.userId).toBe(mockUserId)
       })
 
       it('should return access_token from token generator', async () => {

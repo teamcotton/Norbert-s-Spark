@@ -99,8 +99,8 @@ export class JwtUtil {
       expiresIn: Number.parseInt(EnvConfig.JWT_EXPIRATION),
       issuer: EnvConfig.JWT_ISSUER,
     }
-    // Extract the actual UUID string from the UserId value object
-    const userIdString = sub.getValue()
+    // Use the branded user ID string directly for the JWT subject
+    const userIdString = sub
     if (isString(userIdString)) {
       options.subject = userIdString
     }

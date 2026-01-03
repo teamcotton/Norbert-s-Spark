@@ -32,7 +32,7 @@ describe('GetAllUsersUseCase', () => {
     const emailObj = new Email(email)
     const password = await Password.create('TestPassword123!')
     const roleObj = new Role(role)
-    const userId = new UserId(id || uuidv7()) as UserIdType
+    const userId = new UserId(id || uuidv7()).getValue()
     return new User(userId, emailObj, password, name, roleObj, new Date('2024-01-01'))
   }
 

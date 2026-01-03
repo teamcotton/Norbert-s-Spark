@@ -12,7 +12,7 @@ import type { JwtUserClaims } from '../../../src/shared/types/index.js'
 // Helper function to create mock claims with proper UserIdType
 function createMockClaims(email: string, roles?: string[], userId?: string): JwtUserClaims {
   return {
-    sub: new UserId(userId || uuidv7()) as UserIdType,
+    sub: new UserId(userId || uuidv7()).getValue(),
     email,
     roles,
   }
@@ -50,7 +50,7 @@ describe('JwtUtil', () => {
       const token = JwtUtil.generateToken(validClaims)
       const decoded = jwt.decode(token) as unknown as JwtUserClaims & { iss: string; exp: number }
 
-      expect(decoded.sub).toBe(validClaims.sub.getValue())
+      expect(decoded.sub).toBe(validClaims.sub)
       expect(decoded.email).toBe(validClaims.email)
       expect(decoded.roles).toEqual(validClaims.roles)
     })
@@ -66,7 +66,7 @@ describe('JwtUtil', () => {
       const token = JwtUtil.generateToken(validClaims)
       const decoded = jwt.decode(token) as { sub: string }
 
-      expect(decoded.sub).toBe(validClaims.sub.getValue())
+      expect(decoded.sub).toBe(validClaims.sub)
     })
 
     it('should set expiration time from EnvConfig', () => {
@@ -105,7 +105,7 @@ describe('JwtUtil', () => {
       const result = JwtUtil.verifyToken(validToken)
 
       expect(result).toEqual({
-        sub: validClaims.sub.getValue(),
+        sub: validClaims.sub,
         email: validClaims.email,
         roles: validClaims.roles,
       })
@@ -116,7 +116,7 @@ describe('JwtUtil', () => {
       const result = JwtUtil.verifyToken(token)
 
       expect(result).toEqual({
-        sub: validClaimsWithoutRoles.sub.getValue(),
+        sub: validClaimsWithoutRoles.sub,
         email: validClaimsWithoutRoles.email,
         roles: undefined,
       })
@@ -199,14 +199,14 @@ describe('JwtUtil', () => {
     it('should verify token and check issuer from EnvConfig', () => {
       const result = JwtUtil.verifyToken(validToken)
 
-      expect(result.sub).toBe(validClaims.sub.getValue())
+      expect(result.sub).toBe(validClaims.sub)
       expect(result.email).toBe(validClaims.email)
     })
 
     it('should handle token with extra claims', () => {
       const claimsWithExtra = {
         ...validClaims,
-        sub: validClaims.sub.getValue(), // Convert UserId to string for jwt.sign
+        sub: validClaims.sub, // sub is already a branded string (UserIdType) suitable for jwt.sign
         extraClaim: 'extra-value',
         anotherField: 123,
       }
@@ -217,7 +217,7 @@ describe('JwtUtil', () => {
 
       const result = JwtUtil.verifyToken(token)
 
-      expect(result.sub).toBe(validClaims.sub.getValue())
+      expect(result.sub).toBe(validClaims.sub)
       expect(result.email).toBe(validClaims.email)
       expect(result.roles).toEqual(validClaims.roles)
     })
@@ -235,7 +235,7 @@ describe('JwtUtil', () => {
 
       expect(decoded).toBeDefined()
       expect(decoded).toMatchObject({
-        sub: validClaims.sub.getValue(),
+        sub: validClaims.sub,
         email: validClaims.email,
         roles: validClaims.roles,
       })
@@ -279,7 +279,7 @@ describe('JwtUtil', () => {
         iat: number
       }
 
-      expect(decoded.sub).toBe(validClaims.sub.getValue())
+      expect(decoded.sub).toBe(validClaims.sub)
       expect(decoded.email).toBe(validClaims.email)
       expect(decoded.roles).toEqual(validClaims.roles)
       expect(decoded.iss).toBe(EnvConfig.JWT_ISSUER)
@@ -291,7 +291,7 @@ describe('JwtUtil', () => {
       const token = JwtUtil.generateToken(validClaimsWithoutRoles)
       const decoded = JwtUtil.decodeToken(token) as JwtUserClaims
 
-      expect(decoded.sub).toBe(validClaimsWithoutRoles.sub.getValue())
+      expect(decoded.sub).toBe(validClaimsWithoutRoles.sub)
       expect(decoded.email).toBe(validClaimsWithoutRoles.email)
       expect(decoded.roles).toBeUndefined()
     })
@@ -314,11 +314,11 @@ describe('JwtUtil', () => {
       const verified = JwtUtil.verifyToken(token)
       const decoded = JwtUtil.decodeToken(token) as JwtUserClaims
 
-      expect(verified.sub).toBe(validClaims.sub.getValue())
+      expect(verified.sub).toBe(validClaims.sub)
       expect(verified.email).toBe(validClaims.email)
       expect(verified.roles).toEqual(validClaims.roles)
 
-      expect(decoded.sub).toBe(validClaims.sub.getValue())
+      expect(decoded.sub).toBe(validClaims.sub)
       expect(decoded.email).toBe(validClaims.email)
       expect(decoded.roles).toEqual(validClaims.roles)
     })
@@ -329,7 +329,7 @@ describe('JwtUtil', () => {
 
       // Verify token on subsequent requests
       const verifiedClaims = JwtUtil.verifyToken(loginToken)
-      expect(verifiedClaims.sub).toBe(validClaims.sub.getValue())
+      expect(verifiedClaims.sub).toBe(validClaims.sub)
 
       // Decode token for debugging/logging (without verification)
       const decodedInfo = JwtUtil.decodeToken(loginToken)
@@ -402,7 +402,7 @@ describe('JwtUtil', () => {
       const token = JwtUtil.generateToken(specialClaims)
       const verified = JwtUtil.verifyToken(token)
 
-      expect(verified.sub).toBe(specialClaims.sub.getValue())
+      expect(verified.sub).toBe(specialClaims.sub)
       expect(verified.email).toBe(specialClaims.email)
     })
 

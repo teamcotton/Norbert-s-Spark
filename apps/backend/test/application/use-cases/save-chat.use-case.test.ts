@@ -30,7 +30,7 @@ describe('SaveChatUseCase', () => {
 
     // Create test IDs
     testChatId = new ChatId(uuidv7()).getValue()
-    testUserId = new UserId(uuidv7()) as UserIdType
+    testUserId = new UserId(uuidv7()).getValue()
 
     // Create mock implementations
     mockLogger = {
@@ -130,8 +130,8 @@ describe('SaveChatUseCase', () => {
 
     it('should handle different user IDs correctly', async () => {
       const messages = createMockMessages()
-      const userId1 = new UserId(uuidv7()) as UserIdType
-      const userId2 = new UserId(uuidv7()) as UserIdType
+      const userId1 = new UserId(uuidv7()).getValue()
+      const userId2 = new UserId(uuidv7()).getValue()
       const expectedChatId = testChatId
 
       vi.mocked(mockAIRepository.createChat).mockResolvedValue(expectedChatId)

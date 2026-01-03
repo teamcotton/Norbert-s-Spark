@@ -130,7 +130,7 @@ export async function authMiddleware(
     const verifiedClaims = JwtUtil.verifyToken(token)
 
     // Convert string sub to UserIdType branded type
-    const userId = new UserId(verifiedClaims.sub) as UserIdType
+    const userId = new UserId(verifiedClaims.sub).getValue()
 
     request.user = {
       sub: userId,

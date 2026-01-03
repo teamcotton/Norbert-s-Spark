@@ -32,7 +32,7 @@ describe('AIRepository', () => {
   const mockChatIdString = uuidv7()
   const mockUserIdString = uuidv7()
   const mockChatId = new ChatId(mockChatIdString).getValue()
-  const mockUserId = new UserId(mockUserIdString) as UserIdType
+  const mockUserId = new UserId(mockUserIdString).getValue()
 
   beforeEach(() => {
     vi.clearAllMocks()

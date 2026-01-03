@@ -11,7 +11,7 @@ import { ValidationException } from '../../../../src/shared/exceptions/validatio
 // Helper function to create mock auth result with proper UserIdType
 function createMockAuthResult(email: string, token: string, roles: string[], userId?: string) {
   return {
-    userId: new UserId(userId || uuidv7()) as UserIdType,
+    userId: new UserId(userId || uuidv7()).getValue(),
     email,
     access_token: token,
     roles,

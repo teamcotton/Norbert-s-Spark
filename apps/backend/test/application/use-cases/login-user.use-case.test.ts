@@ -26,7 +26,7 @@ describe('LoginUserUseCase', () => {
     role: string = 'user',
     name: string = 'Test User'
   ): Promise<User> => {
-    const userId = new UserId(uuidv7()) as UserIdType
+    const userId = new UserId(uuidv7()).getValue()
     return new User(userId, new Email(email), await Password.create(password), name, new Role(role))
   }
 
