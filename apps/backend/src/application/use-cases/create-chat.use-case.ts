@@ -20,8 +20,7 @@ export class CreateChatUseCase {
     userId: UserIdType,
     messages: UIMessage[] = []
   ): Promise<CreateChatResult> {
-    this.logger.info('Appending chat messages', { userId, messageCount: messages.length })
-    //chatId: string, userId: string, initialMessages: UIMessage[] = []
+    this.logger.info('Creating chat', { userId, messageCount: messages.length }) //chatId: string, userId: string, initialMessages: UIMessage[] = []
     const id = await this.aiRepository.createChat(chatId, userId, messages)
 
     // This is a placeholder return value
