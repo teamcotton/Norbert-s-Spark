@@ -5,7 +5,40 @@ import { UserController } from '../../../../src/adapters/primary/http/user.contr
 import { RegisterUserDto } from '../../../../src/application/dtos/register-user.dto.js'
 import { GetAllUsersUseCase } from '../../../../src/application/use-cases/get-all-users.use-case.js'
 import { RegisterUserUseCase } from '../../../../src/application/use-cases/register-user.use-case.js'
+import { UserId, type UserIdType } from '../../../../src/domain/value-objects/userID.js'
 import { ValidationException } from '../../../../src/shared/exceptions/validation.exception.js'
+
+// Helper function to create mock user with proper UserIdType
+function createMockUser(
+  userId: string,
+  email: string,
+  name: string,
+  role: string,
+  createdAt: Date
+) {
+  return {
+    userId: new UserId(userId) as UserIdType,
+    email,
+    name,
+    role,
+    createdAt,
+  }
+}
+
+// Helper function to create mock registration result with proper UserIdType
+function createMockRegisterResult(
+  userId: string,
+  accessToken: string,
+  tokenType: string,
+  expiresIn: number
+) {
+  return {
+    userId: new UserId(userId) as UserIdType,
+    access_token: accessToken,
+    token_type: tokenType,
+    expires_in: expiresIn,
+  }
+}
 
 describe('UserController', () => {
   let controller: UserController
@@ -134,20 +167,14 @@ describe('UserController', () => {
     describe('successful retrieval', () => {
       it('should retrieve all users successfully', async () => {
         const mockUsers = [
-          {
-            userId: 'user-1',
-            email: 'user1@example.com',
-            name: 'User One',
-            role: 'user',
-            createdAt: new Date('2024-01-01'),
-          },
-          {
-            userId: 'user-2',
-            email: 'user2@example.com',
-            name: 'User Two',
-            role: 'admin',
-            createdAt: new Date('2024-01-02'),
-          },
+          createMockUser('user-1', 'user1@example.com', 'User One', 'user', new Date('2024-01-01')),
+          createMockUser(
+            'user-2',
+            'user2@example.com',
+            'User Two',
+            'admin',
+            new Date('2024-01-02')
+          ),
         ]
 
         vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue({
@@ -168,13 +195,7 @@ describe('UserController', () => {
 
       it('should return 200 status code for successful retrieval', async () => {
         const mockUsers = [
-          {
-            userId: 'user-1',
-            email: 'user1@example.com',
-            name: 'User One',
-            role: 'user',
-            createdAt: new Date('2024-01-01'),
-          },
+          createMockUser('user-1', 'user1@example.com', 'User One', 'user', new Date('2024-01-01')),
         ]
 
         vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue({
@@ -191,20 +212,14 @@ describe('UserController', () => {
 
       it('should return success response with users array', async () => {
         const mockUsers = [
-          {
-            userId: 'user-1',
-            email: 'user1@example.com',
-            name: 'User One',
-            role: 'user',
-            createdAt: new Date('2024-01-01'),
-          },
-          {
-            userId: 'user-2',
-            email: 'user2@example.com',
-            name: 'User Two',
-            role: 'admin',
-            createdAt: new Date('2024-01-02'),
-          },
+          createMockUser('user-1', 'user1@example.com', 'User One', 'user', new Date('2024-01-01')),
+          createMockUser(
+            'user-2',
+            'user2@example.com',
+            'User Two',
+            'admin',
+            new Date('2024-01-02')
+          ),
         ]
 
         vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue({
@@ -252,13 +267,15 @@ describe('UserController', () => {
       })
 
       it('should handle large number of users', async () => {
-        const mockUsers = Array.from({ length: 100 }, (_, i) => ({
-          userId: `user-${i}`,
-          email: `user${i}@example.com`,
-          name: `User ${i}`,
-          role: 'user',
-          createdAt: new Date('2024-01-01'),
-        }))
+        const mockUsers = Array.from({ length: 100 }, (_, i) =>
+          createMockUser(
+            `user-${i}`,
+            `user${i}@example.com`,
+            `User ${i}`,
+            'user',
+            new Date('2024-01-01')
+          )
+        )
 
         vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue({
           data: mockUsers,
@@ -283,13 +300,13 @@ describe('UserController', () => {
 
       it('should preserve user data structure from use case', async () => {
         const mockUsers = [
-          {
-            userId: 'user-1',
-            email: 'test@example.com',
-            name: 'Test User',
-            role: 'moderator',
-            createdAt: new Date('2024-06-15T10:30:00Z'),
-          },
+          createMockUser(
+            'user-1',
+            'test@example.com',
+            'Test User',
+            'moderator',
+            new Date('2024-06-15T10:30:00Z')
+          ),
         ]
 
         vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue({
@@ -391,13 +408,7 @@ describe('UserController', () => {
     describe('response structure', () => {
       it('should always return object with success property', async () => {
         const mockUsers = [
-          {
-            userId: 'user-1',
-            email: 'test@example.com',
-            name: 'Test User',
-            role: 'user',
-            createdAt: new Date(),
-          },
+          createMockUser('user-1', 'test@example.com', 'Test User', 'user', new Date()),
         ]
 
         vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue({
@@ -430,13 +441,7 @@ describe('UserController', () => {
 
       it('should include data property on success', async () => {
         const mockUsers = [
-          {
-            userId: 'user-1',
-            email: 'test@example.com',
-            name: 'Test User',
-            role: 'user',
-            createdAt: new Date(),
-          },
+          createMockUser('user-1', 'test@example.com', 'Test User', 'user', new Date()),
         ]
 
         vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue({
@@ -497,13 +502,7 @@ describe('UserController', () => {
         expect(getAllUsersHandler).toBeDefined()
 
         const mockUsers = [
-          {
-            userId: 'user-1',
-            email: 'test@example.com',
-            name: 'Test User',
-            role: 'user',
-            createdAt: new Date(),
-          },
+          createMockUser('user-1', 'test@example.com', 'Test User', 'user', new Date()),
         ]
 
         vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue({
@@ -538,13 +537,7 @@ describe('UserController', () => {
         ) => Promise<void>
 
         const mockUsers = [
-          {
-            userId: 'user-1',
-            email: 'test@example.com',
-            name: 'Test User',
-            role: 'user',
-            createdAt: new Date(),
-          },
+          createMockUser('user-1', 'test@example.com', 'Test User', 'user', new Date()),
         ]
 
         vi.mocked(mockGetAllUsersUseCase.execute).mockResolvedValue({
@@ -576,12 +569,12 @@ describe('UserController', () => {
 
         mockRequest.body = requestBody
 
-        const mockResult = {
-          userId: 'user-123-abc',
-          access_token: 'mock.jwt.token',
-          token_type: 'Bearer',
-          expires_in: 3600,
-        }
+        const mockResult = createMockRegisterResult(
+          'user-123-abc',
+          'mock.jwt.token',
+          'Bearer',
+          3600
+        )
         vi.mocked(mockRegisterUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.register(mockRequest, mockReply)
@@ -599,12 +592,12 @@ describe('UserController', () => {
 
         mockRequest.body = requestBody
 
-        const mockResult = {
-          userId: 'user-123-abc',
-          access_token: 'mock.jwt.token',
-          token_type: 'Bearer',
-          expires_in: 3600,
-        }
+        const mockResult = createMockRegisterResult(
+          'user-123-abc',
+          'mock.jwt.token',
+          'Bearer',
+          3600
+        )
         vi.mocked(mockRegisterUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.register(mockRequest, mockReply)
@@ -623,12 +616,12 @@ describe('UserController', () => {
           name: 'Test User',
         }
 
-        const mockResult = {
-          userId: 'user-123-abc',
-          access_token: 'mock.jwt.token',
-          token_type: 'Bearer',
-          expires_in: 3600,
-        }
+        const mockResult = createMockRegisterResult(
+          'user-123-abc',
+          'mock.jwt.token',
+          'Bearer',
+          3600
+        )
         vi.mocked(mockRegisterUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.register(mockRequest, mockReply)
@@ -643,12 +636,12 @@ describe('UserController', () => {
           name: 'Test User',
         }
 
-        const mockResult = {
-          userId: 'user-123-abc',
-          access_token: 'mock.jwt.token',
-          token_type: 'Bearer',
-          expires_in: 3600,
-        }
+        const mockResult = createMockRegisterResult(
+          'user-123-abc',
+          'mock.jwt.token',
+          'Bearer',
+          3600
+        )
         vi.mocked(mockRegisterUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.register(mockRequest, mockReply)
@@ -666,12 +659,12 @@ describe('UserController', () => {
           name: 'Another User',
         }
 
-        const mockResult = {
-          userId: 'user-456-xyz',
-          access_token: 'mock.jwt.token',
-          token_type: 'Bearer',
-          expires_in: 3600,
-        }
+        const mockResult = createMockRegisterResult(
+          'user-456-xyz',
+          'mock.jwt.token',
+          'Bearer',
+          3600
+        )
         vi.mocked(mockRegisterUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.register(mockRequest, mockReply)
@@ -689,12 +682,12 @@ describe('UserController', () => {
           name: 'Test User',
         }
 
-        const mockResult = {
-          userId: 'user-123-abc',
-          access_token: 'mock.jwt.token',
-          token_type: 'Bearer',
-          expires_in: 3600,
-        }
+        const mockResult = createMockRegisterResult(
+          'user-123-abc',
+          'mock.jwt.token',
+          'Bearer',
+          3600
+        )
         vi.mocked(mockRegisterUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.register(mockRequest, mockReply)
@@ -902,12 +895,12 @@ describe('UserController', () => {
           anotherField: 123,
         }
 
-        const mockResult = {
-          userId: 'user-123-abc',
-          access_token: 'mock.jwt.token',
-          token_type: 'Bearer',
-          expires_in: 3600,
-        }
+        const mockResult = createMockRegisterResult(
+          'user-123-abc',
+          'mock.jwt.token',
+          'Bearer',
+          3600
+        )
         vi.mocked(mockRegisterUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.register(mockRequest, mockReply)
@@ -926,12 +919,12 @@ describe('UserController', () => {
           name: '  Test User  ',
         }
 
-        const mockResult = {
-          userId: 'user-123-abc',
-          access_token: 'mock.jwt.token',
-          token_type: 'Bearer',
-          expires_in: 3600,
-        }
+        const mockResult = createMockRegisterResult(
+          'user-123-abc',
+          'mock.jwt.token',
+          'Bearer',
+          3600
+        )
         vi.mocked(mockRegisterUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.register(mockRequest, mockReply)
@@ -976,12 +969,12 @@ describe('UserController', () => {
           name: 'Test User',
         }
 
-        const mockResult = {
-          userId: 'user-123-abc',
-          access_token: 'mock.jwt.token',
-          token_type: 'Bearer',
-          expires_in: 3600,
-        }
+        const mockResult = createMockRegisterResult(
+          'user-123-abc',
+          'mock.jwt.token',
+          'Bearer',
+          3600
+        )
         vi.mocked(mockRegisterUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.register(mockRequest, mockReply)
@@ -1014,12 +1007,12 @@ describe('UserController', () => {
           name: 'Test User',
         }
 
-        const mockResult = {
-          userId: 'user-123-abc',
-          access_token: 'mock.jwt.token',
-          token_type: 'Bearer',
-          expires_in: 3600,
-        }
+        const mockResult = createMockRegisterResult(
+          'user-123-abc',
+          'mock.jwt.token',
+          'Bearer',
+          3600
+        )
         vi.mocked(mockRegisterUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.register(mockRequest, mockReply)
@@ -1112,12 +1105,12 @@ describe('UserController', () => {
         name: 'Integration Test',
       }
 
-      const mockResult = {
-        userId: 'user-integration-123',
-        access_token: 'mock.jwt.token',
-        token_type: 'Bearer',
-        expires_in: 3600,
-      }
+      const mockResult = createMockRegisterResult(
+        'user-integration-123',
+        'mock.jwt.token',
+        'Bearer',
+        3600
+      )
       vi.mocked(mockRegisterUserUseCase.execute).mockResolvedValue(mockResult)
 
       // Execute handler
@@ -1151,12 +1144,7 @@ describe('UserController', () => {
         name: 'Test User',
       }
 
-      const mockResult = {
-        userId: 'user-123',
-        access_token: 'mock.jwt.token',
-        token_type: 'Bearer',
-        expires_in: 3600,
-      }
+      const mockResult = createMockRegisterResult('user-123', 'mock.jwt.token', 'Bearer', 3600)
       vi.mocked(mockRegisterUserUseCase.execute).mockResolvedValue(mockResult)
 
       await registerHandler(mockRequest, mockReply)

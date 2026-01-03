@@ -10,6 +10,7 @@ import { RegisterUserDto } from '../dtos/register-user.dto.js'
 import { ConflictException } from '../../shared/exceptions/conflict.exception.js'
 import { DatabaseUtil } from '../../shared/utils/database.util.js'
 import { EnvConfig } from '../../infrastructure/config/env.config.js'
+import type { UserIdType } from '../../domain/value-objects/userID.js'
 
 /**
  * Use case for registering a new user in the system
@@ -87,7 +88,7 @@ export class RegisterUserUseCase {
    */
   async execute(
     dto: RegisterUserDto
-  ): Promise<{ userId: string; access_token: string; token_type: string; expires_in: number }> {
+  ): Promise<{ userId: UserIdType; access_token: string; token_type: string; expires_in: number }> {
     this.logger.info('Starting user registration', { email: dto.email })
 
     // Create domain objects
@@ -103,7 +104,7 @@ export class RegisterUserUseCase {
     // try to register the same email, one will succeed and the other will fail
     // with a duplicate key error. We catch that error and convert it to a
     // user-friendly ConflictException.
-    let userId: string
+    let userId: UserIdType
     try {
       userId = await this.userRepository.save(user)
     } catch (error) {

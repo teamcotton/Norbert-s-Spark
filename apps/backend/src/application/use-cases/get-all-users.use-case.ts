@@ -1,13 +1,13 @@
 import type { UserRepositoryPort, PaginationParams } from '../ports/user.repository.port.js'
 import type { LoggerPort } from '../ports/logger.port.js'
 import { InternalErrorException } from '../../shared/exceptions/internal-error.exception.js'
-
+import type { UserIdType } from '../../domain/value-objects/userID.js'
 /**
  * Data Transfer Object for user information
  * @interface UserDto
  */
 export interface UserDto {
-  userId: string
+  userId: UserIdType
   email: string
   name: string
   role: string

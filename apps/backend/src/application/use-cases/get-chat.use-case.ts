@@ -3,6 +3,8 @@ import type { LoggerPort } from '../ports/logger.port.js'
 import type { ChatResponseResult } from '../../adapters/secondary/repositories/ai.repository.js'
 import { Uuid7Util } from '../../shared/utils/uuid7.util.js'
 import { ValidationException } from '../../shared/exceptions/validation.exception.js'
+import type { MessageSchemaType } from '@norberts-spark/shared'
+import type { UserIdType } from '../../domain/value-objects/userID.js'
 /**
  * Use case for retrieving chat messages for a specific user
  *
@@ -34,6 +36,7 @@ export class GetChatUseCase {
    * and their associated parts for the given user.
    *
    * @param {string} userId - The user ID (must be a valid UUID v7)
+   * @param messages
    * @returns {Promise<ChatResponseResult | null>} Chat messages with parts, or null if not found
    * @throws {ValidationException} If the userId is not a valid UUID v7
    * @example
@@ -51,23 +54,8 @@ export class GetChatUseCase {
    * ```
    */
   async execute(
-    userId: string, //TODO: change below to types from shared package
-    messages: {
-      id: string
-      role: 'user' | 'assistant'
-      parts: {
-        type:
-          | 'text'
-          | 'reasoning'
-          | 'file'
-          | 'source_url'
-          | 'source_document'
-          | 'step-start'
-          | 'data'
-        text?: string | undefined
-        state?: 'done' | undefined
-      }[]
-    }[]
+    userId: UserIdType,
+    messages: MessageSchemaType[] = []
   ): Promise<ChatResponseResult | null> {
     this.logger.info('Getting chat for user', { userId })
 

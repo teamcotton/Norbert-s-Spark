@@ -6,6 +6,7 @@ import type { LoggerPort } from '../../../../src/application/ports/logger.port.j
 import type { AppendedChatUseCase } from '../../../../src/application/use-cases/append-chat.use-case.js'
 import type { GetChatUseCase } from '../../../../src/application/use-cases/get-chat.use-case.js'
 import type { SaveChatUseCase } from '../../../../src/application/use-cases/save-chat.use-case.js'
+import { UserId, type UserIdType } from '../../../../src/domain/value-objects/userID.js'
 
 // Mock the AI SDK modules
 vi.mock('ai', () => ({
@@ -91,7 +92,10 @@ describe('AIController', () => {
       body: {},
       params: {},
       query: {},
-      user: { sub: 'user-123' },
+      user: {
+        sub: new UserId('user-123') as UserIdType,
+        email: 'user@example.com',
+      },
     } as any
   })
 
@@ -301,7 +305,10 @@ describe('AIController', () => {
           messages: [{ id: '1', role: 'user', parts: [{ type: 'text', text: 'Hello' }] }],
           trigger: 'user-input',
         }
-        mockRequest.user = { sub: 'user-123', email: 'user@example.com' }
+        mockRequest.user = {
+          sub: new UserId('user-123') as UserIdType,
+          email: 'user@example.com',
+        }
 
         vi.mocked(mockGetChatUseCase.execute).mockResolvedValue(null)
 
@@ -344,7 +351,10 @@ describe('AIController', () => {
           messages: [{ id: '1', role: 'user', parts: [{ type: 'text', text: 'Hello' }] }],
           trigger: 'user-input',
         }
-        mockRequest.user = { sub: 'user-123', email: 'user@example.com' }
+        mockRequest.user = {
+          sub: new UserId('user-123') as UserIdType,
+          email: 'user@example.com',
+        }
 
         vi.mocked(mockGetChatUseCase.execute).mockResolvedValue(null)
 

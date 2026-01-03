@@ -4,7 +4,13 @@ import { User } from '../../../src/domain/entities/user.js'
 import { Email } from '../../../src/domain/value-objects/email.js'
 import { Password } from '../../../src/domain/value-objects/password.js'
 import { Role } from '../../../src/domain/value-objects/role.js'
+import { UserId, type UserIdType } from '../../../src/domain/value-objects/userID.js'
 import { ValidationException } from '../../../src/shared/exceptions/validation.exception.js'
+
+// Helper function to create UserIdType from string
+function createUserId(id: string): UserIdType {
+  return new UserId(id) as UserIdType
+}
 
 describe('User Entity', () => {
   let testEmail: Email
@@ -16,19 +22,19 @@ describe('User Entity', () => {
     testEmail = new Email('test@example.com')
     testPassword = await Password.create('password123')
     testRole = new Role('user')
-    testUser = new User('user-123', testEmail, testPassword, 'John Doe', testRole)
+    testUser = new User(createUserId('user-123'), testEmail, testPassword, 'John Doe', testRole)
   })
 
   describe('Constructor', () => {
     it('should create a user with all required fields', () => {
       expect(testUser).toBeInstanceOf(User)
-      expect(testUser.id).toBe('user-123')
+      expect(testUser.id).toBeInstanceOf(UserId)
       expect(testUser.getName()).toBe('John Doe')
       expect(testUser.getEmail()).toBe('test@example.com')
     })
 
     it('should create a user with default createdAt date', () => {
-      const user = new User('user-456', testEmail, testPassword, 'Jane Doe', testRole)
+      const user = new User(createUserId('user-456'), testEmail, testPassword, 'Jane Doe', testRole)
 
       // createdAt should be between beforeCreation and afterCreation
       // We can't directly access createdAt as it's private, but we can verify the user was created
@@ -37,15 +43,22 @@ describe('User Entity', () => {
 
     it('should create a user with custom createdAt date', () => {
       const customDate = new Date('2024-01-01')
-      const user = new User('user-789', testEmail, testPassword, 'Bob Smith', testRole, customDate)
+      const user = new User(
+        createUserId('user-789'),
+        testEmail,
+        testPassword,
+        'Bob Smith',
+        testRole,
+        customDate
+      )
 
       expect(user).toBeInstanceOf(User)
     })
 
     it('should have id property accessible', () => {
       // TypeScript readonly is compile-time only, property is still accessible
-      expect(testUser.id).toBe('user-123')
-      expect(typeof testUser.id).toBe('string')
+      expect(testUser.id).toBeInstanceOf(UserId)
+      expect(testUser.id).toBeDefined()
     })
   })
 
@@ -58,7 +71,13 @@ describe('User Entity', () => {
 
     it('should return normalized lowercase email', () => {
       const upperEmail = new Email('TEST@EXAMPLE.COM')
-      const user = new User('user-123', upperEmail, testPassword, 'Test User', testRole)
+      const user = new User(
+        createUserId('user-123'),
+        upperEmail,
+        testPassword,
+        'Test User',
+        testRole
+      )
 
       expect(user.getEmail()).toBe('test@example.com')
     })
@@ -73,7 +92,13 @@ describe('User Entity', () => {
 
     it('should return the exact name provided in constructor', () => {
       const specialName = "José María O'Brien-Smith"
-      const user = new User('user-123', testEmail, testPassword, specialName, testRole)
+      const user = new User(
+        createUserId('user-123'),
+        testEmail,
+        testPassword,
+        specialName,
+        testRole
+      )
 
       expect(user.getName()).toBe(specialName)
     })
@@ -88,7 +113,13 @@ describe('User Entity', () => {
 
     it('should return the correct role for admin users', () => {
       const adminRole = new Role('admin')
-      const adminUser = new User('admin-123', testEmail, testPassword, 'Admin User', adminRole)
+      const adminUser = new User(
+        createUserId('admin-123'),
+        testEmail,
+        testPassword,
+        'Admin User',
+        adminRole
+      )
 
       expect(adminUser.getRole()).toBe('admin')
     })
@@ -246,37 +277,37 @@ describe('User Entity', () => {
   describe('Type Safety', () => {
     it('should accept Email type for email parameter', () => {
       const email = new Email('typed@example.com')
-      const user = new User('id-123', email, testPassword, 'Test User', testRole)
+      const user = new User(createUserId('id-123'), email, testPassword, 'Test User', testRole)
 
       expect(user.getEmail()).toBe('typed@example.com')
     })
 
     it('should accept Password type for password parameter', async () => {
       const password = await Password.create('typedpassword')
-      const user = new User('id-123', testEmail, password, 'Test User', testRole)
+      const user = new User(createUserId('id-123'), testEmail, password, 'Test User', testRole)
 
       expect(user).toBeInstanceOf(User)
     })
 
-    it('should have id as readonly string', () => {
-      expect(typeof testUser.id).toBe('string')
+    it('should have id as readonly branded type', () => {
+      expect(testUser.id).toBeInstanceOf(UserId)
 
       // TypeScript readonly is compile-time only
       // The id value is accessible
-      expect(testUser.id).toBe('user-123')
+      expect(testUser.id).toBeDefined()
     })
   })
 
   describe('Edge Cases', () => {
     it('should handle user with empty name', () => {
-      const user = new User('id-123', testEmail, testPassword, '', testRole)
+      const user = new User(createUserId('id-123'), testEmail, testPassword, '', testRole)
 
       expect(user.getName()).toBe('')
     })
 
     it('should handle user with very long name', () => {
       const longName = 'A'.repeat(1000)
-      const user = new User('id-123', testEmail, testPassword, longName, testRole)
+      const user = new User(createUserId('id-123'), testEmail, testPassword, longName, testRole)
 
       expect(user.getName()).toBe(longName)
       expect(user.getName().length).toBe(1000)
@@ -292,7 +323,7 @@ describe('User Entity', () => {
       ]
 
       for (const name of specialNames) {
-        const user = new User('id-123', testEmail, testPassword, name, testRole)
+        const user = new User(createUserId('id-123'), testEmail, testPassword, name, testRole)
         expect(user.getName()).toBe(name)
       }
     })
@@ -324,7 +355,13 @@ describe('User Entity', () => {
   describe('Integration with Value Objects', () => {
     it('should work with Email value object normalization', () => {
       const mixedCaseEmail = new Email('TeSt@ExAmPlE.CoM')
-      const user = new User('id-123', mixedCaseEmail, testPassword, 'Test User', testRole)
+      const user = new User(
+        createUserId('id-123'),
+        mixedCaseEmail,
+        testPassword,
+        'Test User',
+        testRole
+      )
 
       expect(user.getEmail()).toBe('test@example.com')
     })
@@ -332,7 +369,13 @@ describe('User Entity', () => {
     it('should work with Password value object hashing', async () => {
       const plainPassword = 'mysecretpassword123'
       const hashedPassword = await Password.create(plainPassword)
-      const user = new User('id-123', testEmail, hashedPassword, 'Test User', testRole)
+      const user = new User(
+        createUserId('id-123'),
+        testEmail,
+        hashedPassword,
+        'Test User',
+        testRole
+      )
 
       expect(user).toBeInstanceOf(User)
 
@@ -345,8 +388,8 @@ describe('User Entity', () => {
       const email1 = new Email('same@example.com')
       const email2 = new Email('same@example.com')
 
-      const user1 = new User('id-1', email1, testPassword, 'User 1', testRole)
-      const user2 = new User('id-2', email2, testPassword, 'User 2', testRole)
+      const user1 = new User(createUserId('id-1'), email1, testPassword, 'User 1', testRole)
+      const user2 = new User(createUserId('id-2'), email2, testPassword, 'User 2', testRole)
 
       expect(user1.getEmail()).toBe(user2.getEmail())
     })
@@ -356,8 +399,8 @@ describe('User Entity', () => {
     it('should have readonly id property (TypeScript compile-time)', () => {
       // TypeScript readonly is compile-time only, not runtime
       // The id property is accessible but TypeScript prevents reassignment
-      expect(testUser.id).toBe('user-123')
-      expect(typeof testUser.id).toBe('string')
+      expect(testUser.id).toBeInstanceOf(UserId)
+      expect(testUser.id).toBeDefined()
     })
 
     it('should properly encapsulate email field', () => {
@@ -398,15 +441,15 @@ describe('User Entity', () => {
       const password1 = await Password.create('password123')
       const password2 = await Password.create('differentpass456')
 
-      const user1 = new User('id-1', testEmail, password1, 'User 1', testRole)
-      const user2 = new User('id-2', testEmail, password2, 'User 2', testRole)
+      const user1 = new User(createUserId('id-1'), testEmail, password1, 'User 1', testRole)
+      const user2 = new User(createUserId('id-2'), testEmail, password2, 'User 2', testRole)
 
       expect(user1.getPasswordHash()).not.toBe(user2.getPasswordHash())
     })
 
     it('should return the same hash for same password input', async () => {
       const password = await Password.create('samepassword123')
-      const user = new User('id-1', testEmail, password, 'Test User', testRole)
+      const user = new User(createUserId('id-1'), testEmail, password, 'Test User', testRole)
 
       const hash1 = user.getPasswordHash()
       const hash2 = user.getPasswordHash()
@@ -468,7 +511,7 @@ describe('User Entity', () => {
     it('should handle special characters correctly', async () => {
       const specialPassword = 'P@ssw0rd!#$%'
       const password = await Password.create(specialPassword)
-      const user = new User('id-1', testEmail, password, 'Test User', testRole)
+      const user = new User(createUserId('id-1'), testEmail, password, 'Test User', testRole)
 
       const isValid = await user.verifyPassword(specialPassword)
 
@@ -478,7 +521,7 @@ describe('User Entity', () => {
     it('should handle passwords with spaces', async () => {
       const passwordWithSpaces = 'pass word 123'
       const password = await Password.create(passwordWithSpaces)
-      const user = new User('id-1', testEmail, password, 'Test User', testRole)
+      const user = new User(createUserId('id-1'), testEmail, password, 'Test User', testRole)
 
       const isValid = await user.verifyPassword(passwordWithSpaces)
 
@@ -509,7 +552,7 @@ describe('User Entity', () => {
     it('should handle unicode characters in password', async () => {
       const unicodePassword = 'pässwørd123汉字'
       const password = await Password.create(unicodePassword)
-      const user = new User('id-1', testEmail, password, 'Test User', testRole)
+      const user = new User(createUserId('id-1'), testEmail, password, 'Test User', testRole)
 
       const isValid = await user.verifyPassword(unicodePassword)
 
@@ -552,12 +595,19 @@ describe('User Entity', () => {
       const createdAt = testUser.getCreatedAt()
 
       expect(createdAt.getTime()).not.toBeNaN()
-      expect(createdAt instanceof Date).toBe(true)
+      expect(createdAt).toBeInstanceOf(Date)
     })
 
     it('should return the custom date when provided in constructor', () => {
       const customDate = new Date('2024-01-15T10:30:00Z')
-      const user = new User('id-123', testEmail, testPassword, 'Test User', testRole, customDate)
+      const user = new User(
+        createUserId('id-123'),
+        testEmail,
+        testPassword,
+        'Test User',
+        testRole,
+        customDate
+      )
 
       const createdAt = user.getCreatedAt()
 
@@ -567,7 +617,7 @@ describe('User Entity', () => {
 
     it('should return current date when no date provided in constructor', () => {
       const beforeCreation = new Date()
-      const user = new User('id-123', testEmail, testPassword, 'Test User', testRole)
+      const user = new User(createUserId('id-123'), testEmail, testPassword, 'Test User', testRole)
       const afterCreation = new Date()
 
       const createdAt = user.getCreatedAt()
@@ -586,12 +636,12 @@ describe('User Entity', () => {
     })
 
     it('should have different creation dates for users created at different times', async () => {
-      const user1 = new User('id-1', testEmail, testPassword, 'User 1', testRole)
+      const user1 = new User(createUserId('id-1'), testEmail, testPassword, 'User 1', testRole)
 
       // Wait a small amount
       await new Promise((resolve) => globalThis.setTimeout(resolve, 10))
 
-      const user2 = new User('id-2', testEmail, testPassword, 'User 2', testRole)
+      const user2 = new User(createUserId('id-2'), testEmail, testPassword, 'User 2', testRole)
 
       expect(user2.getCreatedAt().getTime()).toBeGreaterThan(user1.getCreatedAt().getTime())
     })
@@ -631,7 +681,14 @@ describe('User Entity', () => {
 
     it('should handle dates in the past', () => {
       const pastDate = new Date('2020-01-01T00:00:00Z')
-      const user = new User('id-123', testEmail, testPassword, 'Test User', testRole, pastDate)
+      const user = new User(
+        createUserId('id-123'),
+        testEmail,
+        testPassword,
+        'Test User',
+        testRole,
+        pastDate
+      )
 
       const createdAt = user.getCreatedAt()
 
@@ -641,7 +698,14 @@ describe('User Entity', () => {
 
     it('should return Date object that can be formatted', () => {
       const customDate = new Date('2024-06-15T14:30:00Z')
-      const user = new User('id-123', testEmail, testPassword, 'Test User', testRole, customDate)
+      const user = new User(
+        createUserId('id-123'),
+        testEmail,
+        testPassword,
+        'Test User',
+        testRole,
+        customDate
+      )
 
       const createdAt = user.getCreatedAt()
 

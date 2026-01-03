@@ -1,6 +1,8 @@
 import type { LoggerPort } from '../ports/logger.port.js'
 import type { UIMessage } from 'ai'
 import { AIRepository } from '../../adapters/secondary/repositories/ai.repository.js'
+import type { UserIdType } from '../../domain/value-objects/userID.js'
+import type { ChatIdType } from '../../domain/value-objects/chatID.js'
 
 export interface CreateChatResult {
   id: string
@@ -14,8 +16,8 @@ export class CreateChatUseCase {
   ) {}
   //(id: string, initialMessages: UIMessage[] = []
   async execute(
-    chatId: string,
-    userId: string,
+    chatId: ChatIdType,
+    userId: UserIdType,
     messages: UIMessage[] = []
   ): Promise<CreateChatResult> {
     this.logger.info('Appending chat messages', { userId, messageCount: messages.length })

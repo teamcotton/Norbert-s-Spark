@@ -14,6 +14,7 @@ import type {
 import { DatabaseException } from '../../../shared/exceptions/database.exception.js'
 import { ConflictException } from '../../../shared/exceptions/conflict.exception.js'
 import { DatabaseUtil } from '../../../shared/utils/database.util.js'
+import { UserId, type UserIdType } from '../../../domain/value-objects/userID.js'
 
 /**
  * PostgreSQL implementation of the User Repository
@@ -86,7 +87,7 @@ export class PostgresUserRepository implements UserRepositoryPort {
    * }
    * ```
    */
-  async save(userEntity: User): Promise<string> {
+  async save(userEntity: User): Promise<UserIdType> {
     try {
       // Build values object conditionally to maintain type safety
       // If userId is provided, include it; otherwise let PostgreSQL generate UUIDv7
@@ -99,7 +100,9 @@ export class PostgresUserRepository implements UserRepositoryPort {
       }
 
       const insertValues =
-        userEntity.id !== undefined ? { ...baseValues, userId: userEntity.id } : baseValues
+        userEntity.id !== undefined
+          ? { ...baseValues, userId: userEntity.id.getValue()! }
+          : baseValues
 
       const result = await db.insert(user).values(insertValues).returning({ userId: user.userId })
 
@@ -107,7 +110,7 @@ export class PostgresUserRepository implements UserRepositoryPort {
         throw new DatabaseException('Failed to retrieve generated user ID', {})
       }
 
-      return result[0].userId
+      return new UserId(result[0].userId) as UserIdType
     } catch (error) {
       if (DatabaseUtil.isDuplicateKeyError(error)) {
         throw new ConflictException('User with this email already exists', {
@@ -299,7 +302,7 @@ export class PostgresUserRepository implements UserRepositoryPort {
           name: userEntity.getName(),
           role: userEntity.getRole(),
         })
-        .where(eq(user.userId, userEntity.id))
+        .where(eq(user.userId, userEntity.id.getValue()!))
     } catch (error) {
       if (DatabaseUtil.isDuplicateKeyError(error)) {
         throw new ConflictException('User with this email already exists', {
@@ -402,6 +405,7 @@ export class PostgresUserRepository implements UserRepositoryPort {
     const email = new Email(record.email)
     const password = Password.fromHash(record.password)
     const role = new Role(record.role)
-    return new User(record.userId, email, password, record.name, role, record.createdAt)
+    const userId = new UserId(record.userId) as UserIdType
+    return new User(userId, email, password, record.name, role, record.createdAt)
   }
 }

@@ -9,6 +9,8 @@ import {
   type MyDBUIMessagePartSelect,
 } from '../../../infrastructure/database/schema.js'
 import type { UIMessage } from 'ai'
+import type { UserIdType } from '../../../domain/value-objects/userID.js'
+import type { ChatIdType } from '../../../domain/value-objects/chatID.js'
 
 export type ChatResponseResult = {
   message: DBMessageSelect
@@ -17,13 +19,13 @@ export type ChatResponseResult = {
 
 export class AIRepository implements AIServicePort {
   async createChat(
-    chatId: string,
-    userId: string,
+    chatId: ChatIdType,
+    userId: UserIdType,
     initialMessages: UIMessage[] = []
   ): Promise<string> {
     const newChat = {
-      userId: userId,
-      id: chatId,
+      userId: userId.getValue()!,
+      id: chatId.getValue()!,
     }
     console.log('createChat', newChat)
 
@@ -32,7 +34,7 @@ export class AIRepository implements AIServicePort {
     // Insert initial messages if provided
     if (initialMessages.length > 0) {
       const messageRecords = initialMessages.map((msg) => ({
-        chatId,
+        chatId: chatId.getValue()!,
         role: msg.role,
       }))
 
@@ -62,9 +64,9 @@ export class AIRepository implements AIServicePort {
       }
     }
 
-    return chatId
+    return chatId.getValue()!
   }
-  async getChatResponse(chatId: string): Promise<ChatResponseResult | null> {
+  async getChatResponse(chatId: string | any): Promise<ChatResponseResult | null> {
     try {
       // Query messages based on chatId and retrieve related parts
       const result = await db

@@ -12,6 +12,7 @@ import { EnvConfig } from '../../../infrastructure/config/env.config.js'
 import { HeartOfDarknessTool } from '../../../infrastructure/ai/tools/heart-of-darkness.tool.js'
 import { SaveChatUseCase } from '../../../application/use-cases/save-chat.use-case.js'
 import { GetChatUseCase } from '../../../application/use-cases/get-chat.use-case.js'
+import { ChatId, type ChatIdType } from '../../../domain/value-objects/chatID.js'
 
 export class AIController {
   private readonly heartOfDarknessTool: HeartOfDarknessTool
@@ -70,6 +71,9 @@ export class AIController {
       return reply.status(401).send(FastifyUtil.createResponse('User not authenticated', 401))
     }
 
+    // Convert string id to ChatIdType branded type
+    const chatId = new ChatId(id) as ChatIdType
+
     const chat = await this.getChatUseCase.execute(userId, messages)
 
     const mostRecentMessage = messages[messages.length - 1]
@@ -86,9 +90,9 @@ export class AIController {
 
     if (!chat) {
       this.logger.info('Chat does not exist, creating new chat', { id })
-      await this.saveChatUseCase.execute(id, userId, messages)
+      await this.saveChatUseCase.execute(chatId, userId, messages)
     } else {
-      await this.appendChatUseCase.execute(id, [mostRecentMessage as UIMessage])
+      await this.appendChatUseCase.execute(chatId, [mostRecentMessage as UIMessage])
       this.logger.info('Chat exists, appending most recent message', { id })
     }
 
@@ -170,7 +174,7 @@ export class AIController {
         // console.log('toUIMessageStreamResponse.onFinish')
         // console.log('  responseMessage')
         // console.dir(responseMessage, { depth: null })
-        await this.appendChatUseCase.execute(id, [responseMessage])
+        await this.appendChatUseCase.execute(chatId, [responseMessage])
       },
     })
   }

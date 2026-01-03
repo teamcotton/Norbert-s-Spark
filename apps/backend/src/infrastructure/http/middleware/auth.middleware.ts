@@ -2,6 +2,7 @@ import type { FastifyRequest, FastifyReply } from 'fastify'
 import { JwtUtil } from '../../security/jwt.util.js'
 import { UnauthorizedException } from '../../../shared/exceptions/unauthorized.exception.js'
 import { ErrorCode } from '../../../shared/constants/error-codes.js'
+import { UserId, type UserIdType } from '../../../domain/value-objects/userID.js'
 
 // Maximum allowed token length to prevent DOS attacks (typical JWT is 200-500 bytes)
 const MAX_TOKEN_LENGTH = 8192
@@ -126,7 +127,16 @@ export async function authMiddleware(
     // Validate token format before expensive verification
     validateTokenFormat(token)
 
-    request.user = JwtUtil.verifyToken(token)
+    const verifiedClaims = JwtUtil.verifyToken(token)
+
+    // Convert string sub to UserIdType branded type
+    const userId = new UserId(verifiedClaims.sub) as UserIdType
+
+    request.user = {
+      sub: userId,
+      email: verifiedClaims.email,
+      roles: verifiedClaims.roles,
+    }
   } catch (error) {
     if (error instanceof UnauthorizedException) {
       request.log.warn(

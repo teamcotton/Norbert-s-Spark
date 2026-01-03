@@ -11,6 +11,7 @@ import { User } from '../../../src/domain/entities/user.js'
 import { Email } from '../../../src/domain/value-objects/email.js'
 import { Password } from '../../../src/domain/value-objects/password.js'
 import { Role } from '../../../src/domain/value-objects/role.js'
+import { UserId, type UserIdType } from '../../../src/domain/value-objects/userID.js'
 import { UnauthorizedException } from '../../../src/shared/exceptions/unauthorized.exception.js'
 
 describe('LoginUserUseCase', () => {
@@ -26,13 +27,8 @@ describe('LoginUserUseCase', () => {
     role: string = 'user',
     name: string = 'Test User'
   ): Promise<User> => {
-    return new User(
-      randomUUID(),
-      new Email(email),
-      await Password.create(password),
-      name,
-      new Role(role)
-    )
+    const userId = new UserId(randomUUID()) as UserIdType
+    return new User(userId, new Email(email), await Password.create(password), name, new Role(role))
   }
 
   beforeEach(() => {

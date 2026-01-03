@@ -5,6 +5,7 @@ import { User } from '../../../../src/domain/entities/user.js'
 import { Email } from '../../../../src/domain/value-objects/email.js'
 import { Password } from '../../../../src/domain/value-objects/password.js'
 import { Role } from '../../../../src/domain/value-objects/role.js'
+import { UserId, type UserIdType } from '../../../../src/domain/value-objects/userID.js'
 // Import db after mocking
 import { db } from '../../../../src/infrastructure/database/index.js'
 import { POSTGRES_ERROR_CODE } from '../../../../src/shared/constants/error-codes.js'
@@ -36,7 +37,8 @@ describe('PostgresUserRepository', () => {
     testEmail = new Email('test@example.com')
     testPassword = await Password.create('password123')
     testRole = new Role('user')
-    testUser = new User('user-123', testEmail, testPassword, 'John Doe', testRole)
+    const testUserId = new UserId('user-123') as UserIdType
+    testUser = new User(testUserId, testEmail, testPassword, 'John Doe', testRole)
 
     // Valid bcrypt hash for testing (hash of "password123")
     validBcryptHash = '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy'
@@ -87,11 +89,12 @@ describe('PostgresUserRepository', () => {
       const email = new Email('newemail@example.com')
       const password = await Password.create('newpass123')
       const role = new Role('admin')
-      const user = new User('user-456', email, password, 'Jane Doe', role)
+      const userId = new UserId('user-456') as UserIdType
+      const user = new User(userId, email, password, 'Jane Doe', role)
 
-      const userId = await repository.save(user)
+      const returnedUserId = await repository.save(user)
 
-      expect(userId).toBe('user-456')
+      expect(returnedUserId).toBeInstanceOf(UserId)
       const callArgs = mockValues.mock.calls?.[0]?.[0]
       expect(callArgs.email).toBe('newemail@example.com')
       expect(callArgs.name).toBe('Jane Doe')
@@ -348,7 +351,8 @@ describe('PostgresUserRepository', () => {
       vi.mocked(db.update).mockReturnValue(mockUpdate() as any)
 
       const newEmail = new Email('updated@example.com')
-      const updatedUser = new User('user-789', newEmail, testPassword, 'Updated Name', testRole)
+      const userId = new UserId('user-789') as UserIdType
+      const updatedUser = new User(userId, newEmail, testPassword, 'Updated Name', testRole)
 
       await repository.update(updatedUser)
 

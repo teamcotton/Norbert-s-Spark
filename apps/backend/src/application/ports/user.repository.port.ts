@@ -1,4 +1,5 @@
 import type { User } from '../../domain/entities/user.js'
+import type { UserIdType } from '../../domain/value-objects/userID.js'
 
 export interface PaginationParams {
   limit?: number
@@ -13,7 +14,7 @@ export interface PaginatedResult<T> {
 }
 
 export interface UserRepositoryPort {
-  save(user: User): Promise<string>
+  save(user: User): Promise<UserIdType>
   findAll(params?: PaginationParams): Promise<PaginatedResult<User>>
   findById(id: string): Promise<User | null>
   findByEmail(email: string): Promise<User | null>

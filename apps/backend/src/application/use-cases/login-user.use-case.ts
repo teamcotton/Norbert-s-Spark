@@ -4,6 +4,7 @@ import type { LoggerPort } from '../ports/logger.port.js'
 import type { TokenGeneratorPort } from '../ports/token-generator.port.js'
 import { UnauthorizedException } from '../../shared/exceptions/unauthorized.exception.js'
 import { InternalErrorException } from '../../shared/exceptions/internal-error.exception.js'
+import type { UserIdType } from '../../domain/value-objects/userID.js'
 
 /**
  * Use case for authenticating users and generating access tokens
@@ -116,7 +117,7 @@ export class LoginUserUseCase {
    * ```
    */
   async execute(dto: LoginUserDto): Promise<{
-    userId: string
+    userId: UserIdType
     email: string
     access_token: string
     roles: string[]

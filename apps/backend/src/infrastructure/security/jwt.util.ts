@@ -98,7 +98,10 @@ export class JwtUtil {
     const options: SignOptions = {
       expiresIn: Number.parseInt(EnvConfig.JWT_EXPIRATION),
       issuer: EnvConfig.JWT_ISSUER,
-      subject: sub,
+    }
+    const userIdString = String(sub)
+    if (isString(userIdString)) {
+      options.subject = userIdString
     }
 
     return jwt.sign(restClaims, EnvConfig.JWT_SECRET as string, options)
@@ -170,7 +173,8 @@ export class JwtUtil {
       if (!sub || !email) {
         throw new UnauthorizedException('Token missing required claims', ErrorCode.UNAUTHORIZED)
       }
-      return { sub, email, roles }
+      const userIdString = String(sub)
+      return { sub: userIdString, email, roles }
     } catch (error) {
       if (error instanceof UnauthorizedException) {
         throw error

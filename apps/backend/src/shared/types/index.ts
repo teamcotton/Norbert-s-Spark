@@ -5,6 +5,7 @@ import {
   type UIMessage,
 } from 'ai'
 import { z } from 'zod'
+import type { UserIdType } from '../../domain/value-objects/userID.js'
 
 export const metadataSchema = z.object({})
 
@@ -24,7 +25,7 @@ export type MyDataPart = z.infer<typeof dataPartSchema>
 export type MyUIMessagePart = UIMessagePart<MyDataPart, never>
 
 export type JwtUserClaims = {
-  sub: string
+  sub: UserIdType
   email: string
   roles?: string[]
 }

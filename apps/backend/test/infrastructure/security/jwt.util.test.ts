@@ -1,23 +1,29 @@
 import jwt from 'jsonwebtoken'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { UserId, type UserIdType } from '../../../src/domain/value-objects/userID.js'
 import { EnvConfig } from '../../../src/infrastructure/config/env.config.js'
 import { JwtUtil } from '../../../src/infrastructure/security/jwt.util.js'
 import { ErrorCode } from '../../../src/shared/constants/error-codes.js'
 import { UnauthorizedException } from '../../../src/shared/exceptions/unauthorized.exception.js'
 import type { JwtUserClaims } from '../../../src/shared/types/index.js'
 
-describe('JwtUtil', () => {
-  const validClaims: JwtUserClaims = {
-    sub: 'user-123',
-    email: 'test@example.com',
-    roles: ['user', 'admin'],
+// Helper function to create mock claims with proper UserIdType
+function createMockClaims(userId: string, email: string, roles?: string[]): JwtUserClaims {
+  return {
+    sub: new UserId(userId) as UserIdType,
+    email,
+    roles,
   }
+}
 
-  const validClaimsWithoutRoles: JwtUserClaims = {
-    sub: 'user-456',
-    email: 'basic@example.com',
-  }
+describe('JwtUtil', () => {
+  const validClaims: JwtUserClaims = createMockClaims('user-123', 'test@example.com', [
+    'user',
+    'admin',
+  ])
+
+  const validClaimsWithoutRoles: JwtUserClaims = createMockClaims('user-456', 'basic@example.com')
 
   beforeEach(() => {
     // Clear any mocks and restore spies before each test
@@ -44,7 +50,7 @@ describe('JwtUtil', () => {
 
     it('should include correct claims in the token', () => {
       const token = JwtUtil.generateToken(validClaims)
-      const decoded = jwt.decode(token) as JwtUserClaims & { iss: string; exp: number }
+      const decoded = jwt.decode(token) as unknown as JwtUserClaims & { iss: string; exp: number }
 
       expect(decoded.sub).toBe(validClaims.sub)
       expect(decoded.email).toBe(validClaims.email)
@@ -389,11 +395,11 @@ describe('JwtUtil', () => {
 
   describe('Edge cases', () => {
     it('should handle claims with special characters', () => {
-      const specialClaims: JwtUserClaims = {
-        sub: 'user-123-!@#$%',
-        email: 'test+special@example.com',
-        roles: ['admin', 'super-user'],
-      }
+      const specialClaims: JwtUserClaims = createMockClaims(
+        'user-123-!@#$%',
+        'test+special@example.com',
+        ['admin', 'super-user']
+      )
 
       const token = JwtUtil.generateToken(specialClaims)
       const verified = JwtUtil.verifyToken(token)
@@ -403,11 +409,11 @@ describe('JwtUtil', () => {
     })
 
     it('should handle empty roles array', () => {
-      const claimsWithEmptyRoles: JwtUserClaims = {
-        sub: 'user-789',
-        email: 'empty@example.com',
-        roles: [],
-      }
+      const claimsWithEmptyRoles: JwtUserClaims = createMockClaims(
+        'user-789',
+        'empty@example.com',
+        []
+      )
 
       const token = JwtUtil.generateToken(claimsWithEmptyRoles)
       const verified = JwtUtil.verifyToken(token)
@@ -416,10 +422,10 @@ describe('JwtUtil', () => {
     })
 
     it('should handle long email addresses', () => {
-      const longEmailClaims: JwtUserClaims = {
-        sub: 'user-long',
-        email: 'very.long.email.address.that.exceeds.normal.length@example.com',
-      }
+      const longEmailClaims: JwtUserClaims = createMockClaims(
+        'user-long',
+        'very.long.email.address.that.exceeds.normal.length@example.com'
+      )
 
       const token = JwtUtil.generateToken(longEmailClaims)
       const verified = JwtUtil.verifyToken(token)
@@ -428,11 +434,13 @@ describe('JwtUtil', () => {
     })
 
     it('should handle multiple roles', () => {
-      const multiRoleClaims: JwtUserClaims = {
-        sub: 'user-multi',
-        email: 'multi@example.com',
-        roles: ['user', 'admin', 'moderator', 'editor', 'viewer'],
-      }
+      const multiRoleClaims: JwtUserClaims = createMockClaims('user-multi', 'multi@example.com', [
+        'user',
+        'admin',
+        'moderator',
+        'editor',
+        'viewer',
+      ])
 
       const token = JwtUtil.generateToken(multiRoleClaims)
       const verified = JwtUtil.verifyToken(token)

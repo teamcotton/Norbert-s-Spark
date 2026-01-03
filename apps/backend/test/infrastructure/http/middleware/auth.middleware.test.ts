@@ -1,11 +1,21 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { UserId, type UserIdType } from '../../../../src/domain/value-objects/userID.js'
 import { authMiddleware } from '../../../../src/infrastructure/http/middleware/auth.middleware.js'
 import { JwtUtil } from '../../../../src/infrastructure/security/jwt.util.js'
 import { ErrorCode } from '../../../../src/shared/constants/error-codes.js'
 import { UnauthorizedException } from '../../../../src/shared/exceptions/unauthorized.exception.js'
 import type { JwtUserClaims } from '../../../../src/shared/types/index.js'
+
+// Helper function to create mock claims with proper UserIdType
+function createMockClaims(userId: string, email: string, roles?: string[]): JwtUserClaims {
+  return {
+    sub: new UserId(userId) as UserIdType,
+    email,
+    roles,
+  }
+}
 
 describe('authMiddleware', () => {
   let mockRequest: Partial<FastifyRequest>
@@ -14,11 +24,7 @@ describe('authMiddleware', () => {
   let codeSpy: ReturnType<typeof vi.fn>
   let logWarnSpy: ReturnType<typeof vi.fn>
 
-  const validClaims: JwtUserClaims = {
-    sub: 'user-123',
-    email: 'test@example.com',
-    roles: ['user'],
-  }
+  const validClaims: JwtUserClaims = createMockClaims('user-123', 'test@example.com', ['user'])
 
   beforeEach(() => {
     // Reset all mocks and restore spies
@@ -82,10 +88,7 @@ describe('authMiddleware', () => {
     })
 
     it('should authenticate token without roles', async () => {
-      const claimsWithoutRoles: JwtUserClaims = {
-        sub: 'user-456',
-        email: 'noroles@example.com',
-      }
+      const claimsWithoutRoles: JwtUserClaims = createMockClaims('user-456', 'noroles@example.com')
       const token = JwtUtil.generateToken(claimsWithoutRoles)
       mockRequest.headers = { authorization: `Bearer ${token}` }
 
@@ -99,11 +102,11 @@ describe('authMiddleware', () => {
     })
 
     it('should authenticate token with multiple roles', async () => {
-      const multiRoleClaims: JwtUserClaims = {
-        sub: 'admin-789',
-        email: 'admin@example.com',
-        roles: ['user', 'admin', 'moderator'],
-      }
+      const multiRoleClaims: JwtUserClaims = createMockClaims('admin-789', 'admin@example.com', [
+        'user',
+        'admin',
+        'moderator',
+      ])
       const token = JwtUtil.generateToken(multiRoleClaims)
       mockRequest.headers = { authorization: `Bearer ${token}` }
 
@@ -527,11 +530,11 @@ describe('authMiddleware', () => {
     })
 
     it('should handle very long tokens', async () => {
-      const longClaimsClaims: JwtUserClaims = {
-        sub: 'a'.repeat(100), // Reduced from 1000 to avoid potential JWT size issues
-        email: 'test@example.com',
-        roles: Array.from({ length: 50 }, (_, i) => `role-${i}`), // Reduced from 100
-      }
+      const longClaimsClaims: JwtUserClaims = createMockClaims(
+        'a'.repeat(100), // Reduced from 1000 to avoid potential JWT size issues
+        'test@example.com',
+        Array.from({ length: 50 }, (_, i) => `role-${i}`) // Reduced from 100
+      )
       const token = JwtUtil.generateToken(longClaimsClaims)
       mockRequest.headers = { authorization: `Bearer ${token}` }
 
@@ -599,16 +602,8 @@ describe('authMiddleware', () => {
     })
 
     it('should authenticate different users with different tokens', async () => {
-      const user1Claims: JwtUserClaims = {
-        sub: 'user-1',
-        email: 'user1@example.com',
-        roles: ['user'],
-      }
-      const user2Claims: JwtUserClaims = {
-        sub: 'user-2',
-        email: 'user2@example.com',
-        roles: ['admin'],
-      }
+      const user1Claims: JwtUserClaims = createMockClaims('user-1', 'user1@example.com', ['user'])
+      const user2Claims: JwtUserClaims = createMockClaims('user-2', 'user2@example.com', ['admin'])
 
       const token1 = JwtUtil.generateToken(user1Claims)
       const token2 = JwtUtil.generateToken(user2Claims)

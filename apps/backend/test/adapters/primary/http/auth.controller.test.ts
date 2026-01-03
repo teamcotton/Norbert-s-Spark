@@ -3,8 +3,19 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { AuthController } from '../../../../src/adapters/primary/http/auth.controller.js'
 import { LoginUserUseCase } from '../../../../src/application/use-cases/login-user.use-case.js'
+import { UserId, type UserIdType } from '../../../../src/domain/value-objects/userID.js'
 import { UnauthorizedException } from '../../../../src/shared/exceptions/unauthorized.exception.js'
 import { ValidationException } from '../../../../src/shared/exceptions/validation.exception.js'
+
+// Helper function to create mock auth result with proper UserIdType
+function createMockAuthResult(userId: string, email: string, token: string, roles: string[]) {
+  return {
+    userId: new UserId(userId) as UserIdType,
+    email,
+    access_token: token,
+    roles,
+  }
+}
 
 describe('AuthController', () => {
   let controller: AuthController
@@ -104,12 +115,12 @@ describe('AuthController', () => {
           password: 'SecurePass123!',
         }
 
-        const mockResult = {
-          userId: 'user-123-abc',
-          email: 'user@example.com',
-          access_token: 'mock.jwt.token',
-          roles: ['user'],
-        }
+        const mockResult = createMockAuthResult(
+          'user-123-abc',
+          'user@example.com',
+          'mock.jwt.token',
+          ['user']
+        )
         vi.mocked(mockLoginUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.login(mockRequest, mockReply)
@@ -129,12 +140,12 @@ describe('AuthController', () => {
           password: 'SecurePass123!',
         }
 
-        const mockResult = {
-          userId: 'user-123-abc',
-          email: 'user@example.com',
-          access_token: 'mock.jwt.token',
-          roles: ['user'],
-        }
+        const mockResult = createMockAuthResult(
+          'user-123-abc',
+          'user@example.com',
+          'mock.jwt.token',
+          ['user']
+        )
         vi.mocked(mockLoginUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.login(mockRequest, mockReply)
@@ -148,12 +159,12 @@ describe('AuthController', () => {
           password: 'SecurePass123!',
         }
 
-        const mockResult = {
-          userId: 'user-123-abc',
-          email: 'user@example.com',
-          access_token: 'mock.jwt.token',
-          roles: ['user'],
-        }
+        const mockResult = createMockAuthResult(
+          'user-123-abc',
+          'user@example.com',
+          'mock.jwt.token',
+          ['user']
+        )
         vi.mocked(mockLoginUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.login(mockRequest, mockReply)
@@ -170,12 +181,12 @@ describe('AuthController', () => {
           password: 'AdminPass123!',
         }
 
-        const mockResult = {
-          userId: 'admin-456-xyz',
-          email: 'admin@example.com',
-          access_token: 'admin.jwt.token',
-          roles: ['admin'],
-        }
+        const mockResult = createMockAuthResult(
+          'admin-456-xyz',
+          'admin@example.com',
+          'admin.jwt.token',
+          ['admin']
+        )
         vi.mocked(mockLoginUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.login(mockRequest, mockReply)
@@ -192,12 +203,12 @@ describe('AuthController', () => {
           password: 'SecurePass123!',
         }
 
-        const mockResult = {
-          userId: 'user-123-abc',
-          email: 'user@example.com',
-          access_token: 'mock.jwt.token',
-          roles: ['user'],
-        }
+        const mockResult = createMockAuthResult(
+          'user-123-abc',
+          'user@example.com',
+          'mock.jwt.token',
+          ['user']
+        )
         vi.mocked(mockLoginUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.login(mockRequest, mockReply)
@@ -216,12 +227,12 @@ describe('AuthController', () => {
           password: 'TestPass123!',
         }
 
-        const mockResult = {
-          userId: 'user-789-def',
-          email: 'test@example.com',
-          access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test.signature',
-          roles: ['user', 'moderator'],
-        }
+        const mockResult = createMockAuthResult(
+          'user-789-def',
+          'test@example.com',
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test.signature',
+          ['user', 'moderator']
+        )
         vi.mocked(mockLoginUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.login(mockRequest, mockReply)
@@ -246,12 +257,12 @@ describe('AuthController', () => {
           password: 'SecurePass123!',
         }
 
-        const mockResult = {
-          userId: 'user-123-abc',
-          email: 'user@example.com',
-          access_token: 'mock.jwt.token',
-          roles: ['user'],
-        }
+        const mockResult = createMockAuthResult(
+          'user-123-abc',
+          'user@example.com',
+          'mock.jwt.token',
+          ['user']
+        )
         vi.mocked(mockLoginUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.login(mockRequest, mockReply)
@@ -272,12 +283,12 @@ describe('AuthController', () => {
           password: 'SecurePass123!',
         }
 
-        const mockResult = {
-          userId: 'user-123-abc',
-          email: 'user@example.com',
-          access_token: 'mock.jwt.token',
-          roles: ['user'],
-        }
+        const mockResult = createMockAuthResult(
+          'user-123-abc',
+          'user@example.com',
+          'mock.jwt.token',
+          ['user']
+        )
         vi.mocked(mockLoginUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.login(mockRequest, mockReply)
@@ -650,12 +661,12 @@ describe('AuthController', () => {
           password: 'SecurePass123!',
         }
 
-        const mockResult = {
-          userId: 'user-123-abc',
-          email: 'user@example.com',
-          access_token: 'mock.jwt.token',
-          roles: ['user'],
-        }
+        const mockResult = createMockAuthResult(
+          'user-123-abc',
+          'user@example.com',
+          'mock.jwt.token',
+          ['user']
+        )
 
         vi.mocked(mockLoginUserUseCase.execute).mockResolvedValue(mockResult)
 
@@ -682,12 +693,12 @@ describe('AuthController', () => {
           password: 'SecurePass123!',
         }
 
-        const mockResult = {
-          userId: 'user-123-abc',
-          email: 'user@example.com',
-          access_token: 'mock.jwt.token',
-          roles: ['user'],
-        }
+        const mockResult = createMockAuthResult(
+          'user-123-abc',
+          'user@example.com',
+          'mock.jwt.token',
+          ['user']
+        )
 
         vi.mocked(mockLoginUserUseCase.execute).mockResolvedValue(mockResult)
 
@@ -703,12 +714,12 @@ describe('AuthController', () => {
           password: 'SecurePass123!',
         }
 
-        const mockResult = {
-          userId: 'user-123-abc',
-          email: 'user@example.com',
-          access_token: 'mock.jwt.token',
-          roles: ['user'],
-        }
+        const mockResult = createMockAuthResult(
+          'user-123-abc',
+          'user@example.com',
+          'mock.jwt.token',
+          ['user']
+        )
         vi.mocked(mockLoginUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.login(mockRequest, mockReply)
@@ -724,12 +735,13 @@ describe('AuthController', () => {
           password: 'SecurePass123!',
         }
 
-        const mockResult = {
-          userId: 'user-123-abc',
-          email: 'user@example.com',
-          access_token: 'mock.jwt.token',
-          roles: ['user'],
-        }
+        const mockResult = createMockAuthResult(
+          'user-123-abc',
+          'user@example.com',
+          'mock.jwt.token',
+          ['user']
+        )
+
         vi.mocked(mockLoginUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.login(mockRequest, mockReply)
@@ -763,12 +775,10 @@ describe('AuthController', () => {
           password: 'SecurePass123!',
         }
 
-        const mockResult = {
-          userId: 'user-123-abc',
-          email: longEmail,
-          access_token: 'mock.jwt.token',
-          roles: ['user'],
-        }
+        const mockResult = createMockAuthResult('user-123-abc', longEmail, 'mock.jwt.token', [
+          'user',
+        ])
+
         vi.mocked(mockLoginUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.login(mockRequest, mockReply)
@@ -785,12 +795,13 @@ describe('AuthController', () => {
           password: specialPassword,
         }
 
-        const mockResult = {
-          userId: 'user-123-abc',
-          email: 'user@example.com',
-          access_token: 'mock.jwt.token',
-          roles: ['user'],
-        }
+        const mockResult = createMockAuthResult(
+          'user-123-abc',
+          'user@example.com',
+          'mock.jwt.token',
+          ['user']
+        )
+
         vi.mocked(mockLoginUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.login(mockRequest, mockReply)
@@ -806,12 +817,10 @@ describe('AuthController', () => {
           password: 'パスワード123',
         }
 
-        const mockResult = {
-          userId: 'user-123-abc',
-          email: 'user@例え.com',
-          access_token: 'mock.jwt.token',
-          roles: ['user'],
-        }
+        const mockResult = createMockAuthResult('user-123-abc', 'user@例え.com', 'mock.jwt.token', [
+          'user',
+        ])
+
         vi.mocked(mockLoginUserUseCase.execute).mockResolvedValue(mockResult)
 
         await controller.login(mockRequest, mockReply)

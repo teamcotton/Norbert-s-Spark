@@ -1,6 +1,7 @@
 import type { EmailType } from '../value-objects/email.js'
 import type { PasswordType } from '../value-objects/password.js'
 import type { RoleType } from '../value-objects/role.js'
+import type { UserIdType } from '../value-objects/userID.js'
 import { ValidationException } from '../../shared/exceptions/validation.exception.js'
 
 /**
@@ -64,7 +65,7 @@ export class User {
    * ```
    */
   constructor(
-    public readonly id: string | undefined,
+    public readonly id: UserIdType | undefined,
     private email: EmailType,
     private password: PasswordType,
     private name: string,
