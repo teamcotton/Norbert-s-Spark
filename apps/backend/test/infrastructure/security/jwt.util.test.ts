@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken'
+import { uuidv7 } from 'uuidv7'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { UserId, type UserIdType } from '../../../src/domain/value-objects/userID.js'
@@ -9,21 +10,18 @@ import { UnauthorizedException } from '../../../src/shared/exceptions/unauthoriz
 import type { JwtUserClaims } from '../../../src/shared/types/index.js'
 
 // Helper function to create mock claims with proper UserIdType
-function createMockClaims(userId: string, email: string, roles?: string[]): JwtUserClaims {
+function createMockClaims(email: string, roles?: string[], userId?: string): JwtUserClaims {
   return {
-    sub: new UserId(userId) as UserIdType,
+    sub: new UserId(userId || uuidv7()) as UserIdType,
     email,
     roles,
   }
 }
 
 describe('JwtUtil', () => {
-  const validClaims: JwtUserClaims = createMockClaims('user-123', 'test@example.com', [
-    'user',
-    'admin',
-  ])
+  const validClaims: JwtUserClaims = createMockClaims('test@example.com', ['user', 'admin'])
 
-  const validClaimsWithoutRoles: JwtUserClaims = createMockClaims('user-456', 'basic@example.com')
+  const validClaimsWithoutRoles: JwtUserClaims = createMockClaims('basic@example.com')
 
   beforeEach(() => {
     // Clear any mocks and restore spies before each test
@@ -52,7 +50,7 @@ describe('JwtUtil', () => {
       const token = JwtUtil.generateToken(validClaims)
       const decoded = jwt.decode(token) as unknown as JwtUserClaims & { iss: string; exp: number }
 
-      expect(decoded.sub).toBe(validClaims.sub)
+      expect(decoded.sub).toBe(validClaims.sub.getValue())
       expect(decoded.email).toBe(validClaims.email)
       expect(decoded.roles).toEqual(validClaims.roles)
     })
@@ -68,7 +66,7 @@ describe('JwtUtil', () => {
       const token = JwtUtil.generateToken(validClaims)
       const decoded = jwt.decode(token) as { sub: string }
 
-      expect(decoded.sub).toBe(validClaims.sub)
+      expect(decoded.sub).toBe(validClaims.sub.getValue())
     })
 
     it('should set expiration time from EnvConfig', () => {
@@ -107,7 +105,7 @@ describe('JwtUtil', () => {
       const result = JwtUtil.verifyToken(validToken)
 
       expect(result).toEqual({
-        sub: validClaims.sub,
+        sub: validClaims.sub.getValue(),
         email: validClaims.email,
         roles: validClaims.roles,
       })
@@ -118,7 +116,7 @@ describe('JwtUtil', () => {
       const result = JwtUtil.verifyToken(token)
 
       expect(result).toEqual({
-        sub: validClaimsWithoutRoles.sub,
+        sub: validClaimsWithoutRoles.sub.getValue(),
         email: validClaimsWithoutRoles.email,
         roles: undefined,
       })
@@ -201,13 +199,14 @@ describe('JwtUtil', () => {
     it('should verify token and check issuer from EnvConfig', () => {
       const result = JwtUtil.verifyToken(validToken)
 
-      expect(result.sub).toBe(validClaims.sub)
+      expect(result.sub).toBe(validClaims.sub.getValue())
       expect(result.email).toBe(validClaims.email)
     })
 
     it('should handle token with extra claims', () => {
       const claimsWithExtra = {
         ...validClaims,
+        sub: validClaims.sub.getValue(), // Convert UserId to string for jwt.sign
         extraClaim: 'extra-value',
         anotherField: 123,
       }
@@ -218,7 +217,7 @@ describe('JwtUtil', () => {
 
       const result = JwtUtil.verifyToken(token)
 
-      expect(result.sub).toBe(validClaims.sub)
+      expect(result.sub).toBe(validClaims.sub.getValue())
       expect(result.email).toBe(validClaims.email)
       expect(result.roles).toEqual(validClaims.roles)
     })
@@ -236,7 +235,7 @@ describe('JwtUtil', () => {
 
       expect(decoded).toBeDefined()
       expect(decoded).toMatchObject({
-        sub: validClaims.sub,
+        sub: validClaims.sub.getValue(),
         email: validClaims.email,
         roles: validClaims.roles,
       })
@@ -280,7 +279,7 @@ describe('JwtUtil', () => {
         iat: number
       }
 
-      expect(decoded.sub).toBe(validClaims.sub)
+      expect(decoded.sub).toBe(validClaims.sub.getValue())
       expect(decoded.email).toBe(validClaims.email)
       expect(decoded.roles).toEqual(validClaims.roles)
       expect(decoded.iss).toBe(EnvConfig.JWT_ISSUER)
@@ -292,7 +291,7 @@ describe('JwtUtil', () => {
       const token = JwtUtil.generateToken(validClaimsWithoutRoles)
       const decoded = JwtUtil.decodeToken(token) as JwtUserClaims
 
-      expect(decoded.sub).toBe(validClaimsWithoutRoles.sub)
+      expect(decoded.sub).toBe(validClaimsWithoutRoles.sub.getValue())
       expect(decoded.email).toBe(validClaimsWithoutRoles.email)
       expect(decoded.roles).toBeUndefined()
     })
@@ -315,11 +314,11 @@ describe('JwtUtil', () => {
       const verified = JwtUtil.verifyToken(token)
       const decoded = JwtUtil.decodeToken(token) as JwtUserClaims
 
-      expect(verified.sub).toBe(validClaims.sub)
+      expect(verified.sub).toBe(validClaims.sub.getValue())
       expect(verified.email).toBe(validClaims.email)
       expect(verified.roles).toEqual(validClaims.roles)
 
-      expect(decoded.sub).toBe(validClaims.sub)
+      expect(decoded.sub).toBe(validClaims.sub.getValue())
       expect(decoded.email).toBe(validClaims.email)
       expect(decoded.roles).toEqual(validClaims.roles)
     })
@@ -330,7 +329,7 @@ describe('JwtUtil', () => {
 
       // Verify token on subsequent requests
       const verifiedClaims = JwtUtil.verifyToken(loginToken)
-      expect(verifiedClaims.sub).toBe(validClaims.sub)
+      expect(verifiedClaims.sub).toBe(validClaims.sub.getValue())
 
       // Decode token for debugging/logging (without verification)
       const decodedInfo = JwtUtil.decodeToken(loginToken)
@@ -395,25 +394,20 @@ describe('JwtUtil', () => {
 
   describe('Edge cases', () => {
     it('should handle claims with special characters', () => {
-      const specialClaims: JwtUserClaims = createMockClaims(
-        'user-123-!@#$%',
-        'test+special@example.com',
-        ['admin', 'super-user']
-      )
+      const specialClaims: JwtUserClaims = createMockClaims('test+special@example.com', [
+        'admin',
+        'super-user',
+      ])
 
       const token = JwtUtil.generateToken(specialClaims)
       const verified = JwtUtil.verifyToken(token)
 
-      expect(verified.sub).toBe(specialClaims.sub)
+      expect(verified.sub).toBe(specialClaims.sub.getValue())
       expect(verified.email).toBe(specialClaims.email)
     })
 
     it('should handle empty roles array', () => {
-      const claimsWithEmptyRoles: JwtUserClaims = createMockClaims(
-        'user-789',
-        'empty@example.com',
-        []
-      )
+      const claimsWithEmptyRoles: JwtUserClaims = createMockClaims('empty@example.com', [])
 
       const token = JwtUtil.generateToken(claimsWithEmptyRoles)
       const verified = JwtUtil.verifyToken(token)
@@ -423,7 +417,6 @@ describe('JwtUtil', () => {
 
     it('should handle long email addresses', () => {
       const longEmailClaims: JwtUserClaims = createMockClaims(
-        'user-long',
         'very.long.email.address.that.exceeds.normal.length@example.com'
       )
 
@@ -434,7 +427,7 @@ describe('JwtUtil', () => {
     })
 
     it('should handle multiple roles', () => {
-      const multiRoleClaims: JwtUserClaims = createMockClaims('user-multi', 'multi@example.com', [
+      const multiRoleClaims: JwtUserClaims = createMockClaims('multi@example.com', [
         'user',
         'admin',
         'moderator',

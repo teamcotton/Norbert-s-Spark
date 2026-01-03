@@ -93,7 +93,7 @@ export function requireRole(requiredRoles: string[]): preHandlerAsyncHookHandler
         {
           method,
           route,
-          userId: request.user.sub,
+          userId: request.user.sub.getValue(),
           requiredRoles,
         },
         'Role check failed: User has no roles assigned'
@@ -112,7 +112,7 @@ export function requireRole(requiredRoles: string[]): preHandlerAsyncHookHandler
         {
           method,
           route,
-          userId: request.user.sub,
+          userId: request.user.sub.getValue(),
           userRoles,
           requiredRoles,
         },
@@ -129,7 +129,7 @@ export function requireRole(requiredRoles: string[]): preHandlerAsyncHookHandler
       {
         method,
         route,
-        userId: request.user.sub,
+        userId: request.user.sub.getValue(),
         userRoles,
       },
       'Role check passed'

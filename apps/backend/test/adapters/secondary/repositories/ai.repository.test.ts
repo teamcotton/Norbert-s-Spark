@@ -1,4 +1,5 @@
 import type { UIMessage } from 'ai'
+import { uuidv7 } from 'uuidv7'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { AIRepository } from '../../../../src/adapters/secondary/repositories/ai.repository.js'
@@ -19,13 +20,15 @@ vi.mock('../../../../src/infrastructure/database/index.js', () => ({
 vi.mock('../../../../src/shared/utils/uuid7.util.js', () => ({
   Uuid7Util: {
     createUuidv7: vi.fn(),
+    isValidUUID: vi.fn(() => true),
+    uuidVersionValidation: vi.fn((uuid: string) => 'v7'),
   },
 }))
 
 describe('AIRepository', () => {
   let repository: AIRepository
-  const mockChatIdString = '01234567-89ab-cdef-0123-456789abcdef'
-  const mockUserIdString = 'user-123'
+  const mockChatIdString = uuidv7()
+  const mockUserIdString = uuidv7()
   const mockChatId = new ChatId(mockChatIdString) as ChatIdType
   const mockUserId = new UserId(mockUserIdString) as UserIdType
 

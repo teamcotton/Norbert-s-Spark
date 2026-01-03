@@ -15,21 +15,23 @@ declare const ChatIdBrand: unique symbol
 export type ChatIdType<T extends string = string> = ChatId<T> & { readonly [ChatIdBrand]: T }
 
 export class ChatId<T> {
-  private readonly value: string | undefined
+  private readonly value: string
   declare readonly [ChatIdBrand]: T
 
   constructor(value: string) {
     this.value = this.processChatUUID(value)
   }
 
-  private processChatUUID(userUUID: string): string | undefined {
+  private processChatUUID(userUUID: string): string {
     if (!Uuid7Util.isValidUUID(userUUID)) {
       throw new Error('Invalid UUID format provided')
     }
-    return Uuid7Util.uuidVersionValidation(userUUID)
+    // Validate the UUID version but return the UUID itself, not the version string
+    Uuid7Util.uuidVersionValidation(userUUID)
+    return userUUID
   }
 
-  getValue(): string | undefined {
+  getValue(): string {
     return this.value
   }
 }

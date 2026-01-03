@@ -480,7 +480,7 @@ describe('RegisterUserUseCase', () => {
         expect(savedUser!.id).toBeUndefined()
         // The use case must then expose the ID returned by the repository back
         // to the caller, so the result.userId should match the generated ID.
-        expect(result.userId).toBe(mockUserId)
+        expect(result.userId).toBe(mockUserId.getValue())
       })
 
       it('should return access_token from token generator', async () => {
@@ -500,13 +500,14 @@ describe('RegisterUserUseCase', () => {
       it('should call token generator with correct user claims', async () => {
         const dto = new RegisterUserDto('test@example.com', 'SecurePass123!', 'Test User')
 
-        vi.mocked(mockUserRepository.save).mockResolvedValue(createMockUserId())
+        const mockUserId = createMockUserId()
+        vi.mocked(mockUserRepository.save).mockResolvedValue(mockUserId)
         vi.mocked(mockEmailService.sendWelcomeEmail).mockResolvedValue(undefined)
 
         const result = await useCase.execute(dto)
 
         expect(mockTokenGenerator.generateToken).toHaveBeenCalledWith({
-          sub: result.userId,
+          sub: mockUserId,
           email: 'test@example.com',
           roles: ['user'],
         })
@@ -520,13 +521,14 @@ describe('RegisterUserUseCase', () => {
           'admin'
         )
 
-        vi.mocked(mockUserRepository.save).mockResolvedValue(createMockUserId())
+        const mockUserId = createMockUserId()
+        vi.mocked(mockUserRepository.save).mockResolvedValue(mockUserId)
         vi.mocked(mockEmailService.sendWelcomeEmail).mockResolvedValue(undefined)
 
         const result = await useCase.execute(dto)
 
         expect(mockTokenGenerator.generateToken).toHaveBeenCalledWith({
-          sub: result.userId,
+          sub: mockUserId,
           email: 'admin@example.com',
           roles: ['admin'],
         })

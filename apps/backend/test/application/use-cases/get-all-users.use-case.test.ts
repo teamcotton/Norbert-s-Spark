@@ -1,3 +1,4 @@
+import { uuidv7 } from 'uuidv7'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { LoggerPort } from '../../../src/application/ports/logger.port.js'
@@ -23,15 +24,15 @@ describe('GetAllUsersUseCase', () => {
 
   // Helper function to create a test user
   const createTestUser = async (
-    id: string,
     email: string,
     name: string,
-    role: string
+    role: string,
+    id?: string
   ): Promise<User> => {
     const emailObj = new Email(email)
     const password = await Password.create('TestPassword123!')
     const roleObj = new Role(role)
-    const userId = new UserId(id) as UserIdType
+    const userId = new UserId(id || uuidv7()) as UserIdType
     return new User(userId, emailObj, password, name, roleObj, new Date('2024-01-01'))
   }
 
@@ -62,8 +63,8 @@ describe('GetAllUsersUseCase', () => {
 
   describe('execute() - successful scenarios', () => {
     it('should fetch all users with default pagination', async () => {
-      const user1 = await createTestUser('user-1', 'john@example.com', 'John Doe', 'user')
-      const user2 = await createTestUser('user-2', 'jane@example.com', 'Jane Smith', 'admin')
+      const user1 = await createTestUser('john@example.com', 'John Doe', 'user')
+      const user2 = await createTestUser('jane@example.com', 'Jane Smith', 'admin')
 
       vi.mocked(mockUserRepository.findAll).mockResolvedValue({
         data: [user1, user2],
@@ -82,7 +83,7 @@ describe('GetAllUsersUseCase', () => {
     })
 
     it('should fetch all users with custom pagination params', async () => {
-      const user1 = await createTestUser('user-1', 'user1@example.com', 'User One', 'user')
+      const user1 = await createTestUser('user1@example.com', 'User One', 'user')
 
       const params: PaginationParams = { limit: 5, offset: 10 }
 
@@ -103,7 +104,7 @@ describe('GetAllUsersUseCase', () => {
     })
 
     it('should transform users to DTOs correctly', async () => {
-      const user = await createTestUser('user-123', 'test@example.com', 'Test User', 'admin')
+      const user = await createTestUser('test@example.com', 'Test User', 'admin')
 
       vi.mocked(mockUserRepository.findAll).mockResolvedValue({
         data: [user],
@@ -114,13 +115,13 @@ describe('GetAllUsersUseCase', () => {
 
       const result = await useCase.execute()
 
-      expect(result.data[0]).toEqual({
-        userId: 'user-123',
+      expect(result.data[0]).toMatchObject({
         email: 'test@example.com',
         name: 'Test User',
         role: 'admin',
         createdAt: new Date('2024-01-01'),
       })
+      expect(result.data[0]!.userId).toBe(user.id)
     })
 
     it('should handle empty user list', async () => {
@@ -139,9 +140,9 @@ describe('GetAllUsersUseCase', () => {
 
     it('should handle multiple pages of users', async () => {
       const users = await Promise.all([
-        createTestUser('user-1', 'user1@example.com', 'User 1', 'user'),
-        createTestUser('user-2', 'user2@example.com', 'User 2', 'user'),
-        createTestUser('user-3', 'user3@example.com', 'User 3', 'admin'),
+        createTestUser('user1@example.com', 'User 1', 'user'),
+        createTestUser('user2@example.com', 'User 2', 'user'),
+        createTestUser('user3@example.com', 'User 3', 'admin'),
       ])
 
       vi.mocked(mockUserRepository.findAll).mockResolvedValue({
@@ -155,14 +156,14 @@ describe('GetAllUsersUseCase', () => {
 
       expect(result.data).toHaveLength(3)
       expect(result.total).toBe(100)
-      expect(result.data[0]!.userId).toBe('user-1')
-      expect(result.data[1]!.userId).toBe('user-2')
-      expect(result.data[2]!.userId).toBe('user-3')
+      expect(result.data[0]!.email).toBe('user1@example.com')
+      expect(result.data[1]!.email).toBe('user2@example.com')
+      expect(result.data[2]!.email).toBe('user3@example.com')
     })
 
     it('should preserve user roles in DTOs', async () => {
-      const adminUser = await createTestUser('admin-1', 'admin@example.com', 'Admin', 'admin')
-      const regularUser = await createTestUser('user-1', 'user@example.com', 'User', 'user')
+      const adminUser = await createTestUser('admin@example.com', 'Admin', 'admin')
+      const regularUser = await createTestUser('user@example.com', 'User', 'user')
 
       vi.mocked(mockUserRepository.findAll).mockResolvedValue({
         data: [adminUser, regularUser],
@@ -195,8 +196,8 @@ describe('GetAllUsersUseCase', () => {
 
     it('should log after successfully fetching users', async () => {
       const users = await Promise.all([
-        createTestUser('user-1', 'user1@example.com', 'User 1', 'user'),
-        createTestUser('user-2', 'user2@example.com', 'User 2', 'user'),
+        createTestUser('user1@example.com', 'User 1', 'user'),
+        createTestUser('user2@example.com', 'User 2', 'user'),
       ])
 
       vi.mocked(mockUserRepository.findAll).mockResolvedValue({
@@ -229,9 +230,9 @@ describe('GetAllUsersUseCase', () => {
 
     it('should log correct count even with pagination', async () => {
       const users = await Promise.all([
-        createTestUser('user-1', 'user1@example.com', 'User 1', 'user'),
-        createTestUser('user-2', 'user2@example.com', 'User 2', 'user'),
-        createTestUser('user-3', 'user3@example.com', 'User 3', 'user'),
+        createTestUser('user1@example.com', 'User 1', 'user'),
+        createTestUser('user2@example.com', 'User 2', 'user'),
+        createTestUser('user3@example.com', 'User 3', 'user'),
       ])
 
       vi.mocked(mockUserRepository.findAll).mockResolvedValue({
@@ -329,7 +330,7 @@ describe('GetAllUsersUseCase', () => {
     })
 
     it('should stop processing when first user has missing ID', async () => {
-      const validUser = await createTestUser('user-1', 'valid@example.com', 'Valid', 'user')
+      const validUser = await createTestUser('valid@example.com', 'Valid', 'user')
       const email = new Email('invalid@example.com')
       const password = await Password.create('TestPass123!')
       const role = new Role('user')
@@ -379,7 +380,7 @@ describe('GetAllUsersUseCase', () => {
     it('should handle large limit', async () => {
       const users = await Promise.all(
         Array.from({ length: 5 }, (_, i) =>
-          createTestUser(`user-${i}`, `user${i}@example.com`, `User ${i}`, 'user')
+          createTestUser(`user${i}@example.com`, `User ${i}`, 'user')
         )
       )
 
@@ -397,7 +398,7 @@ describe('GetAllUsersUseCase', () => {
     })
 
     it('should handle users with special characters in names', async () => {
-      const user = await createTestUser('user-1', 'test@example.com', "O'Brien-Smith", 'user')
+      const user = await createTestUser('test@example.com', "O'Brien-Smith", 'user')
 
       vi.mocked(mockUserRepository.findAll).mockResolvedValue({
         data: [user],
@@ -412,7 +413,7 @@ describe('GetAllUsersUseCase', () => {
     })
 
     it('should handle users with unicode characters in names', async () => {
-      const user = await createTestUser('user-1', 'test@example.com', '张伟 张三', 'user')
+      const user = await createTestUser('test@example.com', '张伟 张三', 'user')
 
       vi.mocked(mockUserRepository.findAll).mockResolvedValue({
         data: [user],
@@ -428,7 +429,7 @@ describe('GetAllUsersUseCase', () => {
 
     it('should handle users with very long names', async () => {
       const longName = 'A'.repeat(500)
-      const user = await createTestUser('user-1', 'test@example.com', longName, 'user')
+      const user = await createTestUser('test@example.com', longName, 'user')
 
       vi.mocked(mockUserRepository.findAll).mockResolvedValue({
         data: [user],
@@ -446,7 +447,7 @@ describe('GetAllUsersUseCase', () => {
 
   describe('execute() - return type structure', () => {
     it('should return PaginatedUsersDto with correct structure', async () => {
-      const user = await createTestUser('user-1', 'test@example.com', 'Test', 'user')
+      const user = await createTestUser('test@example.com', 'Test', 'user')
 
       vi.mocked(mockUserRepository.findAll).mockResolvedValue({
         data: [user],
@@ -465,7 +466,7 @@ describe('GetAllUsersUseCase', () => {
     })
 
     it('should return UserDto with correct structure in data array', async () => {
-      const user = await createTestUser('user-1', 'test@example.com', 'Test', 'user')
+      const user = await createTestUser('test@example.com', 'Test', 'user')
 
       vi.mocked(mockUserRepository.findAll).mockResolvedValue({
         data: [user],
@@ -490,13 +491,13 @@ describe('GetAllUsersUseCase', () => {
   describe('integration scenarios', () => {
     it('should handle sequential calls with different pagination', async () => {
       const users1 = await Promise.all([
-        createTestUser('user-1', 'user1@example.com', 'User 1', 'user'),
-        createTestUser('user-2', 'user2@example.com', 'User 2', 'user'),
+        createTestUser('user1@example.com', 'User 1', 'user'),
+        createTestUser('user2@example.com', 'User 2', 'user'),
       ])
 
       const users2 = await Promise.all([
-        createTestUser('user-3', 'user3@example.com', 'User 3', 'user'),
-        createTestUser('user-4', 'user4@example.com', 'User 4', 'user'),
+        createTestUser('user3@example.com', 'User 3', 'user'),
+        createTestUser('user4@example.com', 'User 4', 'user'),
       ])
 
       // First call - page 1
@@ -519,14 +520,14 @@ describe('GetAllUsersUseCase', () => {
 
       const result2 = await useCase.execute({ limit: 2, offset: 2 })
 
-      expect(result1.data[0]!.userId).toBe('user-1')
-      expect(result1.data[1]!.userId).toBe('user-2')
-      expect(result2.data[0]!.userId).toBe('user-3')
-      expect(result2.data[1]!.userId).toBe('user-4')
+      expect(result1.data[0]!.email).toBe('user1@example.com')
+      expect(result1.data[1]!.email).toBe('user2@example.com')
+      expect(result2.data[0]!.email).toBe('user3@example.com')
+      expect(result2.data[1]!.email).toBe('user4@example.com')
     })
 
     it('should work correctly when called multiple times', async () => {
-      const user = await createTestUser('user-1', 'test@example.com', 'Test', 'user')
+      const user = await createTestUser('test@example.com', 'Test', 'user')
 
       vi.mocked(mockUserRepository.findAll).mockResolvedValue({
         data: [user],
@@ -545,10 +546,10 @@ describe('GetAllUsersUseCase', () => {
 
     it('should handle mix of users with different roles', async () => {
       const users = await Promise.all([
-        createTestUser('admin-1', 'admin@example.com', 'Admin User', 'admin'),
-        createTestUser('user-1', 'user1@example.com', 'Regular User 1', 'user'),
-        createTestUser('user-2', 'user2@example.com', 'Regular User 2', 'user'),
-        createTestUser('moderator-1', 'mod@example.com', 'Moderator', 'moderator'),
+        createTestUser('admin@example.com', 'Admin User', 'admin'),
+        createTestUser('user1@example.com', 'Regular User 1', 'user'),
+        createTestUser('user2@example.com', 'Regular User 2', 'user'),
+        createTestUser('mod@example.com', 'Moderator', 'moderator'),
       ])
 
       vi.mocked(mockUserRepository.findAll).mockResolvedValue({

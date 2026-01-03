@@ -99,7 +99,8 @@ export class JwtUtil {
       expiresIn: Number.parseInt(EnvConfig.JWT_EXPIRATION),
       issuer: EnvConfig.JWT_ISSUER,
     }
-    const userIdString = String(sub)
+    // Extract the actual UUID string from the UserId value object
+    const userIdString = sub.getValue()
     if (isString(userIdString)) {
       options.subject = userIdString
     }

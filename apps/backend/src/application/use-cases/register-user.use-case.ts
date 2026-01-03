@@ -88,7 +88,7 @@ export class RegisterUserUseCase {
    */
   async execute(
     dto: RegisterUserDto
-  ): Promise<{ userId: UserIdType; access_token: string; token_type: string; expires_in: number }> {
+  ): Promise<{ userId: string; access_token: string; token_type: string; expires_in: number }> {
     this.logger.info('Starting user registration', { email: dto.email })
 
     // Create domain objects
@@ -120,13 +120,13 @@ export class RegisterUserUseCase {
       await this.emailService.sendWelcomeEmail(dto.email, dto.name)
     } catch (error) {
       this.logger.error('Failed to send welcome email', error as Error, {
-        userId,
+        userId: userId.getValue(),
         email: dto.email,
       })
       // Don't fail registration if email fails
     }
 
-    this.logger.info('User registered successfully', { userId })
+    this.logger.info('User registered successfully', { userId: userId.getValue() })
 
     // Generate JWT access token
     const accessToken = this.tokenGenerator.generateToken({
@@ -139,7 +139,7 @@ export class RegisterUserUseCase {
     const safeExpiresIn = Number.isNaN(expiresIn) ? 3600 : expiresIn
 
     return {
-      userId,
+      userId: userId.getValue(),
       access_token: accessToken,
       token_type: 'Bearer',
       expires_in: safeExpiresIn,
