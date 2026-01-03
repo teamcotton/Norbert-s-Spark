@@ -15,7 +15,11 @@ export class AppendedChatUseCase {
   ) {}
 
   async execute(chatId: ChatIdType, messages: UIMessage[]): Promise<AppendedChatResult | null> {
-    const chatIdString = chatId.getValue()!
+    const chatIdString = chatId.getValue()
+    if (!chatIdString) {
+      this.logger.info('Invalid chatId value received in AppendedChatUseCase', { chatId })
+      return null
+    }
     this.logger.info('Appending chat messages', {
       chatId: chatIdString,
       messageCount: messages.length,
