@@ -137,6 +137,7 @@ describe('ChatId Value Object', () => {
       const chatIdObj = new ChatId(validUuid)
       const chatId: ChatIdType<string> = chatIdObj.getValue()
 
+      expect(chatId).toBe(validUuid)
       // This test verifies that the branded type works at compile-time
       // At runtime, ChatIdType is just a branded string
       expect(chatIdObj).toBeInstanceOf(ChatId)
