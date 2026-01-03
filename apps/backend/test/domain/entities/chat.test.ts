@@ -115,7 +115,7 @@ describe('Chat Entity', () => {
       expect(() => {
         const userId = new UserId('') as UserIdType
         const chatId = new ChatId(uuidv7()) as ChatIdType
-        const chat = new Chat(userId, chatId)
+        new Chat(userId, chatId)
       }).toThrow('Invalid UUID format provided')
     })
 
@@ -123,7 +123,7 @@ describe('Chat Entity', () => {
       expect(() => {
         const longUserId = new UserId('user-' + 'x'.repeat(1000)) as UserIdType
         const chatId = new ChatId(uuidv7()) as ChatIdType
-        const chat = new Chat(longUserId, chatId)
+        return new Chat(longUserId, chatId)
       }).toThrow('Invalid UUID format provided')
     })
 
@@ -131,7 +131,7 @@ describe('Chat Entity', () => {
       expect(() => {
         const specialUserId = new UserId('user@#$%^&*()-_=+[]{}|;:,.<>?') as UserIdType
         const chatId = new ChatId(uuidv7()) as ChatIdType
-        const chat = new Chat(specialUserId, chatId)
+        return new Chat(specialUserId, chatId)
       }).toThrow('Invalid UUID format provided')
     })
 
@@ -139,7 +139,7 @@ describe('Chat Entity', () => {
       expect(() => {
         const userId = new UserId(uuidv7()) as UserIdType
         const chatId = new ChatId('') as ChatIdType
-        const chat = new Chat(userId, chatId)
+        return new Chat(userId, chatId)
       }).toThrow('Invalid UUID format provided')
     })
 
@@ -147,7 +147,7 @@ describe('Chat Entity', () => {
       expect(() => {
         const userId = new UserId(uuidv7()) as UserIdType
         const longChatId = new ChatId('chat-' + 'x'.repeat(1000)) as ChatIdType
-        const chat = new Chat(userId, longChatId)
+        return new Chat(userId, longChatId)
       }).toThrow('Invalid UUID format provided')
     })
 
@@ -155,7 +155,7 @@ describe('Chat Entity', () => {
       expect(() => {
         const userId = new UserId(uuidv7()) as UserIdType
         const specialChatId = new ChatId('chat@#$%^&*()-_=+[]{}|;:,.<>?') as ChatIdType
-        const chat = new Chat(userId, specialChatId)
+        return new Chat(userId, specialChatId)
       }).toThrow('Invalid UUID format provided')
     })
   })
