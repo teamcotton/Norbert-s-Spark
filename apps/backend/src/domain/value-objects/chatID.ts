@@ -102,7 +102,6 @@ export class ChatId<T extends string = string> {
    * 2. Specifically a UUID version 7 (time-ordered UUID)
    *
    * @param value - The UUID v7 string to use as the chat identifier
-   * @throws {Error} Throws "Invalid UUID format provided" if the string is not a valid UUID
    * @throws {Error} Throws "Invalid UUID version: {version}" if the UUID is not version 7
    *
    * @example
