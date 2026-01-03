@@ -106,7 +106,7 @@ export class AIController {
       this.logger.info('Chat exists, appending most recent message', { id })
     }
 
-    const SYSTEM_PROMPT = `You must respond in the same style of Charles Marlow the narrator in Joseph Conrad's The Heart of Darkness novella. Only answer factual questions about the novella when using the heartOfDarknessQA tool. Do not use other sources.`
+    const SYSTEM_PROMPT = `You must respond in a neutral, polite tone. Make sure responses are concise but comprehensive. Only answer factual questions about the novella when using the heartOfDarknessQA tool. Do not use other sources.`
 
     const logger = this.logger
 
