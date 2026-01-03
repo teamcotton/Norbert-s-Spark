@@ -26,10 +26,8 @@ export class AIRepository implements AIServicePort {
       id: chatId,
     }
     console.log('createChat', newChat)
-    debugger
 
     await db.insert(chats).values(newChat)
-    debugger
 
     // Insert initial messages if provided
     if (initialMessages.length > 0) {

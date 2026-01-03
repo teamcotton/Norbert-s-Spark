@@ -85,7 +85,6 @@ export class AIController {
     }
 
     if (!chat) {
-      debugger
       this.logger.info('Chat does not exist, creating new chat', { id })
       await this.saveChatUseCase.execute(id, userId, messages)
     } else {
