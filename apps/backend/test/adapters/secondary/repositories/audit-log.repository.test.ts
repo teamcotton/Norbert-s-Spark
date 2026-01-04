@@ -173,11 +173,9 @@ describe('AuditLogRepository', () => {
 
       await repository.log(entry)
 
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        'Failed to create audit log entry',
-        dbError,
-        { entry }
-      )
+      expect(mockLogger.error).toHaveBeenCalledWith('Failed to create audit log entry', dbError, {
+        entry,
+      })
       expect(mockLogger.info).not.toHaveBeenCalled()
     })
 

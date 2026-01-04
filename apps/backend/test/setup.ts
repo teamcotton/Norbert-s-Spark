@@ -74,4 +74,3 @@ if (!process.env.RESEND_API_KEY) {
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'test'
 }
-
