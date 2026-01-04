@@ -205,9 +205,9 @@ export const parts = pgTable(
     toolErrorText: varchar('tool_error_text'),
 
     // Tool-specific fields for heartOfDarknessQA
-    toolHeartOfDarknessQAInput: jsonb('tool_heartOfDarknessQA_input'),
-    toolHeartOfDarknessQAOutput: jsonb('tool_heartOfDarknessQA_output'),
-    toolHeartOfDarknessQAErrorText: varchar('tool_heartOfDarknessQA_errorText'),
+    toolHeartOfDarknessQAInput: jsonb('tool_heart_of_darkness_qa_input'),
+    toolHeartOfDarknessQAOutput: jsonb('tool_heart_of_darkness_qa_output'),
+    toolHeartOfDarknessQAErrorText: varchar('tool_heart_of_darkness_qa_error_text'),
 
     // Data part fields (for custom data like darkness, weather, etc.)
     dataContent: jsonb('data_content'),
