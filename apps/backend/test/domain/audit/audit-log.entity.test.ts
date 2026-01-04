@@ -1,6 +1,11 @@
 import { uuidv7 } from 'uuidv7'
 import { beforeEach, describe, expect, it } from 'vitest'
 
+import type {
+  DeleteChanges,
+  LoginChanges,
+  UpdateChanges,
+} from '../../../src/domain/audit/audit-changes.types.js'
 import { AuditLog } from '../../../src/domain/audit/audit-log.entity.js'
 import { AuditAction, EntityType } from '../../../src/domain/audit/entity-type.enum.js'
 
@@ -482,11 +487,11 @@ describe('AuditLog Entity', () => {
       )
 
       expect(auditLog.changes).toEqual(changes)
-      expect(auditLog.changes?.success).toBe(true)
+      expect((auditLog.changes as LoginChanges)?.success).toBe(true)
     })
 
     it('should handle complex nested changes objects', () => {
-      const changes = {
+      const changes: UpdateChanges = {
         before: {
           profile: {
             address: {
@@ -526,8 +531,12 @@ describe('AuditLog Entity', () => {
       )
 
       expect(auditLog.changes).toEqual(changes)
-      expect(auditLog.changes?.before.profile.address.city).toBe('Old City')
-      expect(auditLog.changes?.after.profile.address.city).toBe('New City')
+      expect(((auditLog.changes as UpdateChanges)?.before as any).profile.address.city).toBe(
+        'Old City'
+      )
+      expect(((auditLog.changes as UpdateChanges)?.after as any).profile.address.city).toBe(
+        'New City'
+      )
     })
 
     it('should handle empty changes object', () => {
@@ -731,7 +740,7 @@ describe('AuditLog Entity', () => {
 
       expect(loginAudit.action).toBe(AuditAction.LOGIN)
       expect(loginAudit.userId).toBe(testUserId)
-      expect(loginAudit.changes?.success).toBe(true)
+      expect((loginAudit.changes as LoginChanges)?.success).toBe(true)
       expect(loginAudit.ipAddress).toBeTruthy()
       expect(loginAudit.userAgent).toBeTruthy()
     })
@@ -751,7 +760,7 @@ describe('AuditLog Entity', () => {
 
       expect(failedLoginAudit.action).toBe(AuditAction.LOGIN_FAILED)
       expect(failedLoginAudit.userId).toBeNull()
-      expect(failedLoginAudit.changes?.reason).toBe('invalid_password')
+      expect((failedLoginAudit.changes as any)?.reason).toBe('invalid_password')
     })
 
     it('should represent a user profile update', () => {
@@ -771,8 +780,8 @@ describe('AuditLog Entity', () => {
       )
 
       expect(updateAudit.action).toBe(AuditAction.UPDATE)
-      expect(updateAudit.changes?.before.email).toBe('john@old.com')
-      expect(updateAudit.changes?.after.email).toBe('john@new.com')
+      expect((updateAudit.changes as UpdateChanges)?.before.email).toBe('john@old.com')
+      expect((updateAudit.changes as UpdateChanges)?.after.email).toBe('john@new.com')
     })
 
     it('should represent a chat creation', () => {
@@ -791,7 +800,7 @@ describe('AuditLog Entity', () => {
 
       expect(createChatAudit.action).toBe(AuditAction.CREATE)
       expect(createChatAudit.entityType).toBe(EntityType.CHAT)
-      expect(createChatAudit.changes?.created.chatId).toBe(chatId)
+      expect((createChatAudit.changes as any)?.created.chatId).toBe(chatId)
     })
 
     it('should represent a chat deletion', () => {
@@ -810,7 +819,7 @@ describe('AuditLog Entity', () => {
 
       expect(deleteChatAudit.action).toBe(AuditAction.DELETE)
       expect(deleteChatAudit.entityType).toBe(EntityType.CHAT)
-      expect(deleteChatAudit.changes?.deleted.messageCount).toBe(42)
+      expect(((deleteChatAudit.changes as DeleteChanges)?.deleted as any).messageCount).toBe(42)
     })
 
     it('should represent a system-initiated action', () => {
