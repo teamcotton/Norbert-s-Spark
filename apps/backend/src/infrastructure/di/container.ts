@@ -6,7 +6,6 @@ import { RegisterUserUseCase } from '../../application/use-cases/register-user.u
 import { GetAllUsersUseCase } from '../../application/use-cases/get-all-users.use-case.js'
 import { LoginUserUseCase } from '../../application/use-cases/login-user.use-case.js'
 import { GetChatUseCase } from '../../application/use-cases/get-chat.use-case.js'
-// import { CreateChatUseCase } from '../../application/use-cases/create-chat.use-case.js'
 import { AppendedChatUseCase } from '../../application/use-cases/append-chat.use-case.js'
 import { SaveChatUseCase } from '../../application/use-cases/save-chat.use-case.js'
 
