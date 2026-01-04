@@ -102,18 +102,18 @@ export class AIRepository implements AIServicePort {
 
   async appendToChatMessages(
     chatId: ChatIdType,
-    initialMessages: UIMessage[] = []
+    messagesToAppend: UIMessage[] = []
   ): Promise<string> {
-    const isArrayString = isArray(initialMessages) ? 'yes' : 'no'
+    const isArrayString = isArray(messagesToAppend) ? 'yes' : 'no'
     this.logger.info('chatId', chatId)
-    this.logger.info('initialMessages', initialMessages)
+    this.logger.info('messagesToAppend', messagesToAppend)
     this.logger.info('isArray', { isArrayString })
 
     // 1. Update the chat table updated_at column
     await db.update(chats).set({ updatedAt: new Date() }).where(eq(chats.id, chatId))
 
     // 2. Insert the new messages into the messages table
-    await this.insertMessagesWithParts(chatId, initialMessages)
+    await this.insertMessagesWithParts(chatId, messagesToAppend)
 
     return chatId
   }
