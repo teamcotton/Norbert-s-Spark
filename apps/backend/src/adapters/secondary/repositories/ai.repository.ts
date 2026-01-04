@@ -83,6 +83,48 @@ export class AIRepository implements AIServicePort {
     return chatId
   }
 
+  async appendToChatMessages(
+    chatId: ChatIdType,
+    initialMessages: UIMessage[] = []
+  ): Promise<string> {
+    const isArrayString = isArray(initialMessages) ? 'yes' : 'no'
+    this.logger.info('chatId', chatId)
+    this.logger.info('initialMessages', initialMessages)
+    this.logger.info('isArray', { isArrayString })
+
+    // 1. Update the chat table updated_at column
+    await db.update(chats).set({ updatedAt: new Date() }).where(eq(chats.id, chatId))
+
+    // 2. Insert the new messages into the messages table
+    if (initialMessages.length > 0) {
+      const messageRecords = initialMessages.map((msg) => ({
+        chatId: chatId,
+        role: msg.role,
+      }))
+
+      this.logger.info('messageRecords', messageRecords)
+
+      const insertedMessages = await db.insert(messages).values(messageRecords).returning()
+
+      this.logger.info('appendToChatMessages - insertedMessages', insertedMessages)
+
+      // 3. Insert the message parts into the parts table
+      const partsRecords = insertedMessages.flatMap((insertedMsg, index) => {
+        const correspondingMessage = initialMessages[index]
+        if (!correspondingMessage?.parts) return []
+        return mapUIMessagePartsToDBParts(correspondingMessage.parts as any, insertedMsg.id)
+      })
+
+      this.logger.info('appendToChatMessages - partsRecords', partsRecords)
+
+      if (partsRecords.length > 0) {
+        await db.insert(parts).values(partsRecords)
+      }
+    }
+
+    return chatId
+  }
+
   async getChatResponse(chatId: ChatIdType): Promise<ChatResponseResult | null> {
     try {
       // Query chats table by id, then join with messages and parts

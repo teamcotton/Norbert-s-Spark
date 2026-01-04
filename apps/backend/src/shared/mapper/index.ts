@@ -8,6 +8,11 @@ export const mapUIMessagePartsToDBParts = (
   messageParts: MyUIMessagePart[],
   messageId: string
 ): MyDBUIMessagePart[] => {
+  console.log(
+    'messageParts keys:',
+    messageParts.map((part, idx) => ({ index: idx, keys: Object.keys(part) }))
+  )
+  debugger
   return messageParts.map((part, index) => {
     switch (part.type) {
       case 'text':
