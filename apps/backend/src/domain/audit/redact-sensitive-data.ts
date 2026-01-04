@@ -223,5 +223,5 @@ export function redactCreateAuditLogDTO<T extends { changes?: unknown }>(entry: 
   return {
     ...entry,
     changes: redactedChanges,
-  } as T
+  }
 }

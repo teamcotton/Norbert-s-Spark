@@ -417,11 +417,13 @@ describe('redactCreateAuditLogDTO', () => {
     expect(result.action).toBe(AuditAction.UPDATE)
     expect(result.ipAddress).toBe('192.168.1.1')
 
-    const changes = result.changes as any
-    expect(changes.before.email).toBe('old@example.com')
-    expect(changes.before.password).toBe('[REDACTED]')
-    expect(changes.after.email).toBe('new@example.com')
-    expect(changes.after.password).toBe('[REDACTED]')
+    const changes = result.changes as Record<string, unknown>
+    const before = changes.before as Record<string, unknown>
+    const after = changes.after as Record<string, unknown>
+    expect(before.email).toBe('old@example.com')
+    expect(before.password).toBe('[REDACTED]')
+    expect(after.email).toBe('new@example.com')
+    expect(after.password).toBe('[REDACTED]')
   })
 
   it('should handle DTO without changes field', () => {
@@ -471,7 +473,7 @@ describe('redactCreateAuditLogDTO', () => {
     expect(result.ipAddress).toBe('10.0.0.1')
     expect(result.userAgent).toBe('Chrome')
 
-    const changes = result.changes as any
+    const changes = result.changes as Record<string, unknown>
     expect(changes.success).toBe(true)
     expect(changes.password).toBe('[REDACTED]')
   })
@@ -491,7 +493,7 @@ describe('redactCreateAuditLogDTO', () => {
 
     const result = redactCreateAuditLogDTO(entry)
 
-    const changes = result.changes as any
+    const changes = result.changes as Record<string, unknown>
     expect(changes.reason).toBe('invalid_password')
     expect(changes.token).toBe('[REDACTED]')
     expect(changes.apiKey).toBe('[REDACTED]')
