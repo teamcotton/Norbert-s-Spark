@@ -69,7 +69,11 @@ export class AIRepository implements AIServicePort {
       const partsRecords = insertedMessages.flatMap((insertedMsg, index) => {
         const correspondingMessage = initialMessages[index]
         if (!correspondingMessage?.parts) return []
-        return mapUIMessagePartsToDBParts(correspondingMessage.parts as any, insertedMsg.id)
+        return mapUIMessagePartsToDBParts(
+          correspondingMessage.parts as any,
+          insertedMsg.id,
+          this.logger
+        )
       })
 
       this.logger.info('partsRecords', partsRecords)
@@ -112,7 +116,11 @@ export class AIRepository implements AIServicePort {
       const partsRecords = insertedMessages.flatMap((insertedMsg, index) => {
         const correspondingMessage = initialMessages[index]
         if (!correspondingMessage?.parts) return []
-        return mapUIMessagePartsToDBParts(correspondingMessage.parts as any, insertedMsg.id)
+        return mapUIMessagePartsToDBParts(
+          correspondingMessage.parts as any,
+          insertedMsg.id,
+          this.logger
+        )
       })
 
       this.logger.info('appendToChatMessages - partsRecords', partsRecords)

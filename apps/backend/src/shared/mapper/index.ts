@@ -3,16 +3,18 @@ import type {
   MyDBUIMessagePart,
   MyDBUIMessagePartSelect,
 } from '../../infrastructure/database/schema.js'
+import type { LoggerPort } from '../../application/ports/logger.port.js'
 
 export const mapUIMessagePartsToDBParts = (
   messageParts: MyUIMessagePart[],
-  messageId: string
+  messageId: string,
+  logger?: LoggerPort
 ): MyDBUIMessagePart[] => {
-  console.log(
-    'messageParts keys:',
-    messageParts.map((part, idx) => ({ index: idx, keys: Object.keys(part) }))
-  )
-  debugger
+  if (logger) {
+    logger.info('messageParts keys:', {
+      parts: messageParts.map((part, idx) => ({ index: idx, keys: Object.keys(part) })),
+    })
+  }
   return messageParts.map((part, index) => {
     switch (part.type) {
       case 'text':
