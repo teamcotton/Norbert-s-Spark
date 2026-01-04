@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
+import type { CreateAuditLogDTO } from '../../../src/application/ports/audit-log.port.js'
+import { AuditAction,EntityType } from '../../../src/domain/audit/entity-type.enum.js'
 import {
   redactAuditLogEntry,
   redactCreateAuditLogDTO,
   redactSensitiveData,
 } from '../../../src/domain/audit/redact-sensitive-data.js'
-import type { CreateAuditLogDTO } from '../../../src/application/ports/audit-log.port.js'
-import { EntityType, AuditAction } from '../../../src/domain/audit/entity-type.enum.js'
 
 describe('redactSensitiveData', () => {
   describe('primitive values', () => {
