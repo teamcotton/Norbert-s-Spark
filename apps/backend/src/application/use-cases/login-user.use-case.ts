@@ -173,7 +173,7 @@ export class LoginUserUseCase {
     if (!isPasswordValid) {
       // Log failed login attempt with user ID
       await this.auditLog.log({
-        userId: 'unknown',
+        userId: null,
         entityType: EntityType.USER,
         entityId: 'unknown',
         action: AuditAction.LOGIN_FAILED,
