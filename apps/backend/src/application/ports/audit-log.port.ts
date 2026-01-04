@@ -1,6 +1,7 @@
 import { AuditLog } from '../../domain/audit/audit-log.entity.js'
 import { EntityType } from '../../domain/audit/entity-type.enum.js'
 import { AuditAction } from '../../domain/audit/entity-type.enum.js'
+import type { AuditChanges } from '../../domain/audit/audit-changes.types.js'
 
 export interface AuditLogPort {
   /**
@@ -29,7 +30,7 @@ export interface CreateAuditLogDTO {
   entityType: EntityType
   entityId: string
   action: AuditAction
-  changes?: Record<string, any>
+  changes?: AuditChanges
   ipAddress?: string
   userAgent?: string
 }
