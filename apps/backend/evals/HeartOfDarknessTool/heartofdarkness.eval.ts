@@ -148,6 +148,188 @@ async function getAgentResponse(question: string): Promise<string> {
 }
 
 /**
+ * Comprehensive English stopwords list for keyword filtering
+ * These are common words that don't contribute meaningful semantic value
+ */
+const STOPWORDS = new Set([
+  // Articles
+  'the',
+  'a',
+  'an',
+  // Pronouns
+  'i',
+  'you',
+  'he',
+  'she',
+  'it',
+  'we',
+  'they',
+  'them',
+  'their',
+  'what',
+  'which',
+  'who',
+  'whom',
+  'this',
+  'that',
+  'these',
+  'those',
+  // Prepositions
+  'in',
+  'on',
+  'at',
+  'to',
+  'for',
+  'of',
+  'with',
+  'from',
+  'by',
+  'about',
+  'as',
+  'into',
+  'through',
+  'during',
+  'before',
+  'after',
+  'above',
+  'below',
+  'between',
+  'under',
+  'over',
+  'within',
+  // Conjunctions
+  'and',
+  'but',
+  'or',
+  'nor',
+  'so',
+  'yet',
+  'because',
+  'although',
+  'though',
+  'while',
+  'if',
+  'when',
+  'where',
+  'how',
+  'why',
+  // Auxiliary verbs
+  'is',
+  'are',
+  'was',
+  'were',
+  'be',
+  'been',
+  'being',
+  'have',
+  'has',
+  'had',
+  'do',
+  'does',
+  'did',
+  'will',
+  'would',
+  'shall',
+  'should',
+  'may',
+  'might',
+  'must',
+  'can',
+  'could',
+  // Common verbs
+  'get',
+  'got',
+  'make',
+  'made',
+  'take',
+  'taken',
+  'say',
+  'said',
+  'see',
+  'seen',
+  // Common adverbs
+  'very',
+  'also',
+  'just',
+  'only',
+  'even',
+  'now',
+  'then',
+  'here',
+  'there',
+  'well',
+  'back',
+  'out',
+  'up',
+  'down',
+  'off',
+  'more',
+  'most',
+  'other',
+  'some',
+  'such',
+  // Other common words
+  'all',
+  'any',
+  'both',
+  'each',
+  'few',
+  'many',
+  'no',
+  'not',
+  'own',
+  'same',
+  'than',
+  'too',
+  'use',
+  'used',
+  'way',
+  // Common adjectives/descriptors
+  'first',
+  'last',
+  'next',
+  'previous',
+  'following',
+  'given',
+  'certain',
+  'particular',
+  // Question/Answer specific stopwords
+  'answer',
+  'question',
+  'include',
+  'includes',
+  'commonly',
+  'assumed',
+  'however',
+  'explicitly',
+  'never',
+  'states',
+  'stated',
+  'placed',
+  'surrounding',
+  'named',
+])
+
+/**
+ * Extracts meaningful keywords from text by:
+ * 1. Converting to lowercase
+ * 2. Removing possessives ('s and s')
+ * 3. Removing punctuation
+ * 4. Splitting into words
+ * 5. Filtering out short words (< 4 chars)
+ * 6. Filtering out common stopwords
+ */
+function extractKeywords(text: string): string[] {
+  return text
+    .toLowerCase()
+    .replace(/['']s?\b/g, '') // Remove possessives before other punctuation
+    .replace(/[^\w\s]/g, ' ') // Replace remaining punctuation with spaces
+    .split(/\s+/)
+    .filter((word) => word.length >= 4) // Keep words with 4+ chars
+    .filter((word) => !STOPWORDS.has(word)) // Remove stopwords
+}
+
+/**
  * Evalite test suite
  */
 evalite('Heart of Darkness Agent Accuracy', {
@@ -177,16 +359,11 @@ evalite('Heart of Darkness Agent Accuracy', {
       scorer: ({ input, output, expected }) => {
         if (!expected) return { score: 0, passed: false }
 
-        const keyTerms = expected
-          .toLowerCase()
-          .split(/\s+/)
-          .filter((word: string) => word.length > 3)
-          .filter(
-            (word: string) => !['that', 'this', 'with', 'from', 'answer', 'must'].includes(word)
-          )
+        const keyTerms = extractKeywords(expected)
+        const outputKeywords = extractKeywords(output)
 
-        const outputLower = output.toLowerCase()
-        const matchedTerms = keyTerms.filter((term: string) => outputLower.includes(term))
+        // Use exact matching to avoid false positives from substring matches
+        const matchedTerms = keyTerms.filter((term: string) => outputKeywords.includes(term))
         const keywordScore = keyTerms.length > 0 ? matchedTerms.length / keyTerms.length : 0
 
         return {
