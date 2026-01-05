@@ -80,7 +80,7 @@ test.describe('Chat Interaction', () => {
     await page.waitForURL(/\/ai\/[a-f0-9-]+/, { timeout: 5000 })
 
     // Intercept API request and return an error response
-    await page.route('**/api/ai/**', (route) => {
+    await page.route('**/api/v1/ai/**', (route) => {
       route.fulfill({
         status: 500,
         contentType: 'application/json',
