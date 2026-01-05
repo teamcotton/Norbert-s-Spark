@@ -437,7 +437,7 @@ describe('AIController', () => {
           expect.objectContaining({
             model: expect.any(String),
             messages: expect.any(Array),
-            system: expect.stringContaining('neutral, polite tone'),
+            system: expect.stringContaining('literary expert'),
             tools: expect.objectContaining({
               heartOfDarknessQA: expect.any(Object),
             }),
