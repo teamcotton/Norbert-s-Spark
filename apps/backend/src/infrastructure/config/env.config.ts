@@ -39,6 +39,8 @@ export class EnvConfig {
   static readonly JWT_EXPIRATION = process.env.JWT_EXPIRATION || '3600' // 1 hour in seconds
   static readonly JWT_ISSUER = process.env.JWT_ISSUER || 'my-app'
   static readonly API_VERSION = process.env.API_VERSION || 'v1'
+  static readonly UPSTASH_REDIS_REST_URL = obscured.make(process.env.UPSTASH_REDIS_REST_URL)
+  static readonly UPSTASH_REDIS_REST_TOKEN = obscured.make(process.env.UPSTASH_REDIS_REST_TOKEN)
 
   static validate(): void {
     const missing = requiredEnvs.filter((key) => !process.env[key])
