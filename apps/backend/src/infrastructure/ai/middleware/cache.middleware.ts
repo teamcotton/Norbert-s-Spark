@@ -2,6 +2,7 @@ import { Redis } from '@upstash/redis'
 import type { UIMessage } from 'ai'
 import { EnvConfig } from '../../config/env.config.js'
 import type { LoggerPort } from '../../../application/ports/logger.port.js'
+import { obscured } from 'obscured'
 
 /**
  * AI response cache service using Upstash Redis
@@ -54,8 +55,8 @@ export function createCacheService(
   }
 
   const redis = new Redis({
-    url: redisUrl,
-    token: redisToken,
+    url: obscured.value(EnvConfig.UPSTASH_REDIS_REST_URL),
+    token: obscured.value(EnvConfig.UPSTASH_REDIS_REST_TOKEN),
   })
 
   logger.info('Redis cache service enabled', {
