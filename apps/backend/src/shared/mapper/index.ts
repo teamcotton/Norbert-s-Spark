@@ -73,17 +73,16 @@ export const mapUIMessagePartsToDBParts = (
           messageId,
           order: index,
           type: part.type,
-          tool_toolCallId: part.toolCallId,
-          tool_state: part.state,
-          tool_heartOfDarknessQA_input:
+          toolToolCallId: part.toolCallId,
+          toolState: part.state,
+          toolHeartOfDarknessQAInput:
             part.state === 'input-available' ||
             part.state === 'output-available' ||
             part.state === 'output-error'
               ? part.input
               : undefined,
-          tool_heartOfDarknessQA_output:
-            part.state === 'output-available' ? part.output : undefined,
-          tool_heartOfDarknessQA_errorText:
+          toolHeartOfDarknessQAOutput: part.state === 'output-available' ? part.output : undefined,
+          toolHeartOfDarknessQAErrorText:
             part.state === 'output-error' ? part.errorText : undefined,
         }
       default:
@@ -133,6 +132,45 @@ export const mapDBPartToUIMessagePart = (part: MyDBUIMessagePartSelect): MyUIMes
       return {
         type: part.type,
       }
+    case 'tool-heartOfDarknessQA': {
+      const baseToolPart = {
+        type: 'dynamic-tool' as const,
+        toolCallId: part.toolToolCallId!,
+        toolName: 'heartOfDarknessQA' as const,
+      }
+
+      // Return appropriate structure based on state
+      if (part.toolState === 'input-available') {
+        return {
+          ...baseToolPart,
+          state: 'input-available' as const,
+          input: part.toolHeartOfDarknessQAInput,
+        }
+      } else if (part.toolState === 'output-available') {
+        return {
+          ...baseToolPart,
+          state: 'output-available' as const,
+          input: part.toolHeartOfDarknessQAInput,
+          output: part.toolHeartOfDarknessQAOutput,
+        }
+      } else if (part.toolState === 'output-error') {
+        return {
+          ...baseToolPart,
+          state: 'output-error' as const,
+          input: part.toolHeartOfDarknessQAInput,
+          errorText: part.toolHeartOfDarknessQAErrorText!,
+        }
+      } else {
+        // If no state is stored or unknown state, return output-available with null output
+        // This handles cases where the tool was called but state wasn't properly saved
+        return {
+          ...baseToolPart,
+          state: 'output-available' as const,
+          input: part.toolHeartOfDarknessQAInput,
+          output: part.toolHeartOfDarknessQAOutput ?? null,
+        }
+      }
+    }
     default:
       throw new Error(`Unsupported part type: ${part.type}`)
   }
