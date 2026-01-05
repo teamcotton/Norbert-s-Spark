@@ -48,7 +48,7 @@ function normalizeMessage(message: UIMessage): { role: string; content: string }
   if (message.parts && Array.isArray(message.parts)) {
     content = message.parts
       .filter((part) => part.type === 'text' && 'text' in part)
-      .map((part) => ('text' in part ? part.text : ''))
+      .map((part) => part.text)
       .join('')
   }
 
@@ -130,13 +130,13 @@ export function createCacheService(
 
         if (cached !== null) {
           logger.debug('Cache HIT', {
-            cacheKey: cacheKey.substring(0, 100),
+            cacheKey,
           })
           return cached
         }
 
         logger.debug('Cache MISS', {
-          cacheKey: cacheKey.substring(0, 100),
+          cacheKey,
         })
         return null
       } catch (error) {
@@ -153,7 +153,7 @@ export function createCacheService(
         const cacheKey = generateCacheKey(messages)
         await redis.set(cacheKey, text, { ex: cacheExpirationSeconds })
         logger.debug('Cached response', {
-          cacheKey: cacheKey.substring(0, 100),
+          cacheKey,
           textLength: text.length,
         })
       } catch (error) {
