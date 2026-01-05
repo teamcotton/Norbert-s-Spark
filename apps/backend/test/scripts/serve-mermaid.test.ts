@@ -157,7 +157,12 @@ ${content}
 
   describe('HTML Escaping', () => {
     const escapeHtml = (str: string) => {
-      return str.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;')
     }
 
     it('should escape < and > characters', () => {
@@ -173,11 +178,48 @@ ${content}
       expect(escaped).toContain('&lt;/script&gt;')
     })
 
-    it('should not affect already escaped content without & escaping', () => {
-      const alreadyEscaped = '&lt;div&gt;'
-      const escaped = escapeHtml(alreadyEscaped)
-      // Simple escapeHtml only replaces < and >, so & remains as is
-      expect(escaped).toBe('&lt;div&gt;')
+    it('should escape ampersands', () => {
+      const text = 'Tom & Jerry'
+      const escaped = escapeHtml(text)
+      expect(escaped).toBe('Tom &amp; Jerry')
+    })
+
+    it('should escape double quotes', () => {
+      const text = 'He said "hello"'
+      const escaped = escapeHtml(text)
+      expect(escaped).toBe('He said &quot;hello&quot;')
+    })
+
+    it('should escape single quotes', () => {
+      const text = "It's a test"
+      const escaped = escapeHtml(text)
+      expect(escaped).toBe('It&#039;s a test')
+    })
+
+    it('should escape all special characters together', () => {
+      const text = `<script>alert("XSS & 'attack'")</script>`
+      const escaped = escapeHtml(text)
+      expect(escaped).toBe(
+        '&lt;script&gt;alert(&quot;XSS &amp; &#039;attack&#039;&quot;)&lt;/script&gt;'
+      )
+    })
+
+    it('should handle file paths with special characters', () => {
+      const filePath = 'docs/<important>/file&name.md'
+      const escaped = escapeHtml(filePath)
+      expect(escaped).toBe('docs/&lt;important&gt;/file&amp;name.md')
+    })
+
+    it('should handle empty strings', () => {
+      const text = ''
+      const escaped = escapeHtml(text)
+      expect(escaped).toBe('')
+    })
+
+    it('should handle strings without special characters', () => {
+      const text = 'normal-file-path.md'
+      const escaped = escapeHtml(text)
+      expect(escaped).toBe('normal-file-path.md')
     })
   })
 

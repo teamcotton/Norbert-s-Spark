@@ -11,6 +11,16 @@ const __dirname = dirname(__filename)
 const args = process.argv.slice(2)
 const markdownFilePath = args[0] || 'di:container.md'
 
+// HTML escape function to prevent XSS vulnerabilities
+const escapeHtml = (str: string): string => {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
 // Resolve the path relative to the backend directory
 const fullPath = resolve(join(__dirname, '..', markdownFilePath))
 
@@ -34,7 +44,7 @@ const htmlTemplate = `
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mermaid Diagram Viewer - ${markdownFilePath}</title>
+  <title>Mermaid Diagram Viewer - ${escapeHtml(markdownFilePath)}</title>
   <script type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
     mermaid.initialize({ 
@@ -190,7 +200,7 @@ const htmlTemplate = `
   <div class="container">
     <div class="header">
       <h1>🧜‍♀️ Mermaid Diagram Viewer</h1>
-      <div class="file-path">${markdownFilePath}</div>
+      <div class="file-path">${escapeHtml(markdownFilePath)}</div>
     </div>
     
     <div class="controls">
