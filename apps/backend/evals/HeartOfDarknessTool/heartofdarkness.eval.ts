@@ -103,7 +103,7 @@ Respond with ONLY a number.`
 
   try {
     const result = streamText({
-      model: google(EnvConfig.MODEL_NAME || 'gemini-2.0-flash-exp'),
+      model: google(EnvConfig.MODEL_NAME || 'gemini-2.0-flash-lite'),
       prompt: judgePrompt,
     })
     const text = await result.text
