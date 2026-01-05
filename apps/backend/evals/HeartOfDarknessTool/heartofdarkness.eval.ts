@@ -341,7 +341,7 @@ function extractKeywords(text: string): string[] {
     .replace(/'s?\b/g, '') // Remove possessives before other punctuation
     .replace(/[^\w\s]/g, ' ') // Replace remaining punctuation with spaces
     .split(/\s+/)
-    .filter((word) => word.length >= 4) // Keep words with 4+ chars
+    .filter((word) => word.length >= 3) // Keep words with 4+ chars
     .filter((word) => !STOPWORDS.has(word)) // Remove stopwords
 }
 
