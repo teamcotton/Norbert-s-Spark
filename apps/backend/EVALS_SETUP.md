@@ -33,7 +33,7 @@ Evalite uses `better-sqlite3` which requires native bindings. If you encounter a
 
 ```bash
 cd node_modules/.pnpm/better-sqlite3@*/node_modules/better-sqlite3
-npm run build-release
+pnpm run build-release
 cd -
 ```
 
