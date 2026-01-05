@@ -297,18 +297,18 @@ const STOPWORDS = new Set([
 /**
  * Extracts meaningful keywords from text by:
  * 1. Converting to lowercase
- * 2. Splitting into words
+ * 2. Removing possessives ('s and s')
  * 3. Removing punctuation
- * 4. Filtering out short words (< 4 chars)
- * 5. Filtering out common stopwords
- * 6. Removing possessives ('s)
+ * 4. Splitting into words
+ * 5. Filtering out short words (< 4 chars)
+ * 6. Filtering out common stopwords
  */
 function extractKeywords(text: string): string[] {
   return text
     .toLowerCase()
-    .replace(/[^\w\s]/g, ' ') // Replace punctuation with spaces
+    .replace(/['']s?\b/g, '') // Remove possessives before other punctuation
+    .replace(/[^\w\s]/g, ' ') // Replace remaining punctuation with spaces
     .split(/\s+/)
-    .map((word) => word.replace(/['']s$/, '')) // Remove possessive 's
     .filter((word) => word.length >= 4) // Keep words with 4+ chars
     .filter((word) => !STOPWORDS.has(word)) // Remove stopwords
 }
