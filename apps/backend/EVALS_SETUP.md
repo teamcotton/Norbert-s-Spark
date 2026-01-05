@@ -26,7 +26,7 @@ GOOGLE_API_KEY=your_google_api_key_here
 GOOGLE_GENERATIVE_AI_API_KEY=your_google_api_key_here
 
 # Model configuration
-MODEL_NAME=ggemini-1.5-flash
+MODEL_NAME=gemini-1.5-flash
 ```
 
 **Important:** The AI SDK library (used by evalite) looks for `GOOGLE_API_KEY` in the environment, while the application code uses `GOOGLE_GENERATIVE_AI_API_KEY`. You need to set both to the same value.
