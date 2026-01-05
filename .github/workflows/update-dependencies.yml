@@ -20,8 +20,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           # Use PAT_TOKEN if available, otherwise fall back to GITHUB_TOKEN
-          # Note: GITHUB_TOKEN requires "Allow GitHub Actions to create and approve pull requests"
-          # to be enabled in repository Settings > Actions > General > Workflow permissions
+          # Important: Using secrets.GITHUB_TOKEN here WILL FAIL unless
+          # "Allow GitHub Actions to create and approve pull requests" is enabled in
+          # repository Settings > Actions > General > Workflow permissions.
           token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Install pnpm
