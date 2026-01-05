@@ -328,9 +328,17 @@ ${markdownContent}
       wrapper.scrollTop = scrollTop - walkY;
     });
 
-    // Apply initial zoom after page loads
+     // Apply initial zoom after page loads, once Mermaid has rendered
     window.addEventListener('load', () => {
-      setTimeout(updateZoom, 500);
+      const waitForMermaidAndZoom = () => {
+        const svg = document.querySelector('.mermaid svg');
+        if (svg) {
+          updateZoom();
+        } else {
+          window.requestAnimationFrame(waitForMermaidAndZoom);
+        }
+      };
+      window.requestAnimationFrame(waitForMermaidAndZoom);
     });
   </script>
 </body>
