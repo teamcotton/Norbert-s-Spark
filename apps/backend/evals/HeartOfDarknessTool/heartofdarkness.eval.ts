@@ -110,8 +110,8 @@ Respond with ONLY a number.`
     const score = parseFloat(text.trim())
     return isNaN(score) ? 0 : Math.max(0, Math.min(1, score))
   } catch (error) {
-    console.error('LLM Judge error:', error)
-    return 0
+    console.error('LLM Judge error while scoring Heart of Darkness eval:', error)
+    throw error
   }
 }
 
