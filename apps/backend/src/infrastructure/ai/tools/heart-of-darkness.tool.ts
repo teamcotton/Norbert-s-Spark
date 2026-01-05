@@ -2,6 +2,8 @@ import { tool, type InferToolInput, type InferToolOutput } from 'ai'
 import { z } from 'zod'
 import { GetTextUseCase } from '../../../application/use-cases/get-text.use-case.js'
 import type { LoggerPort } from '../../../application/ports/logger.port.js'
+import { TextAnalysisService } from '../../../application/services/text-analysis.service.js'
+import { HEART_OF_DARKNESS_MAPPINGS } from '../../../application/services/domain-keyword-mapping.config.js'
 
 /**
  * AI tool for answering questions about Joseph Conrad's "Heart of Darkness"
@@ -20,10 +22,12 @@ import type { LoggerPort } from '../../../application/ports/logger.port.js'
 export class HeartOfDarknessTool {
   private readonly getTextUseCase: GetTextUseCase
   private readonly logger: LoggerPort
+  private readonly textAnalysisService: TextAnalysisService
 
   constructor(logger: LoggerPort) {
     this.logger = logger
     this.getTextUseCase = new GetTextUseCase('data', 'heart-of-darkness.txt')
+    this.textAnalysisService = new TextAnalysisService(HEART_OF_DARKNESS_MAPPINGS)
   }
 
   /**
@@ -53,13 +57,24 @@ export class HeartOfDarknessTool {
             this.logger.info('Heart of Darkness text loaded from file')
           }
 
-          // Return the full text as context for the AI to use in answering
+          if (!heartOfDarknessText) {
+            throw new Error('Failed to load Heart of Darkness text')
+          }
+
+          // Extract relevant passages based on question keywords
+          const relevantContext = this.textAnalysisService.extractRelevantPassages(
+            heartOfDarknessText,
+            question
+          )
+
+          // Return extracted context for the AI to use in answering
           return {
             question,
-            textLength: heartOfDarknessText ? heartOfDarknessText.length : 0,
-            context: heartOfDarknessText,
+            textLength: heartOfDarknessText.length,
+            contextLength: relevantContext.length,
+            context: relevantContext,
             instructions:
-              'Use the provided full text of Heart of Darkness to answer the question comprehensively and accurately. Reference specific passages where relevant.',
+              'Use the provided text passages from Heart of Darkness to answer the question. These are the most relevant sections based on your question.',
           }
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
