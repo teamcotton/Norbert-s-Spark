@@ -59,7 +59,7 @@ Make sure you have the required environment variables set in your `.env` file:
 
 ```bash
 GOOGLE_API_KEY=your_api_key_here
-MODEL_NAME=ggemini-1.5-flash
+MODEL_NAME=gemini-1.5-flash
 ```
 
 ### Run Evaluations
