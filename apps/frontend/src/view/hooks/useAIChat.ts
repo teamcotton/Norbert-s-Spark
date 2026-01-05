@@ -43,6 +43,14 @@ export function useAIChat({ id }: UseAIChatProps = {}) {
     router.push(`/ai/${newId}`)
   }
 
+  // State declarations - must be before useChat to avoid reference errors in callbacks
+  const [input, setInput] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string>('')
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
   const { messages, sendMessage, stop } = useChat({
     id: id,
     transport: new DefaultChatTransport({
@@ -61,6 +69,7 @@ export function useAIChat({ id }: UseAIChatProps = {}) {
     }),
     onError: (error) => {
       logger.error('Chat transport error', error)
+      setErrorMessage(error.message || 'An error occurred while communicating with the AI service')
     },
   })
 
@@ -69,12 +78,6 @@ export function useAIChat({ id }: UseAIChatProps = {}) {
 
     void stop().catch(console.error)
   }, [disabled, stop])
-  const [input, setInput] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [errorMessage, setErrorMessage] = useState<string>('')
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
