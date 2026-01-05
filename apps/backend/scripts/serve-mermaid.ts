@@ -40,7 +40,8 @@ const htmlTemplate = `
     mermaid.initialize({ 
       startOnLoad: true,
       theme: 'default',
-      securityLevel: 'loose',
+       // from diagram content. Only relax this if all diagrams are fully trusted.
+      securityLevel: 'strict',
       flowchart: { 
         useMaxWidth: false, 
         htmlLabels: true,
