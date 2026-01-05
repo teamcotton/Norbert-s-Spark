@@ -2,7 +2,7 @@
 import { readFileSync } from 'fs'
 import { createServer } from 'http'
 import { dirname, join, resolve } from 'path'
-import { fileURLToPath } from 'url'
+import { fileURLToPath, pathToFileURL } from 'url'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -393,7 +393,7 @@ export const MERMAID_CONFIG = {
 export const PORT = 3001
 
 // Only run the server if this module is the main module
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   // Get the markdown file path from command line arguments
   const args = process.argv.slice(2)
   const markdownFilePath = getMarkdownFilePath(args)
