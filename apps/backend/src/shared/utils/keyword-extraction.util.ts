@@ -185,6 +185,13 @@ const STOPWORDS = new Set([
 ])
 
 /**
+ * Minimum word length for keyword extraction.
+ * Words shorter than this are filtered out as they typically
+ * don't carry significant semantic meaning.
+ */
+const MIN_WORD_LENGTH = 4
+
+/**
  * Utility class for keyword extraction operations.
  * All methods are static and can be used without instantiation.
  */
@@ -229,7 +236,7 @@ export class KeywordExtractionUtil {
       .replace(/'s?\b/g, '') // Remove possessives before other punctuation
       .replace(/[^\w\s]/g, ' ') // Replace remaining punctuation with spaces
       .split(/\s+/)
-      .filter((word) => word.length >= 4) // Keep words with 4+ chars
+      .filter((word) => word.length >= MIN_WORD_LENGTH) // Keep words with MIN_WORD_LENGTH+ chars
       .filter((word) => !STOPWORDS.has(word)) // Remove stopwords
   }
 
@@ -238,6 +245,7 @@ export class KeywordExtractionUtil {
    *
    * This method provides read-only access to the stopwords set,
    * useful for testing or custom keyword extraction logic.
+   * Returns a new Set to ensure immutability and prevent external mutations.
    *
    * @returns A Set containing all stopwords
    *
@@ -249,6 +257,6 @@ export class KeywordExtractionUtil {
    * ```
    */
   static getStopwords(): ReadonlySet<string> {
-    return STOPWORDS
+    return new Set(STOPWORDS)
   }
 }
