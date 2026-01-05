@@ -1,4 +1,5 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
+import type { UIMessage } from 'ai'
 import { uuidv7 } from 'uuidv7'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -40,7 +41,11 @@ vi.mock('../../../../src/infrastructure/ai/tools/getText.js', () => {
 })
 
 // Mock cache service
-let mockCacheService: { get: any; set: any } | null = null
+interface MockCacheService {
+  get: vi.MockedFunction<(messages: UIMessage[]) => Promise<string | null>>
+  set: vi.MockedFunction<(messages: UIMessage[], response: string) => Promise<void>>
+}
+let mockCacheService: MockCacheService | null = null
 vi.mock('../../../../src/infrastructure/ai/middleware/cache.middleware.js', () => ({
   createCacheService: vi.fn(() => mockCacheService),
 }))
@@ -517,22 +522,23 @@ describe('AIController', () => {
         // 2. Once for the assistant message from cache
         expect(mockAppendChatUseCase.execute).toHaveBeenCalledTimes(2)
 
-        // Verify the second call persisted the assistant message
-        const secondCall = vi.mocked(mockAppendChatUseCase.execute).mock.calls[1]
-        expect(secondCall).toBeDefined()
-        expect(secondCall![0]).toBe(chatId) // chatId
-        expect(secondCall![1]).toEqual([
-          expect.objectContaining({
-            role: 'assistant',
-            parts: [
-              expect.objectContaining({
-                type: 'text',
-                text: cachedResponse,
-                state: 'done',
-              }),
-            ],
-          }),
-        ])
+        // Verify the second call persisted the assistant message with cached content
+        expect(mockAppendChatUseCase.execute).toHaveBeenNthCalledWith(
+          2,
+          chatId,
+          [
+            expect.objectContaining({
+              role: 'assistant',
+              parts: [
+                expect.objectContaining({
+                  type: 'text',
+                  text: cachedResponse,
+                  state: 'done',
+                }),
+              ],
+            }),
+          ]
+        )
       })
 
       it('should return cached response as plain text', async () => {
