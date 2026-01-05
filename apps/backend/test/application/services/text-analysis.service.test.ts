@@ -73,7 +73,8 @@ describe('TextAnalysisService', () => {
 
       // Should return fallback format with beginning, [...], and ending
       expect(result).toContain('[...]')
-      expect(result.length).toBeLessThanOrEqual(25000)
+      // add an extra 9 characters accounts for the separator: '\n\n[...]\n\n'
+      expect(result.length).toBeLessThanOrEqual(25009)
     })
 
     it('should respect MAX_CONTEXT_LENGTH limit', () => {

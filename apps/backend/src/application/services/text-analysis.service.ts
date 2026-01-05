@@ -61,6 +61,9 @@ export class TextAnalysisService {
    *
    */
   public extractRelevantPassages(fullText: string, question: string): string {
+    // Handle empty text gracefully
+    if (fullText.length === 0) return ''
+
     // Extract meaningful keywords from the question (exclude common words)
     const stopWords = new Set([
       'the',
