@@ -31,6 +31,12 @@ pnpm mermaid docs/architecture.md
 - 🔄 Toggle source code view
 - 🖨️ Print-friendly layout
 - 📱 Responsive design
+- 🔍 Enhanced viewing controls:
+  - 250% initial zoom for better readability
+  - On-screen zoom controls
+  - Keyboard shortcuts: <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>+</kbd> to zoom in, <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>-</kbd> to zoom out
+  - Mouse wheel zoom
+  - Click-and-drag panning of the diagram
 
 ## Supported Diagram Types
 
