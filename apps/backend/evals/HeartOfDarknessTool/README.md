@@ -135,7 +135,7 @@ const testCases = [
 getAgentResponse(question)
   ↓
 streamText({
-  model: ggemini-1.5-flash,
+  model: gemini-1.5-flash,
   system: SYSTEM_PROMPT,
   tools: { heartOfDarknessQA },
   messages: [{ role: 'user', content: question }]
