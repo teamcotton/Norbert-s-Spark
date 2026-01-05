@@ -125,6 +125,24 @@ export class AIController {
       const cached = await cacheService.get(messages as UIMessage[])
       if (cached) {
         this.logger.info('Returning cached AI response', { chatId })
+        
+        // Persist the cached assistant message to maintain consistency
+        // This ensures cache hits have the same persistence behavior as cache misses
+        const assistantMessage: UIMessage = {
+          id: `msg-${Date.now()}`,
+          role: 'assistant',
+          parts: [
+            {
+              type: 'text',
+              text: cached,
+              state: 'done',
+            },
+          ],
+        }
+        
+        await this.appendChatUseCase.execute(chatId, [assistantMessage])
+        this.logger.debug('Persisted cached assistant message', { chatId })
+        
         // Return plain text response for cached content
         return reply.status(200).type('text/plain').send(cached)
       }
