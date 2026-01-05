@@ -184,9 +184,9 @@ export class TextAnalysisService {
       if (passages.length === 0) {
         passages.push({ ...interval, score: 1 })
       } else {
-        const last = passages[passages.length - 1]
+        const last = passages[passages.length - 1]!
         // TypeScript: last is guaranteed to exist since passages.length > 0
-        if (last && interval.start <= last.end) {
+        if (interval.start <= last.end) {
           // Overlapping intervals: merge and increment score
           last.end = Math.max(last.end, interval.end)
           last.score += 1
