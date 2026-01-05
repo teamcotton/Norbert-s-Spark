@@ -1,35 +1,14 @@
 import { expect, test } from '@playwright/test'
 
+import { signInAndNavigateToChat } from './helpers.js'
+
 test.describe('Chat Interaction', () => {
   test('should navigate to chat page and verify form is disabled for new chat', async ({
     context,
     page,
   }) => {
-    // Clear cookies and storage for clean state
-    await context.clearCookies()
-
-    // Navigate to sign in page
-    await page.goto('/signin')
-
-    // Sign in as admin user
-    const emailField = page.getByLabel(/email address/i)
-    const passwordField = page.getByLabel(/^password/i)
-    const submitButton = page.getByRole('button', { name: /^sign in$/i })
-
-    await emailField.fill('james.smith@gmail.com')
-    await passwordField.fill('Admin123!')
-    await submitButton.click()
-
-    // Wait for redirect to dashboard
-    await expect(page).toHaveURL('/dashboard', { timeout: 10000 })
-
-    // Click on chat navigation element
-    const chatButton = page.getByTestId('chat')
-    await expect(chatButton).toBeVisible()
-    await chatButton.click()
-
-    // Verify navigation to /ai page
-    await expect(page).toHaveURL('/ai', { timeout: 10000 })
+    // Sign in and navigate to chat page
+    await signInAndNavigateToChat(page, { clearCookies: true, context })
 
     // Verify form elements are disabled - use simple selectors
     const textInput = page.getByPlaceholder('Type your message...')
@@ -47,29 +26,8 @@ test.describe('Chat Interaction', () => {
   })
 
   test('should display error message in UI when API request fails', async ({ context, page }) => {
-    // Clear cookies and storage for clean state
-    await context.clearCookies()
-
-    // Navigate to sign in page
-    await page.goto('/signin')
-
-    // Sign in as admin user
-    const emailField = page.getByLabel(/email address/i)
-    const passwordField = page.getByLabel(/^password/i)
-    const submitButton = page.getByRole('button', { name: /^sign in$/i })
-
-    await emailField.fill('james.smith@gmail.com')
-    await passwordField.fill('Admin123!')
-    await submitButton.click()
-
-    // Wait for redirect to dashboard
-    await expect(page).toHaveURL('/dashboard', { timeout: 10000 })
-
-    // Navigate to chat page
-    const chatButton = page.getByTestId('chat')
-    await expect(chatButton).toBeVisible()
-    await chatButton.click()
-    await expect(page).toHaveURL('/ai', { timeout: 10000 })
+    // Sign in and navigate to chat page
+    await signInAndNavigateToChat(page, { clearCookies: true, context })
 
     // Click "New Chat" button to enable the form
     const newChatButton = page.getByRole('button', { name: /new chat/i })
@@ -80,7 +38,7 @@ test.describe('Chat Interaction', () => {
     await page.waitForURL(/\/ai\/[a-f0-9-]+/, { timeout: 5000 })
 
     // Intercept API request and return an error response
-    await page.route('**/api/ai/**', (route) => {
+    await page.route('**/api/v1/ai/**', (route) => {
       route.fulfill({
         status: 500,
         contentType: 'application/json',
