@@ -4,6 +4,7 @@ CREATE TABLE users (
     name        TEXT NOT NULL CHECK (length(name) >= 2 AND length(name) <= 100),
     password    TEXT NOT NULL CHECK (length(password) = 60), -- bcrypt hash
     email       CITEXT      NOT NULL UNIQUE,
+    role        TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin', 'moderator')),
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -23,7 +24,7 @@ CREATE INDEX chats_user_id_updated_at_idx ON chats(user_id, updated_at DESC);
 CREATE TABLE messages (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     chat_id UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
-    created_at TIMESTAMPZ NOT NULL DEFAULT now(),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     role VARCHAR NOT NULL CONSTRAINT role_length_check CHECK (char_length(role) <= 15)
 );
 
@@ -36,11 +37,11 @@ CREATE TABLE ai_options (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     message_id UUID NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
     prompt TEXT NOT NULL,
-    max_output_tokens INTEGER NOT NULL CHECK (max_tokens > 0),
-    temperature FLOAT NOT NULL,
-    top_p FLOAT NOT NULL,
-    frequency_penalty FLOAT NOT NULL,
-    presence_penalty FLOAT NOT NULL,
+    max_output_tokens INTEGER NOT NULL CHECK (max_output_tokens > 0),
+    temperature NUMERIC NOT NULL CHECK (temperature >= 0 AND temperature <= 2),
+    top_p NUMERIC NOT NULL CHECK (top_p >= 0 AND top_p <= 1),
+    frequency_penalty NUMERIC NOT NULL CHECK (frequency_penalty >= -2 AND frequency_penalty <= 2),
+    presence_penalty NUMERIC NOT NULL CHECK (presence_penalty >= -2 AND presence_penalty <= 2),
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -81,6 +82,9 @@ CREATE TABLE parts (
     tool_state VARCHAR,
     tool_error_text VARCHAR,
 
+    -- Data part fields (for custom data like darkness, weather, etc.)
+    data_content JSONB,
+
     -- Provider metadata
     provider_metadata JSONB,
 
@@ -114,7 +118,10 @@ CREATE TABLE parts (
         CHECK (CASE WHEN type = 'source_url' THEN source_url_source_id IS NOT NULL AND source_url_url IS NOT NULL ELSE TRUE END),
     
     CONSTRAINT source_document_fields_required_if_type_is_source_document 
-        CHECK (CASE WHEN type = 'source_document' THEN source_document_source_id IS NOT NULL AND source_document_media_type IS NOT NULL AND source_document_title IS NOT NULL ELSE TRUE END)
+        CHECK (CASE WHEN type = 'source_document' THEN source_document_source_id IS NOT NULL AND source_document_media_type IS NOT NULL AND source_document_title IS NOT NULL ELSE TRUE END),
+    
+    CONSTRAINT data_content_required_if_type_is_data 
+        CHECK (CASE WHEN type = 'data' THEN data_content IS NOT NULL ELSE TRUE END)
 );
 
 -- Indexes for parts table
