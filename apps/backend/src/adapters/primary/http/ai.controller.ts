@@ -143,6 +143,7 @@ export class AIController {
         this.logger.debug('Stream finished', { finishReason })
         this.logger.debug('Stream usage info', { usage, totalUsage })
         this.logger.debug('streamText.onFinish')
+
         // Model messages (AssistantModelMessage or ToolModelMessage)
         // Minimal information, no UI data
         // Not suitable for UI applications

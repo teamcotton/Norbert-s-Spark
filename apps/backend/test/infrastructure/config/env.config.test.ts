@@ -599,4 +599,108 @@ describe('EnvConfig', () => {
       expect(typeof EnvConfig.validate).toBe('function')
     })
   })
+
+  describe('UPSTASH_REDIS_REST_URL', () => {
+    it('should be a static readonly property', async () => {
+      process.env.UPSTASH_REDIS_REST_URL = 'https://redis.example.com'
+      process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
+      process.env.GOOGLE_GENERATIVE_AI_API_KEY = 'test_google_key'
+      process.env.MODEL_NAME = 'gemini-pro'
+
+      const { EnvConfig } = await import('../../../src/infrastructure/config/env.config.js')
+
+      const descriptor = Object.getOwnPropertyDescriptor(EnvConfig, 'UPSTASH_REDIS_REST_URL')
+      expect(descriptor).toBeDefined()
+      expect(descriptor?.configurable).toBe(true)
+      expect(descriptor?.enumerable).toBe(true)
+    })
+
+    it('should have type Obscured<string | undefined>', async () => {
+      process.env.UPSTASH_REDIS_REST_URL = 'https://redis.example.com'
+      process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
+      process.env.GOOGLE_GENERATIVE_AI_API_KEY = 'test_google_key'
+      process.env.MODEL_NAME = 'gemini-pro'
+
+      const { EnvConfig } = await import('../../../src/infrastructure/config/env.config.js')
+
+      // Type assertion to verify compile-time type
+      const _typeCheck: Obscured<string | undefined> = EnvConfig.UPSTASH_REDIS_REST_URL
+
+      // Runtime checks - Obscured objects have specific characteristics
+      expect(EnvConfig.UPSTASH_REDIS_REST_URL).toBeDefined()
+      expect(typeof EnvConfig.UPSTASH_REDIS_REST_URL).toBe('object')
+
+      // Obscured objects return '[OBSCURED]' when converted to string
+      expect(String(EnvConfig.UPSTASH_REDIS_REST_URL)).toBe('[OBSCURED]')
+      expect(EnvConfig.UPSTASH_REDIS_REST_URL.toString()).toBe('[OBSCURED]')
+
+      // Prevent unused variable warning
+      void _typeCheck
+    })
+
+    it('should obscure the actual Redis URL value', async () => {
+      process.env.UPSTASH_REDIS_REST_URL = 'https://secret-redis-url.upstash.io'
+      process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
+      process.env.GOOGLE_GENERATIVE_AI_API_KEY = 'test_google_key'
+      process.env.MODEL_NAME = 'gemini-pro'
+
+      const { EnvConfig } = await import('../../../src/infrastructure/config/env.config.js')
+
+      // Verify the URL is obscured (doesn't expose the raw value)
+      expect(String(EnvConfig.UPSTASH_REDIS_REST_URL)).not.toContain('secret-redis-url')
+      expect(EnvConfig.UPSTASH_REDIS_REST_URL.toString()).toBe('[OBSCURED]')
+    })
+  })
+
+  describe('UPSTASH_REDIS_REST_TOKEN', () => {
+    it('should be a static readonly property', async () => {
+      process.env.UPSTASH_REDIS_REST_TOKEN = 'test_token_12345'
+      process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
+      process.env.GOOGLE_GENERATIVE_AI_API_KEY = 'test_google_key'
+      process.env.MODEL_NAME = 'gemini-pro'
+
+      const { EnvConfig } = await import('../../../src/infrastructure/config/env.config.js')
+
+      const descriptor = Object.getOwnPropertyDescriptor(EnvConfig, 'UPSTASH_REDIS_REST_TOKEN')
+      expect(descriptor).toBeDefined()
+      expect(descriptor?.configurable).toBe(true)
+      expect(descriptor?.enumerable).toBe(true)
+    })
+
+    it('should have type Obscured<string | undefined>', async () => {
+      process.env.UPSTASH_REDIS_REST_TOKEN = 'test_token_12345'
+      process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
+      process.env.GOOGLE_GENERATIVE_AI_API_KEY = 'test_google_key'
+      process.env.MODEL_NAME = 'gemini-pro'
+
+      const { EnvConfig } = await import('../../../src/infrastructure/config/env.config.js')
+
+      // Type assertion to verify compile-time type
+      const _typeCheck: Obscured<string | undefined> = EnvConfig.UPSTASH_REDIS_REST_TOKEN
+
+      // Runtime checks - Obscured objects have specific characteristics
+      expect(EnvConfig.UPSTASH_REDIS_REST_TOKEN).toBeDefined()
+      expect(typeof EnvConfig.UPSTASH_REDIS_REST_TOKEN).toBe('object')
+
+      // Obscured objects return '[OBSCURED]' when converted to string
+      expect(String(EnvConfig.UPSTASH_REDIS_REST_TOKEN)).toBe('[OBSCURED]')
+      expect(EnvConfig.UPSTASH_REDIS_REST_TOKEN.toString()).toBe('[OBSCURED]')
+
+      // Prevent unused variable warning
+      void _typeCheck
+    })
+
+    it('should obscure the actual Redis token value', async () => {
+      process.env.UPSTASH_REDIS_REST_TOKEN = 'secret_token_xyz_12345'
+      process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
+      process.env.GOOGLE_GENERATIVE_AI_API_KEY = 'test_google_key'
+      process.env.MODEL_NAME = 'gemini-pro'
+
+      const { EnvConfig } = await import('../../../src/infrastructure/config/env.config.js')
+
+      // Verify the token is obscured (doesn't expose the raw value)
+      expect(String(EnvConfig.UPSTASH_REDIS_REST_TOKEN)).not.toContain('secret_token_xyz')
+      expect(EnvConfig.UPSTASH_REDIS_REST_TOKEN.toString()).toBe('[OBSCURED]')
+    })
+  })
 })
