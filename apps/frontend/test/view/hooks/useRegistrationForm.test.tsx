@@ -979,7 +979,7 @@ describe('useRegistrationForm', () => {
 
       // Submit the form
       await act(async () => {
-        result.current.handleSubmit({
+        await result.current.handleSubmit({
           preventDefault: () => {},
         } as React.FormEvent)
       })
