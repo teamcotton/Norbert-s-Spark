@@ -14,6 +14,8 @@ import { TransformStream } from 'node:stream/web'
  * Cache the evaluated Redis configuration to avoid repeated obscured.value() calls
  */
 let isConfiguredCache: boolean | null = null
+let cachedRedisUrl: string | undefined
+let cachedRedisToken: string | undefined
 
 /**
  * Check if Redis credentials are properly configured
@@ -24,17 +26,17 @@ function isRedisConfigured(): boolean {
     return isConfiguredCache
   }
 
-  const redisUrl = obscured.value(EnvConfig.UPSTASH_REDIS_REST_URL)
-  const redisToken = obscured.value(EnvConfig.UPSTASH_REDIS_REST_TOKEN)
+  cachedRedisUrl = obscured.value(EnvConfig.UPSTASH_REDIS_REST_URL)
+  cachedRedisToken = obscured.value(EnvConfig.UPSTASH_REDIS_REST_TOKEN)
 
   // Check if credentials exist and are not obscured placeholder values
   isConfiguredCache =
-    !!redisUrl &&
-    !!redisToken &&
-    redisUrl !== '[OBSCURED]' &&
-    redisToken !== '[OBSCURED]' &&
-    redisUrl !== 'undefined' &&
-    redisToken !== 'undefined'
+    !!cachedRedisUrl &&
+    !!cachedRedisToken &&
+    cachedRedisUrl !== '[OBSCURED]' &&
+    cachedRedisToken !== '[OBSCURED]' &&
+    cachedRedisUrl !== 'undefined' &&
+    cachedRedisToken !== 'undefined'
 
   return isConfiguredCache
 }
@@ -65,8 +67,8 @@ function getRedisClient(): Redis | null {
 
   try {
     redisClient = new Redis({
-      url: obscured.value(EnvConfig.UPSTASH_REDIS_REST_URL),
-      token: obscured.value(EnvConfig.UPSTASH_REDIS_REST_TOKEN),
+      url: cachedRedisUrl!,
+      token: cachedRedisToken!,
     })
     return redisClient
   } catch (error) {
