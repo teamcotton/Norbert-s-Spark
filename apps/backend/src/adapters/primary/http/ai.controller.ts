@@ -18,6 +18,7 @@ import { SaveChatUseCase } from '../../../application/use-cases/save-chat.use-ca
 import { GetChatUseCase } from '../../../application/use-cases/get-chat.use-case.js'
 import { ChatId } from '../../../domain/value-objects/chatID.js'
 import { SYSTEM_PROMPT } from '../../../shared/constants/ai-constants.js'
+import { ChatRequestDto } from '../../../application/dtos/chat-request.dto.js'
 
 export class AIController {
   private readonly heartOfDarknessTool: HeartOfDarknessTool
@@ -64,31 +65,25 @@ export class AIController {
     let trigger: string
 
     try {
-      const body = request.body as any
+      // Validate request body using DTO
+      const dto = ChatRequestDto.validate(request.body)
 
       this.logger.info('Request body:', {
-        id: body?.id,
-        trigger: body?.trigger,
-        messages: body?.messages,
+        id: dto.id,
+        trigger: dto.trigger,
+        messages: dto.messages,
       })
 
       // Validate messages using validateUIMessages from 'ai' package
       messages = await validateUIMessages({
-        messages: body?.messages || [],
+        messages: dto.messages,
       })
 
-      // Extract id and trigger from body
-      id = body?.id
+      // Extract id and trigger from DTO
+      id = dto.id
+      trigger = dto.trigger
 
-      trigger = body?.trigger
-
-      if (!id || !trigger) {
-        return reply.status(400).send({
-          error: 'Invalid request body',
-          details: 'id and trigger are required',
-        })
-      }
-
+      // Validate ChatId format
       try {
         id = new ChatId(id).getValue()
       } catch {
