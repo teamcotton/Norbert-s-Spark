@@ -23,7 +23,7 @@ vi.mock('resend', () => {
 // Mock EnvConfig
 vi.mock('../../../../src/infrastructure/config/env.config.js', () => ({
   EnvConfig: {
-    EMAIL_FROM_ADDRESS: 'noreply@gym.com',
+    EMAIL_FROM_ADDRESS: 'noreply@example.com',
   },
 }))
 
@@ -80,7 +80,7 @@ describe('ResendService', () => {
       })
 
       expect(mockEmailsSend).toHaveBeenCalledWith({
-        from: 'noreply@gym.com',
+        from: 'noreply@example.com',
         to: 'user@example.com',
         subject: 'Hello World',
         html: '<p>Congrats on sending your <strong>first email</strong>!</p>',
@@ -111,7 +111,7 @@ describe('ResendService', () => {
 
       expect(mockEmailsSend).toHaveBeenCalledWith(
         expect.objectContaining({
-          from: 'noreply@gym.com',
+          from: 'noreply@example.com',
           to: 'recipient@example.com',
           subject: expect.any(String),
           html: expect.any(String),

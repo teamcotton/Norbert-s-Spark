@@ -1,4 +1,4 @@
-# @level-2-gym/shared
+# @no/shared
 
 Shared types and schemas for the monorepo.
 
@@ -15,7 +15,7 @@ Current exports:
 Usage (frontend or backend):
 
 ```ts
-import { LoginSchema, LoginDTO } from '@level-2-gym/shared'
+import { LoginSchema, LoginDTO } from '@norberts-spark/shared'
 ```
 
 Notes:
