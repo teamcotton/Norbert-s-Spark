@@ -7,7 +7,7 @@ export async function POST(request: Request) {
   try {
     const body = (await request.json()) as RegisterUserData
 
-    const apiUrl = process.env.BACKEND_AI_CALLBACK_URL ?? process.env.BACKEND_AI_CALLBACK_UR
+    const apiUrl = process.env.BACKEND_AI_CALLBACK_URL
 
     if (!apiUrl) {
       return Response.json(
