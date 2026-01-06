@@ -11,35 +11,68 @@ import { simulateReadableStream } from 'ai'
 import { TransformStream } from 'node:stream/web'
 
 /**
+ * Cache the evaluated Redis configuration to avoid repeated obscured.value() calls
+ */
+let isConfiguredCache: boolean | null = null
+
+/**
  * Check if Redis credentials are properly configured
  */
 function isRedisConfigured(): boolean {
+  // Return cached result if already computed
+  if (isConfiguredCache !== null) {
+    return isConfiguredCache
+  }
+
   const redisUrl = obscured.value(EnvConfig.UPSTASH_REDIS_REST_URL)
   const redisToken = obscured.value(EnvConfig.UPSTASH_REDIS_REST_TOKEN)
 
   // Check if credentials exist and are not obscured placeholder values
-  return (
+  isConfiguredCache =
     !!redisUrl &&
     !!redisToken &&
     redisUrl !== '[OBSCURED]' &&
     redisToken !== '[OBSCURED]' &&
     redisUrl !== 'undefined' &&
     redisToken !== 'undefined'
-  )
+
+  return isConfiguredCache
 }
 
 /**
  * Lazily initialize Redis client only when credentials are configured
  */
 let redisClient: Redis | null = null
+let isInitializing = false
+
 function getRedisClient(): Redis | null {
-  if (redisClient === null && isRedisConfigured()) {
+  // Return existing client if already initialized
+  if (redisClient !== null) {
+    return redisClient
+  }
+
+  // Prevent concurrent initialization
+  if (isInitializing) {
+    return null
+  }
+
+  // Check if Redis is configured
+  if (!isRedisConfigured()) {
+    return null
+  }
+
+  // Mark as initializing to prevent race conditions
+  isInitializing = true
+
+  try {
     redisClient = new Redis({
       url: obscured.value(EnvConfig.UPSTASH_REDIS_REST_URL),
       token: obscured.value(EnvConfig.UPSTASH_REDIS_REST_TOKEN),
     })
+    return redisClient
+  } finally {
+    isInitializing = false
   }
-  return redisClient
 }
 
 /**
