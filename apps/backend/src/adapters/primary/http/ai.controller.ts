@@ -160,13 +160,8 @@ export class AIController {
         .send(FastifyUtil.createResponse('AI service configuration error', 500))
     }
 
-    const wrappedModel = wrapLanguageModel({
-      model: google(EnvConfig.MODEL_NAME),
-      middleware: cacheMiddleware,
-    })
-
     const result = streamText({
-      model: wrappedModel,
+      model: google(EnvConfig.MODEL_NAME),
       messages: await convertToModelMessages(messages as UIMessage[]),
       system: `${SYSTEM_PROMPT}`,
       tools: {
