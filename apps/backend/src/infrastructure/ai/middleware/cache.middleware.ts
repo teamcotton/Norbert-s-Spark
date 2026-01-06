@@ -101,10 +101,10 @@ export const cacheMiddleware: LanguageModelV3Middleware = {
         fullResponse.push(chunk)
         controller.enqueue(chunk)
       },
-      flush() {
+      async flush() {
         // Try to store the full response in the cache after streaming is complete
         try {
-          redis.set(cacheKey, fullResponse)
+          await redis.set(cacheKey, fullResponse)
         } catch (error) {
           console.error('Cache write error in wrapStream flush:', error)
           // Continue without caching - graceful degradation
