@@ -1,5 +1,7 @@
 'use server'
 // Shared utilities (error handling, logging, SSL handling)
+import { redirect } from 'next/navigation.js'
+
 import { createLogger } from '@/infrastructure/logging/logger.js'
 
 const logger = createLogger({ prefix: 'backendRequest' })
@@ -41,6 +43,13 @@ async function handleResponse<T>(
 
   if (!res.ok) {
     logger.error('[backendRequest] non-ok response', { url, status: res.status, body: parsed })
+
+    // Redirect to signin on 401 Unauthorized (JWT expired or invalid)
+    if (res.status === 401) {
+      logger.info('[backendRequest] JWT expired or unauthorized - redirecting to signin')
+      redirect('/signin?error=session_expired')
+    }
+
     const extractedError = (() => {
       if (!parsed || typeof parsed !== 'object') return undefined
       if ('error' in parsed) {
