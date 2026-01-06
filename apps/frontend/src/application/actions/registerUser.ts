@@ -7,7 +7,7 @@ export async function registerUser(data: RegisterUserData): Promise<RegisterUser
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://localhost:4321'
 
-    // Only send required fields to the server (exclude confirmPassword)
+    // Only send the expected fields to the server, ignoring any extra properties on data
     const payload = {
       email: data.email,
       name: data.name,
