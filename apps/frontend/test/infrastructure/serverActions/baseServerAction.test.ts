@@ -92,3 +92,7 @@ describe('backendRequest effectiveTimeoutMs', () => {
     expect(abortSignalAnySpy).not.toHaveBeenCalled()
   })
 })
+
+// Note: 401 handling behavior is tested through E2E tests in jwt-expiration.spec.ts
+// Unit testing the redirect behavior requires complex module mocking that is better
+// covered by integration/E2E tests

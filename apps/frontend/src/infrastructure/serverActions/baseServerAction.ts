@@ -1,5 +1,7 @@
 'use server'
 // Shared utilities (error handling, logging, SSL handling)
+import { redirect } from 'next/navigation.js'
+
 import { createLogger } from '@/infrastructure/logging/logger.js'
 
 const logger = createLogger({ prefix: 'backendRequest' })
@@ -11,6 +13,18 @@ export interface BackendRequestOptions {
   signal?: AbortSignal
   headers?: Record<string, string>
   timeoutMs?: number
+  /**
+   * Whether to automatically redirect to /signin on 401 Unauthorized errors.
+   * Defaults to true for backward compatibility.
+   *
+   * Set to false if:
+   * - You want to handle 401 errors differently (e.g., show a modal)
+   * - The server action is called from a background operation
+   * - You need to perform cleanup before redirecting
+   *
+   * When false, a 401 error will throw an Error with status 401 instead of redirecting.
+   */
+  redirectOn401?: boolean
 }
 
 function normalizeUrl(apiUrl: string, endpoint: string) {
@@ -29,7 +43,8 @@ function normalizeUrl(apiUrl: string, endpoint: string) {
  */
 async function handleResponse<T>(
   res: Response | Awaited<ReturnType<typeof import('node-fetch').default>>,
-  url: string
+  url: string,
+  redirectOn401 = true
 ): Promise<T> {
   const text = await res.text()
   let parsed: unknown
@@ -41,6 +56,14 @@ async function handleResponse<T>(
 
   if (!res.ok) {
     logger.error('[backendRequest] non-ok response', { url, status: res.status, body: parsed })
+
+    // Redirect to signin on 401 Unauthorized (JWT expired or invalid)
+    // Only redirect if redirectOn401 is true (default behavior)
+    if (res.status === 401 && redirectOn401) {
+      logger.info('[backendRequest] JWT expired or unauthorized - redirecting to signin')
+      redirect('/signin?error=session_expired')
+    }
+
     const extractedError = (() => {
       if (!parsed || typeof parsed !== 'object') return undefined
       if ('error' in parsed) {
@@ -117,7 +140,7 @@ export async function backendRequest<T>(options: BackendRequestOptions): Promise
         signal: combinedSignal,
       })
 
-      return await handleResponse<T>(res, url)
+      return await handleResponse<T>(res, url, options.redirectOn401)
     } finally {
       clearTimeout(timeout)
     }
@@ -136,7 +159,7 @@ export async function backendRequest<T>(options: BackendRequestOptions): Promise
         signal: combinedSignal,
       })
 
-      return await handleResponse<T>(res, url)
+      return await handleResponse<T>(res, url, options.redirectOn401)
     } finally {
       clearTimeout(timeout)
     }
