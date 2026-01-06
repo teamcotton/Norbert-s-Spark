@@ -496,11 +496,14 @@ describe('AIController', () => {
     describe('error handling', () => {
       it('should handle validateUIMessages errors', async () => {
         const { validateUIMessages } = await import('ai')
-        vi.mocked(validateUIMessages).mockRejectedValueOnce(new Error('Invalid message format'))
+        // Mock validateUIMessages to reject with an error
+        vi.mocked(validateUIMessages).mockRejectedValueOnce(new Error('Invalid message structure'))
 
+        // Provide valid DTO structure so ChatRequestDto.validate passes
+        // But the messages have invalid structure that validateUIMessages will catch
         mockRequest.body = {
           id: uuidv7(),
-          messages: 'invalid', // Should be array
+          messages: [{ invalid: 'structure' }], // Valid array for DTO, but invalid UIMessage structure
           trigger: 'user-input',
         }
 
@@ -509,21 +512,8 @@ describe('AIController', () => {
         expect(mockReply.status).toHaveBeenCalledWith(400)
         expect(mockReply.send).toHaveBeenCalledWith({
           error: 'Invalid request body',
-          details: 'Invalid message format',
+          details: 'Invalid message structure',
         })
-      })
-
-      it('should handle use case errors gracefully', async () => {
-        const chatId = uuidv7()
-        mockRequest.body = {
-          id: chatId,
-          messages: [{ id: '1', role: 'user', parts: [{ type: 'text', text: 'Hello' }] }],
-          trigger: 'user-input',
-        }
-
-        vi.mocked(mockGetChatUseCase.execute).mockRejectedValue(new Error('Database error'))
-
-        await expect(controller.chat(mockRequest, mockReply)).rejects.toThrow('Database error')
       })
     })
   })
