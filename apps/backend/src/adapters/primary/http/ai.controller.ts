@@ -14,7 +14,6 @@ import { SaveChatUseCase } from '../../../application/use-cases/save-chat.use-ca
 import { GetChatUseCase } from '../../../application/use-cases/get-chat.use-case.js'
 import { ChatId } from '../../../domain/value-objects/chatID.js'
 import { SYSTEM_PROMPT } from '../../../shared/constants/ai-constants.js'
-import { createCacheService } from '../../../infrastructure/ai/middleware/cache.middleware.js'
 
 export class AIController {
   private readonly heartOfDarknessTool: HeartOfDarknessTool
@@ -117,19 +116,6 @@ export class AIController {
         .send(FastifyUtil.createResponse('AI service configuration error', 500))
     }
 
-    // Create cache service instance
-    const cacheService = createCacheService(this.logger)
-
-    // Check cache first - if found, return cached text directly
-    if (cacheService) {
-      const cached = await cacheService.get(messages as UIMessage[])
-      if (cached) {
-        this.logger.info('Returning cached AI response', { chatId })
-        // Return plain text response for cached content
-        return reply.status(200).type('text/plain').send(cached)
-      }
-    }
-
     const result = streamText({
       model: google(EnvConfig.MODEL_NAME),
       messages: convertToModelMessages(messages as UIMessage[]),
@@ -157,13 +143,6 @@ export class AIController {
         this.logger.debug('Stream finished', { finishReason })
         this.logger.debug('Stream usage info', { usage, totalUsage })
         this.logger.debug('streamText.onFinish')
-
-        // Cache the response
-        if (cacheService && text) {
-          cacheService.set(messages as UIMessage[], text).catch((error) => {
-            this.logger.error('Failed to cache AI response', error as Error)
-          })
-        }
 
         // Model messages (AssistantModelMessage or ToolModelMessage)
         // Minimal information, no UI data
