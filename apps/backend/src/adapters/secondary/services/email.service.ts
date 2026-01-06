@@ -59,7 +59,7 @@ export class ResendService implements EmailServicePort {
       to,
       from: 'noreply@norbertsSpark.com',
       subject: 'Reset Your Password',
-      html: `<p>Click here to reset: <a href="https://gym.com/reset/${resetToken}">Reset Password</a></p>`,
+      html: `<p>Click here to reset: <a href="https://example.com/reset/${resetToken}">Reset Password</a></p>`,
     }
 
     // await this.sendGridClient.send(emailData)

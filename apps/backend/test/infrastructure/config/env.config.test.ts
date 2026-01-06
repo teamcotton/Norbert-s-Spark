@@ -163,14 +163,14 @@ describe('EnvConfig', () => {
     })
 
     it('should have type string', async () => {
-      process.env.EMAIL_FROM_ADDRESS = 'noreply@gym.com'
+      process.env.EMAIL_FROM_ADDRESS = 'noreply@example.com'
       process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
 
       vi.resetModules()
       const { EnvConfig } = await import('../../../src/infrastructure/config/env.config.js')
 
       expect(typeof EnvConfig.EMAIL_FROM_ADDRESS).toBe('string')
-      expect(EnvConfig.EMAIL_FROM_ADDRESS).toBe('noreply@gym.com')
+      expect(EnvConfig.EMAIL_FROM_ADDRESS).toBe('noreply@example.com')
     })
 
     it('should not be obscured (plain string value)', async () => {

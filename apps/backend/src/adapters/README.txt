@@ -205,9 +205,9 @@ export class SendGridEmailService implements EmailServicePort {
     // In real implementation, use SendGrid SDK
     const emailData = {
       to,
-      from: 'noreply@gym.com',
-      subject: 'Welcome to Level 2 Gym!',
-      html: `<h1>Welcome ${name}!</h1><p>Thanks for joining our gym.</p>`
+      from: 'noreply@example.com',
+      subject: 'Welcome to Norbert's Spark!',
+      html: `<h1>Welcome ${name}!</h1><p>Thanks for joining.</p>`
     }
 
     // await this.sendGridClient.send(emailData)
@@ -219,27 +219,13 @@ export class SendGridEmailService implements EmailServicePort {
     
     const emailData = {
       to,
-      from: 'noreply@gym.com',
+      from: 'noreply@example.com',
       subject: 'Reset Your Password',
-      html: `<p>Click here to reset: <a href="https://gym.com/reset/${resetToken}">Reset Password</a></p>`
+      html: `<p>Click here to reset: <a href="https://example.com/reset/${resetToken}">Reset Password</a></p>`
     }
 
     // await this.sendGridClient.send(emailData)
     this.logger.info('Password reset email sent', { to })
-  }
-
-  async sendWorkoutReminder(to: string, workoutDetails: any): Promise<void> {
-    this.logger.info('Sending workout reminder', { to })
-    
-    const emailData = {
-      to,
-      from: 'noreply@gym.com',
-      subject: 'Your Workout Reminder',
-      html: `<p>Don't forget your workout today!</p>`
-    }
-
-    // await this.sendGridClient.send(emailData)
-    this.logger.info('Workout reminder sent', { to })
   }
 }
 
