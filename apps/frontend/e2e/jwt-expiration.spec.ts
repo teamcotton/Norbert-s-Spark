@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-import { TEST_CREDENTIALS } from './helpers'
+import { TEST_CREDENTIALS } from './helpers.js'
 
 test.describe('JWT Token Expiration', () => {
   test.beforeEach(async ({ context }) => {

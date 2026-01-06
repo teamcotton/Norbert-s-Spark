@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-import { TEST_CREDENTIALS } from './helpers'
+import { TEST_CREDENTIALS } from './helpers.js'
 
 test.describe('Dashboard Sign Out', () => {
   test.beforeEach(async ({ page }) => {
