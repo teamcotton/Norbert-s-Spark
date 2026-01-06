@@ -989,6 +989,7 @@ describe('useRegistrationForm', () => {
 
       // Verify that invalidateQueries was called
       expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: ['users'] })
+      expect(invalidateQueriesSpy).toHaveBeenCalledTimes(1)
     })
 
     it('should not invalidate queries on failed registration', async () => {
