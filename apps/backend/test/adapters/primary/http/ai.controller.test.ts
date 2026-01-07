@@ -191,7 +191,7 @@ describe('AIController', () => {
       expect(mockApp.delete).not.toHaveBeenCalled()
     })
 
-    it('should register GET /ai/chats/{userId} route', () => {
+    it('should register GET /ai/chats/:userId route', () => {
       const mockApp = {
         post: vi.fn(),
         get: vi.fn(),
@@ -201,7 +201,7 @@ describe('AIController', () => {
 
       expect(mockApp.get).toHaveBeenCalledTimes(1)
       expect(mockApp.get).toHaveBeenCalledWith(
-        '/ai/chats/{userId}',
+        '/ai/chats/:userId',
         expect.objectContaining({ preHandler: expect.any(Array) }),
         expect.any(Function)
       )

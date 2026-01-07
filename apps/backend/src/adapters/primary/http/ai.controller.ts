@@ -43,7 +43,7 @@ export class AIController {
       this.chat.bind(this)
     )
     app.get(
-      `/ai/chats/{userId}`,
+      '/ai/chats/:userId',
       {
         preHandler: [authMiddleware],
       },
