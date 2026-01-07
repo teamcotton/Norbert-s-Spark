@@ -15,6 +15,7 @@ import { EnvConfig } from '../../../infrastructure/config/env.config.js'
 import { HeartOfDarknessTool } from '../../../infrastructure/ai/tools/heart-of-darkness.tool.js'
 import { SaveChatUseCase } from '../../../application/use-cases/save-chat.use-case.js'
 import { GetChatUseCase } from '../../../application/use-cases/get-chat.use-case.js'
+import type { ChatIdType } from '../../../domain/value-objects/chatID.js'
 import { ChatId } from '../../../domain/value-objects/chatID.js'
 import { SYSTEM_PROMPT } from '../../../shared/constants/ai-constants.js'
 import { GetChatsByUserIdUseCase } from '../../../application/use-cases/get-chats-by-userid.use-case.js'
@@ -230,7 +231,7 @@ export class AIController {
     })
   }
 
-  async getAIChatsByUserId(request: FastifyRequest, reply: FastifyReply): Promise<ChatId> {
+  async getAIChatsByUserId(request: FastifyRequest, reply: FastifyReply): Promise<ChatIdType[]> {
     this.logger.debug('Received getAIChatsByUserId request')
 
     const params = request.params as Record<string, unknown>
