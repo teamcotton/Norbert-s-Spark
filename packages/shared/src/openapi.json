@@ -319,7 +319,7 @@
         "description": "Sends a prompt to the AI service and retrieves the generated response",
         "operationId": "getAIResponse",
         "tags": ["ai"],
-        "security": [],
+        "security": [{ "bearerAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
@@ -410,6 +410,16 @@
           },
           "400": {
             "description": "Invalid request data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
             "content": {
               "application/json": {
                 "schema": {
