@@ -629,7 +629,7 @@ describe('AIController', () => {
     })
 
     describe('error handling', () => {
-      it('should propagate use case errors', async () => {
+      it('should return 500 when use case throws error', async () => {
         const userId = new UserId(uuidv7()).getValue()
         mockRequest.params = { userId }
 
@@ -637,13 +637,15 @@ describe('AIController', () => {
           new Error('Database connection failed')
         )
 
-        await expect(controller.getAIChatsByUserId(mockRequest, mockReply)).rejects.toThrow(
-          'Database connection failed'
-        )
+        await controller.getAIChatsByUserId(mockRequest, mockReply)
+
+        expect(mockReply.status).toHaveBeenCalledWith(500)
+        expect(mockReply.send).toHaveBeenCalled()
+        expect(mockLogger.error).toHaveBeenCalled()
         expect(mockGetChatsByUserIdUseCase.execute).toHaveBeenCalledWith(userId)
       })
 
-      it('should handle repository errors gracefully', async () => {
+      it('should return 500 when repository throws error', async () => {
         const userId = new UserId(uuidv7()).getValue()
         mockRequest.params = { userId }
 
@@ -651,9 +653,12 @@ describe('AIController', () => {
           new Error('Repository error')
         )
 
-        await expect(controller.getAIChatsByUserId(mockRequest, mockReply)).rejects.toThrow(
-          'Repository error'
-        )
+        await controller.getAIChatsByUserId(mockRequest, mockReply)
+
+        expect(mockReply.status).toHaveBeenCalledWith(500)
+        expect(mockReply.send).toHaveBeenCalled()
+        expect(mockLogger.error).toHaveBeenCalled()
+        expect(mockGetChatsByUserIdUseCase.execute).toHaveBeenCalledWith(userId)
       })
 
       it('should return 400 error for invalid userId format', async () => {

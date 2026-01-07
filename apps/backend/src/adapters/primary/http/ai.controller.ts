@@ -16,6 +16,7 @@ import { HeartOfDarknessTool } from '../../../infrastructure/ai/tools/heart-of-d
 import { SaveChatUseCase } from '../../../application/use-cases/save-chat.use-case.js'
 import { GetChatUseCase } from '../../../application/use-cases/get-chat.use-case.js'
 import type { ChatIdType } from '../../../domain/value-objects/chatID.js'
+import type { UserIdType } from '../../../domain/value-objects/userID.js'
 import { UserId } from '../../../domain/value-objects/userID.js'
 import { ChatId } from '../../../domain/value-objects/chatID.js'
 import { SYSTEM_PROMPT } from '../../../shared/constants/ai-constants.js'
@@ -231,6 +232,24 @@ export class AIController {
     })
   }
 
+  /**
+   * Retrieves all chat IDs associated with a specific user.
+   *
+   * @param request - The Fastify request object containing the userId parameter
+   * @param reply - The Fastify reply object for sending responses
+   * @returns A promise that resolves to an array of ChatIdType or void if an error response is sent
+   *
+   * @throws {400} When userId parameter is missing or has invalid format (not a valid UUID v7)
+   * @throws {500} When an error occurs while fetching chats from the repository
+   *
+   * @example
+   * ```typescript
+   * // Route: GET /ai/chats/:userId
+   * // Example request: GET /ai/chats/01935e8a-7890-7123-b456-123456789abc
+   * // Example response: ["01935e8a-1234-7abc-b456-111111111111", "01935e8a-5678-7def-b456-222222222222"]
+   * ```
+   */
+
   async getAIChatsByUserId(
     request: FastifyRequest,
     reply: FastifyReply
@@ -244,20 +263,15 @@ export class AIController {
       return reply.status(400).send(FastifyUtil.createResponse('Invalid userId parameter', 400))
     }
 
-    let userId: string
+    let userId: UserIdType
 
     try {
       userId = new UserId(userIdParam).getValue()
     } catch (error) {
       if (error instanceof Error) {
-        this.logger.error(
-          `Invalid userId format in getAIChatsByUserId: ${userIdParam}`,
-          error
-        )
+        this.logger.error(`Invalid userId format in getAIChatsByUserId: ${userIdParam}`, error)
       }
-      return reply
-        .status(400)
-        .send(FastifyUtil.createResponse('Invalid userId format', 400))
+      return reply.status(400).send(FastifyUtil.createResponse('Invalid userId format', 400))
     }
 
     try {
@@ -269,9 +283,7 @@ export class AIController {
           error
         )
       }
-      return reply
-        .status(500)
-        .send(FastifyUtil.createResponse('Internal server error', 500))
+      return reply.status(500).send(FastifyUtil.createResponse('Internal server error', 500))
     }
   }
 }
