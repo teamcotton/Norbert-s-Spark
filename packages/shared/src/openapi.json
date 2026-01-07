@@ -429,7 +429,7 @@
             }
           },
           "403": {
-            "description": "Forbidden - User does not have required role (admin or moderator)",
+            "description": "Forbidden - User does not have required role (user, moderator or admin)",
             "content": {
               "application/json": {
                 "schema": {
