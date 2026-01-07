@@ -135,7 +135,7 @@ export function AIChatView({
             <ListItem>
               <Box sx={{ width: '100%', p: 2 }}>
                 <Alert severity="error">
-                  There has been an issue in retrieving your chat history
+                  Unable to retrieve your chat history. Please try again.
                 </Alert>
               </Box>
             </ListItem>
