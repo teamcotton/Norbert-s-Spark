@@ -256,6 +256,10 @@ export class AIController {
   ): Promise<ChatIdType[] | void> {
     this.logger.debug('Received getAIChatsByUserId request')
 
+    if (!request.user?.sub) {
+      return reply.status(401).send(FastifyUtil.createResponse('User not authenticated', 401))
+    }
+
     const params = request.params as Record<string, unknown>
     const userIdParam = params.userId as string
 

@@ -586,6 +586,26 @@ describe('AIController', () => {
     })
 
     describe('validation', () => {
+      beforeEach(() => {
+        // Reset mockRequest.user to ensure authenticated state for tests that don't explicitly test auth
+        mockRequest.user = {
+          sub: new UserId(uuidv7()).getValue(),
+          email: 'user@example.com',
+        } as any
+      })
+
+      it('should return 401 if user is not authenticated', async () => {
+        const userId = new UserId(uuidv7()).getValue()
+        mockRequest.params = { userId }
+        mockRequest.user = undefined
+
+        await controller.getAIChatsByUserId(mockRequest, mockReply)
+
+        expect(mockReply.status).toHaveBeenCalledWith(401)
+        expect(mockReply.send).toHaveBeenCalled()
+        expect(mockGetChatsByUserIdUseCase.execute).not.toHaveBeenCalled()
+      })
+
       it('should return 400 if userId parameter is missing', async () => {
         mockRequest.params = {}
 
