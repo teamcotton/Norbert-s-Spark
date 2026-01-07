@@ -71,6 +71,7 @@ describe('getChatsByUserIdAction', () => {
           Authorization: `Bearer ${TEST_TOKEN}`,
         },
         timeoutMs: 10000,
+        redirectOn401: false,
       })
       expect(mockLoggerWarn).not.toHaveBeenCalled()
       expect(mockLoggerError).not.toHaveBeenCalled()

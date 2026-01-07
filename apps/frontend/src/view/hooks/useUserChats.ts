@@ -20,8 +20,11 @@ export function useUserChats(userId: string | null) {
   return useQuery({
     queryKey: ['user-chats', userId],
     queryFn: async () => {
-      const response = await getChatsByUserIdAction(userId!)
-      return response.data // Extract just the array of chat IDs
+      if (!userId) {
+        throw new Error('userId is required to fetch user chats')
+      }
+      const response = await getChatsByUserIdAction(userId)
+      return response.data
     },
     enabled: !!userId, // Only run query if userId exists
     staleTime: ONE_MINUTE_MS, // 1 minute
