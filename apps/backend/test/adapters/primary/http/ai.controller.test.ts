@@ -655,6 +655,17 @@ describe('AIController', () => {
           'Repository error'
         )
       })
+
+      it('should return 500 error for invalid userId format', async () => {
+        mockRequest.params = { userId: 'invalid-uuid-format' }
+
+        await controller.getAIChatsByUserId(mockRequest, mockReply)
+
+        expect(mockReply.status).toHaveBeenCalledWith(500)
+        expect(mockReply.send).toHaveBeenCalled()
+        expect(mockLogger.error).toHaveBeenCalled()
+        expect(mockGetChatsByUserIdUseCase.execute).not.toHaveBeenCalled()
+      })
     })
   })
 })
