@@ -16,6 +16,7 @@ import { getChatsByUserIdAction } from '@/infrastructure/serverActions/getChatsB
  *   for the user when the query succeeds.
  */
 export function useUserChats(userId: string | null) {
+  const ONE_MINUTE_MS = 60_000
   return useQuery({
     queryKey: ['user-chats', userId],
     queryFn: async () => {
@@ -23,6 +24,6 @@ export function useUserChats(userId: string | null) {
       return response.data // Extract just the array of chat IDs
     },
     enabled: !!userId, // Only run query if userId exists
-    staleTime: 60 * 1000, // 1 minute
+    staleTime: ONE_MINUTE_MS, // 1 minute
   })
 }
