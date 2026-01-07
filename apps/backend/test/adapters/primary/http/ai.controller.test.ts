@@ -8,6 +8,7 @@ import type { AppendedChatUseCase } from '../../../../src/application/use-cases/
 import type { GetChatUseCase } from '../../../../src/application/use-cases/get-chat.use-case.js'
 import type { GetChatsByUserIdUseCase } from '../../../../src/application/use-cases/get-chats-by-userid.use-case.js'
 import type { SaveChatUseCase } from '../../../../src/application/use-cases/save-chat.use-case.js'
+import { ChatId } from '../../../../src/domain/value-objects/chatID.js'
 import { UserId } from '../../../../src/domain/value-objects/userID.js'
 
 // Mock the AI SDK modules
@@ -145,6 +146,7 @@ describe('AIController', () => {
     it('should register POST /ai/chat route', () => {
       const mockApp = {
         post: vi.fn(),
+        get: vi.fn(),
       } as unknown as FastifyInstance
 
       controller.registerRoutes(mockApp)
@@ -160,6 +162,7 @@ describe('AIController', () => {
     it('should bind controller context to route handler', () => {
       const mockApp = {
         post: vi.fn(),
+        get: vi.fn(),
       } as unknown as FastifyInstance
 
       controller.registerRoutes(mockApp)
@@ -172,7 +175,7 @@ describe('AIController', () => {
       expect(chatHandler).toBeTypeOf('function')
     })
 
-    it('should register route with correct HTTP method', () => {
+    it('should register routes with correct HTTP methods', () => {
       const mockApp = {
         post: vi.fn(),
         get: vi.fn(),
@@ -183,9 +186,25 @@ describe('AIController', () => {
       controller.registerRoutes(mockApp)
 
       expect(mockApp.post).toHaveBeenCalledTimes(1)
-      expect(mockApp.get).not.toHaveBeenCalled()
+      expect(mockApp.get).toHaveBeenCalledTimes(1)
       expect(mockApp.put).not.toHaveBeenCalled()
       expect(mockApp.delete).not.toHaveBeenCalled()
+    })
+
+    it('should register GET /ai/chats/{userId} route', () => {
+      const mockApp = {
+        post: vi.fn(),
+        get: vi.fn(),
+      } as unknown as FastifyInstance
+
+      controller.registerRoutes(mockApp)
+
+      expect(mockApp.get).toHaveBeenCalledTimes(1)
+      expect(mockApp.get).toHaveBeenCalledWith(
+        '/ai/chats/{userId}',
+        expect.objectContaining({ preHandler: expect.any(Array) }),
+        expect.any(Function)
+      )
     })
   })
 
@@ -518,6 +537,123 @@ describe('AIController', () => {
         vi.mocked(mockGetChatUseCase.execute).mockRejectedValue(new Error('Database error'))
 
         await expect(controller.chat(mockRequest, mockReply)).rejects.toThrow('Database error')
+      })
+    })
+  })
+
+  describe('getAIChatsByUserId()', () => {
+    describe('successful scenarios', () => {
+      it('should retrieve chats for a valid userId', async () => {
+        const userId = new UserId(uuidv7()).getValue()
+        const mockChats = [new ChatId(uuidv7()).getValue(), new ChatId(uuidv7()).getValue()]
+
+        mockRequest.params = { userId }
+        vi.mocked(mockGetChatsByUserIdUseCase.execute).mockResolvedValue(mockChats)
+
+        const result = await controller.getAIChatsByUserId(mockRequest, mockReply)
+
+        expect(result).toEqual(mockChats)
+        expect(mockGetChatsByUserIdUseCase.execute).toHaveBeenCalledWith(userId)
+        expect(mockGetChatsByUserIdUseCase.execute).toHaveBeenCalledTimes(1)
+        expect(mockLogger.debug).toHaveBeenCalledWith('Received getAIChatsByUserId request')
+      })
+
+      it('should return empty array when user has no chats', async () => {
+        const userId = new UserId(uuidv7()).getValue()
+        const mockChats: any[] = []
+
+        mockRequest.params = { userId }
+        vi.mocked(mockGetChatsByUserIdUseCase.execute).mockResolvedValue(mockChats)
+
+        const result = await controller.getAIChatsByUserId(mockRequest, mockReply)
+
+        expect(result).toEqual([])
+        expect(mockGetChatsByUserIdUseCase.execute).toHaveBeenCalledWith(userId)
+      })
+
+      it('should handle multiple chats for a user', async () => {
+        const userId = new UserId(uuidv7()).getValue()
+        const mockChats = Array.from({ length: 10 }, () => new ChatId(uuidv7()).getValue())
+
+        mockRequest.params = { userId }
+        vi.mocked(mockGetChatsByUserIdUseCase.execute).mockResolvedValue(mockChats)
+
+        const result = await controller.getAIChatsByUserId(mockRequest, mockReply)
+
+        expect(result).toHaveLength(10)
+        expect(mockGetChatsByUserIdUseCase.execute).toHaveBeenCalledWith(userId)
+      })
+    })
+
+    describe('validation', () => {
+      it('should return 400 if userId parameter is missing', async () => {
+        mockRequest.params = {}
+
+        await controller.getAIChatsByUserId(mockRequest, mockReply)
+
+        expect(mockReply.status).toHaveBeenCalledWith(400)
+        expect(mockReply.send).toHaveBeenCalled()
+        expect(mockGetChatsByUserIdUseCase.execute).not.toHaveBeenCalled()
+      })
+
+      it('should return 400 if userId parameter is undefined', async () => {
+        mockRequest.params = { userId: undefined }
+
+        await controller.getAIChatsByUserId(mockRequest, mockReply)
+
+        expect(mockReply.status).toHaveBeenCalledWith(400)
+        expect(mockReply.send).toHaveBeenCalled()
+        expect(mockGetChatsByUserIdUseCase.execute).not.toHaveBeenCalled()
+      })
+
+      it('should return 400 if userId parameter is null', async () => {
+        mockRequest.params = { userId: null }
+
+        await controller.getAIChatsByUserId(mockRequest, mockReply)
+
+        expect(mockReply.status).toHaveBeenCalledWith(400)
+        expect(mockReply.send).toHaveBeenCalled()
+        expect(mockGetChatsByUserIdUseCase.execute).not.toHaveBeenCalled()
+      })
+
+      it('should log debug message on request', async () => {
+        const userId = new UserId(uuidv7()).getValue()
+        mockRequest.params = { userId }
+        vi.mocked(mockGetChatsByUserIdUseCase.execute).mockResolvedValue([])
+
+        await controller.getAIChatsByUserId(mockRequest, mockReply)
+
+        expect(mockLogger.debug).toHaveBeenCalledWith('Received getAIChatsByUserId request')
+        expect(mockLogger.debug).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    describe('error handling', () => {
+      it('should propagate use case errors', async () => {
+        const userId = new UserId(uuidv7()).getValue()
+        mockRequest.params = { userId }
+
+        vi.mocked(mockGetChatsByUserIdUseCase.execute).mockRejectedValue(
+          new Error('Database connection failed')
+        )
+
+        await expect(controller.getAIChatsByUserId(mockRequest, mockReply)).rejects.toThrow(
+          'Database connection failed'
+        )
+        expect(mockGetChatsByUserIdUseCase.execute).toHaveBeenCalledWith(userId)
+      })
+
+      it('should handle repository errors gracefully', async () => {
+        const userId = new UserId(uuidv7()).getValue()
+        mockRequest.params = { userId }
+
+        vi.mocked(mockGetChatsByUserIdUseCase.execute).mockRejectedValue(
+          new Error('Repository error')
+        )
+
+        await expect(controller.getAIChatsByUserId(mockRequest, mockReply)).rejects.toThrow(
+          'Repository error'
+        )
       })
     })
   })
