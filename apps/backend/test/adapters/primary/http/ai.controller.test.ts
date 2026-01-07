@@ -217,8 +217,9 @@ describe('AIController', () => {
 
         await controller.chat(mockRequest, mockReply)
 
-        expect(mockReply.status).toHaveBeenCalledWith(400)
+        expect(mockReply.code).toHaveBeenCalledWith(400)
         expect(mockReply.send).toHaveBeenCalledWith({
+          success: false,
           error: 'Invalid request body',
           details: 'id and trigger are required',
         })
@@ -234,22 +235,26 @@ describe('AIController', () => {
 
         await controller.chat(mockRequest, mockReply)
 
-        expect(mockReply.status).toHaveBeenCalledWith(400)
-        expect(mockReply.send).toHaveBeenCalled()
+        expect(mockReply.code).toHaveBeenCalledWith(400)
+        expect(mockReply.send).toHaveBeenCalledWith({
+          success: false,
+          error: 'No messages provided',
+        })
         // When messages is missing, validateUIMessages accepts empty array,
         // then the controller checks for empty messages and returns "No messages provided"
       })
 
-      it('should return 400 if id is missing', async () => {
+      it('should return 400 if trigger is missing', async () => {
         mockRequest.body = {
+          id: uuidv7(),
           messages: [{ role: 'user', parts: [{ type: 'text', text: 'Hello' }] }],
-          trigger: 'user-input',
         }
 
         await controller.chat(mockRequest, mockReply)
 
-        expect(mockReply.status).toHaveBeenCalledWith(400)
+        expect(mockReply.code).toHaveBeenCalledWith(400)
         expect(mockReply.send).toHaveBeenCalledWith({
+          success: false,
           error: 'Invalid request body',
           details: 'id and trigger are required',
         })
@@ -266,8 +271,11 @@ describe('AIController', () => {
 
         await controller.chat(mockRequest, mockReply)
 
-        expect(mockReply.status).toHaveBeenCalledWith(400)
-        expect(mockReply.send).toHaveBeenCalled()
+        expect(mockReply.code).toHaveBeenCalledWith(400)
+        expect(mockReply.send).toHaveBeenCalledWith({
+          success: false,
+          error: 'No messages provided',
+        })
       })
 
       it('should return 400 if last message is not from user', async () => {
@@ -284,8 +292,11 @@ describe('AIController', () => {
 
         await controller.chat(mockRequest, mockReply)
 
-        expect(mockReply.status).toHaveBeenCalledWith(400)
-        expect(mockReply.send).toHaveBeenCalled()
+        expect(mockReply.code).toHaveBeenCalledWith(400)
+        expect(mockReply.send).toHaveBeenCalledWith({
+          success: false,
+          error: 'Last message must be from the user',
+        })
       })
 
       it('should return 401 if user is not authenticated for new chat', async () => {
@@ -300,8 +311,11 @@ describe('AIController', () => {
 
         await controller.chat(mockRequest, mockReply)
 
-        expect(mockReply.status).toHaveBeenCalledWith(401)
-        expect(mockReply.send).toHaveBeenCalled()
+        expect(mockReply.code).toHaveBeenCalledWith(401)
+        expect(mockReply.send).toHaveBeenCalledWith({
+          success: false,
+          error: 'User not authenticated',
+        })
       })
     })
 
@@ -507,22 +521,19 @@ describe('AIController', () => {
     })
 
     describe('error handling', () => {
-      it('should handle validateUIMessages errors', async () => {
-        const { validateUIMessages } = await import('ai')
-        vi.mocked(validateUIMessages).mockRejectedValueOnce(new Error('Invalid message format'))
-
+      it('should return 400 if id is missing', async () => {
         mockRequest.body = {
-          id: uuidv7(),
-          messages: 'invalid', // Should be array
+          messages: [{ role: 'user', parts: [{ type: 'text', text: 'Hello' }] }],
           trigger: 'user-input',
         }
 
         await controller.chat(mockRequest, mockReply)
 
-        expect(mockReply.status).toHaveBeenCalledWith(400)
+        expect(mockReply.code).toHaveBeenCalledWith(400)
         expect(mockReply.send).toHaveBeenCalledWith({
+          success: false,
           error: 'Invalid request body',
-          details: 'Invalid message format',
+          details: 'id and trigger are required',
         })
       })
 

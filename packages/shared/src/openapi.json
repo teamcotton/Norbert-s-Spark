@@ -361,6 +361,46 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "missingFields": {
+                    "summary": "Missing required fields",
+                    "value": {
+                      "success": false,
+                      "error": "Invalid request body",
+                      "details": "id and trigger are required"
+                    }
+                  },
+                  "invalidIdFormat": {
+                    "summary": "Invalid chat ID format",
+                    "value": {
+                      "success": false,
+                      "error": "Invalid id format",
+                      "details": "incorrect ChatId format"
+                    }
+                  },
+                  "invalidMessages": {
+                    "summary": "Invalid messages format",
+                    "value": {
+                      "success": false,
+                      "error": "Invalid request body",
+                      "details": "validation error message"
+                    }
+                  },
+                  "noMessages": {
+                    "summary": "No messages provided",
+                    "value": {
+                      "success": false,
+                      "error": "No messages provided"
+                    }
+                  },
+                  "lastMessageNotUser": {
+                    "summary": "Last message not from user",
+                    "value": {
+                      "success": false,
+                      "error": "Last message must be from the user"
+                    }
+                  }
                 }
               }
             }
@@ -371,6 +411,24 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "success": false,
+                  "error": "User not authenticated"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "success": false,
+                  "error": "AI service configuration error"
                 }
               }
             }

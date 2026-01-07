@@ -1,6 +1,5 @@
 import type { LoggerPort } from '../../../application/ports/logger.port.js'
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
-import { FastifyUtil } from '../../../shared/utils/fastify.utils.js'
 import { authMiddleware } from '../../../infrastructure/http/middleware/auth.middleware.js'
 import {
   convertToModelMessages,
@@ -15,7 +14,6 @@ import { EnvConfig } from '../../../infrastructure/config/env.config.js'
 import { HeartOfDarknessTool } from '../../../infrastructure/ai/tools/heart-of-darkness.tool.js'
 import { SaveChatUseCase } from '../../../application/use-cases/save-chat.use-case.js'
 import { GetChatUseCase } from '../../../application/use-cases/get-chat.use-case.js'
-import type { ChatIdType } from '../../../domain/value-objects/chatID.js'
 import type { UserIdType } from '../../../domain/value-objects/userID.js'
 import { UserId } from '../../../domain/value-objects/userID.js'
 import { ChatId } from '../../../domain/value-objects/chatID.js'
@@ -94,7 +92,8 @@ export class AIController {
       trigger = body?.trigger
 
       if (!id || !trigger) {
-        return reply.status(400).send({
+        return reply.code(400).send({
+          success: false,
           error: 'Invalid request body',
           details: 'id and trigger are required',
         })
@@ -103,7 +102,8 @@ export class AIController {
       try {
         id = new ChatId(id).getValue()
       } catch {
-        return reply.status(400).send({
+        return reply.code(400).send({
+          success: false,
           error: 'Invalid id format',
           details: 'incorrect ChatId format',
         })
@@ -111,14 +111,18 @@ export class AIController {
 
       this.logger.debug('Validated messages', { messageCount: messages.length, id, trigger })
     } catch (e) {
-      return reply.status(400).send({
+      return reply.code(400).send({
+        success: false,
         error: 'Invalid request body',
         details: e instanceof Error ? e.message : e,
       })
     }
 
     if (!request.user?.sub) {
-      return reply.status(401).send(FastifyUtil.createResponse('User not authenticated', 401))
+      return reply.code(401).send({
+        success: false,
+        error: 'User not authenticated',
+      })
     }
 
     // Conversion of string request.user.sub id to UserIdType branded type
@@ -146,13 +150,17 @@ export class AIController {
     const mostRecentMessage = messages[messages.length - 1]
 
     if (!mostRecentMessage) {
-      return reply.status(400).send(FastifyUtil.createResponse('No messages provided', 400))
+      return reply.code(400).send({
+        success: false,
+        error: 'No messages provided',
+      })
     }
 
     if (mostRecentMessage.role !== 'user') {
-      return reply
-        .status(400)
-        .send(FastifyUtil.createResponse('Last message must be from the user', 400))
+      return reply.code(400).send({
+        success: false,
+        error: 'Last message must be from the user',
+      })
     }
 
     if (!chat) {
@@ -165,9 +173,10 @@ export class AIController {
 
     if (!EnvConfig.MODEL_NAME) {
       this.logger.error('MODEL_NAME environment variable is not configured')
-      return reply
-        .status(500)
-        .send(FastifyUtil.createResponse('AI service configuration error', 500))
+      return reply.code(500).send({
+        success: false,
+        error: 'AI service configuration error',
+      })
     }
 
     const result = streamText({
