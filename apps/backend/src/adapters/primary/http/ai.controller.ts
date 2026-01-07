@@ -231,7 +231,10 @@ export class AIController {
     })
   }
 
-  async getAIChatsByUserId(request: FastifyRequest, reply: FastifyReply): Promise<ChatIdType[]> {
+  async getAIChatsByUserId(
+    request: FastifyRequest,
+    reply: FastifyReply
+  ): Promise<ChatIdType[] | void> {
     this.logger.debug('Received getAIChatsByUserId request')
 
     const params = request.params as Record<string, unknown>
@@ -241,7 +244,14 @@ export class AIController {
       return reply.status(400).send(FastifyUtil.createResponse('Invalid userId parameter', 400))
     }
 
-    const userId = new UserId(userIdParam).getValue()
-    return this.getChatsByUserIdUseCase.execute(userId)
+    try {
+      const userId = new UserId(userIdParam).getValue()
+      return this.getChatsByUserIdUseCase.execute(userId)
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error(`Invalid userId format in getAIChatsByUserId: ${userIdParam}`, error)
+      }
+      return reply.status(400).send(FastifyUtil.createResponse('Invalid userId format', 400))
+    }
   }
 }
