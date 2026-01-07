@@ -79,23 +79,10 @@ export function AIChatView({
   userId,
 }: AIChatViewProps) {
   const router = useRouter()
-  const {
-    data: chats,
-    error,
-    failureReason,
-    fetchStatus,
-    isError,
-    isLoading: isLoadingChats,
-  } = useUserChats(userId)
-  console.log(error, failureReason, fetchStatus, isError)
-  console.log('error loading chats:', error)
-  console.log('isLoading:', isLoading)
-  console.log('fetchStatus:', fetchStatus)
-  console.log('isError:', isError)
-  console.log(chats)
+  const { data: chats, isError, isLoading: isLoadingChats } = useUserChats(userId)
   const drawer = (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ p: 2 }}>
+      <Box sx={{ p: 2, flexShrink: 0 }}>
         <ListItemButton
           onClick={onNewChat}
           sx={{
@@ -115,14 +102,41 @@ export function AIChatView({
         </ListItemButton>
       </Box>
 
-      <Divider />
+      <Divider sx={{ flexShrink: 0 }} />
 
-      <Box sx={{ overflow: 'auto', flex: 1 }}>
-        <List>
+      <Box
+        sx={{
+          overflow: 'auto',
+          flex: 1,
+          minHeight: 0, // Important for flex overflow
+          '&::-webkit-scrollbar': {
+            width: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            backgroundColor: 'transparent',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: 'rgba(255,255,255,0.5)',
+            borderRadius: '4px',
+            '&:hover': {
+              backgroundColor: 'rgba(255,255,255,0.8)',
+            },
+          },
+        }}
+      >
+        <List sx={{ py: 0 }}>
           {isLoadingChats ? (
             <ListItem>
               <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%', py: 2 }}>
                 <CircularProgress size={24} />
+              </Box>
+            </ListItem>
+          ) : isError ? (
+            <ListItem>
+              <Box sx={{ width: '100%', p: 2 }}>
+                <Alert severity="error">
+                  There has been an issue in retrieving your chat history
+                </Alert>
               </Box>
             </ListItem>
           ) : chats && chats.length > 0 ? (
@@ -166,7 +180,7 @@ export function AIChatView({
     <Wrapper>
       <IntroComponent />
 
-      <Box sx={{ display: 'flex', flex: 1, mb: 2, gap: 2 }}>
+      <Box sx={{ display: 'flex', flex: 1, mb: 2, gap: 2, minHeight: 0, overflow: 'hidden' }}>
         {/* Mobile drawer */}
         <Drawer
           variant="temporary"

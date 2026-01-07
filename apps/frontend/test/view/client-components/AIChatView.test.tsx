@@ -1,7 +1,17 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest'
 
 import { AIChatView } from '@/view/client-components/AIChatView.js'
+
+// Mock next/navigation
+vi.mock('next/navigation.js', () => ({
+  useRouter: vi.fn(),
+}))
+
+// Mock useUserChats hook
+vi.mock('@/view/hooks/useUserChats.js', () => ({
+  useUserChats: vi.fn(),
+}))
 
 describe('AIChatView Component', () => {
   const mockOnSubmit = vi.fn()
@@ -11,6 +21,7 @@ describe('AIChatView Component', () => {
   const mockOnInputChange = vi.fn()
   const mockOnErrorClose = vi.fn()
   const mockMessagesEndRef = { current: null }
+  const mockPush = vi.fn()
 
   const defaultProps = {
     disabled: false,
@@ -31,8 +42,27 @@ describe('AIChatView Component', () => {
     selectedFile: null,
   }
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks()
+
+    // Mock useRouter
+    const { useRouter } = await import('next/navigation.js')
+    ;(useRouter as Mock).mockReturnValue({
+      push: mockPush,
+      replace: vi.fn(),
+      back: vi.fn(),
+      forward: vi.fn(),
+      refresh: vi.fn(),
+      prefetch: vi.fn(),
+    })
+
+    // Mock useUserChats
+    const { useUserChats } = await import('@/view/hooks/useUserChats.js')
+    ;(useUserChats as Mock).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: null,
+    })
   })
 
   describe('Core Rendering', () => {
@@ -87,7 +117,7 @@ describe('AIChatView Component', () => {
     it('should display placeholder text for previous chats', () => {
       render(<AIChatView {...defaultProps} />)
 
-      const placeholderTexts = screen.getAllByText('Previous chats will appear here')
+      const placeholderTexts = screen.getAllByText('No previous chats yet')
       expect(placeholderTexts.length).toBeGreaterThan(0)
     })
 
