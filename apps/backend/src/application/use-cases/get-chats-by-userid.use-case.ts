@@ -1,11 +1,11 @@
 import type { UserIdType } from '../../domain/value-objects/userID.js'
 import type { LoggerPort } from '../ports/logger.port.js'
 import type { ChatIdType } from '../../domain/value-objects/chatID.js'
-import { AIRepository } from '../../adapters/secondary/repositories/ai.repository.js'
+import type { AIServicePort } from '../ports/ai.port.js'
 
 export class GetChatsByUserIdUseCase {
   constructor(
-    private readonly aiRepository: AIRepository,
+    private readonly aiRepository: AIServicePort,
     private readonly logger: LoggerPort
   ) {}
 
