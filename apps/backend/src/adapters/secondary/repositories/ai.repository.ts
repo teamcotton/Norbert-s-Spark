@@ -127,7 +127,7 @@ export class AIRepository implements AIServicePort {
       .where(eq(chats.userId, userId))
       .orderBy(desc(chats.id))
 
-    return result.map((row) => row.id as ChatIdType) || []
+    return result.map((row) => row.id as ChatIdType)
   }
 
   async getChatResponse(chatId: ChatIdType): Promise<ChatResponseResult | null> {
