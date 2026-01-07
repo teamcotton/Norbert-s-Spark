@@ -268,7 +268,10 @@ export class AIController {
     const userIdParam = params.userId as string
 
     if (!userIdParam) {
-      return reply.status(400).send(FastifyUtil.createResponse('Invalid userId parameter', 400))
+      return reply.code(400).send({
+        success: false,
+        error: 'Invalid userId parameter',
+      })
     }
 
     let userId: UserIdType
@@ -279,7 +282,10 @@ export class AIController {
       if (error instanceof Error) {
         this.logger.error(`Invalid userId format in getAIChatsByUserId: ${userIdParam}`, error)
       }
-      return reply.status(400).send(FastifyUtil.createResponse('Invalid userId format', 400))
+      return reply.code(400).send({
+        success: false,
+        error: 'Invalid userId format',
+      })
     }
 
     // Authorization check: User can only access their own chat history unless they have admin/moderator role
@@ -288,7 +294,10 @@ export class AIController {
 
     if (!authenticatedUserId) {
       this.logger.warn('Authorization check failed: User not authenticated')
-      return reply.status(401).send(FastifyUtil.createResponse('Authentication required', 401))
+      return reply.code(401).send({
+        success: false,
+        error: 'Authentication required',
+      })
     }
 
     // Check if user is accessing their own data OR has admin/moderator role
@@ -299,14 +308,10 @@ export class AIController {
       this.logger.warn(
         `Authorization check failed: User ${authenticatedUserId} attempted to access chats for user ${userId} without required permissions`
       )
-      return reply
-        .status(403)
-        .send(
-          FastifyUtil.createResponse(
-            'Access denied. You can only access your own chat history or must have admin/moderator role',
-            403
-          )
-        )
+      return reply.code(403).send({
+        success: false,
+        error: 'Access denied. You can only access your own chat history or must have admin/moderator role',
+      })
     }
 
     try {
@@ -322,7 +327,10 @@ export class AIController {
           error
         )
       }
-      return reply.status(500).send(FastifyUtil.createResponse('Internal server error', 500))
+      return reply.code(500).send({
+        success: false,
+        error: 'Internal server error',
+      })
     }
   }
 }

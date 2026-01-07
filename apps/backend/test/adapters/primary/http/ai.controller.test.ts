@@ -618,8 +618,11 @@ describe('AIController', () => {
 
         await controller.getAIChatsByUserId(mockRequest, mockReply)
 
-        expect(mockReply.status).toHaveBeenCalledWith(400)
-        expect(mockReply.send).toHaveBeenCalled()
+        expect(mockReply.code).toHaveBeenCalledWith(400)
+        expect(mockReply.send).toHaveBeenCalledWith({
+          success: false,
+          error: 'Invalid userId parameter',
+        })
         expect(mockGetChatsByUserIdUseCase.execute).not.toHaveBeenCalled()
       })
 
@@ -628,8 +631,11 @@ describe('AIController', () => {
 
         await controller.getAIChatsByUserId(mockRequest, mockReply)
 
-        expect(mockReply.status).toHaveBeenCalledWith(400)
-        expect(mockReply.send).toHaveBeenCalled()
+        expect(mockReply.code).toHaveBeenCalledWith(400)
+        expect(mockReply.send).toHaveBeenCalledWith({
+          success: false,
+          error: 'Invalid userId parameter',
+        })
         expect(mockGetChatsByUserIdUseCase.execute).not.toHaveBeenCalled()
       })
 
@@ -638,8 +644,11 @@ describe('AIController', () => {
 
         await controller.getAIChatsByUserId(mockRequest, mockReply)
 
-        expect(mockReply.status).toHaveBeenCalledWith(400)
-        expect(mockReply.send).toHaveBeenCalled()
+        expect(mockReply.code).toHaveBeenCalledWith(400)
+        expect(mockReply.send).toHaveBeenCalledWith({
+          success: false,
+          error: 'Invalid userId parameter',
+        })
         expect(mockGetChatsByUserIdUseCase.execute).not.toHaveBeenCalled()
       })
 
@@ -676,8 +685,11 @@ describe('AIController', () => {
 
         await controller.getAIChatsByUserId(mockRequest, mockReply)
 
-        expect(mockReply.status).toHaveBeenCalledWith(500)
-        expect(mockReply.send).toHaveBeenCalled()
+        expect(mockReply.code).toHaveBeenCalledWith(500)
+        expect(mockReply.send).toHaveBeenCalledWith({
+          success: false,
+          error: 'Internal server error',
+        })
         expect(mockLogger.error).toHaveBeenCalled()
         expect(mockGetChatsByUserIdUseCase.execute).toHaveBeenCalledWith(userId)
       })
@@ -697,8 +709,11 @@ describe('AIController', () => {
 
         await controller.getAIChatsByUserId(mockRequest, mockReply)
 
-        expect(mockReply.status).toHaveBeenCalledWith(500)
-        expect(mockReply.send).toHaveBeenCalled()
+        expect(mockReply.code).toHaveBeenCalledWith(500)
+        expect(mockReply.send).toHaveBeenCalledWith({
+          success: false,
+          error: 'Internal server error',
+        })
         expect(mockLogger.error).toHaveBeenCalled()
         expect(mockGetChatsByUserIdUseCase.execute).toHaveBeenCalledWith(userId)
       })
@@ -708,8 +723,11 @@ describe('AIController', () => {
 
         await controller.getAIChatsByUserId(mockRequest, mockReply)
 
-        expect(mockReply.status).toHaveBeenCalledWith(400)
-        expect(mockReply.send).toHaveBeenCalled()
+        expect(mockReply.code).toHaveBeenCalledWith(400)
+        expect(mockReply.send).toHaveBeenCalledWith({
+          success: false,
+          error: 'Invalid userId format',
+        })
         expect(mockGetChatsByUserIdUseCase.execute).not.toHaveBeenCalled()
       })
     })
@@ -735,7 +753,7 @@ describe('AIController', () => {
           data: mockChats,
         })
         expect(mockGetChatsByUserIdUseCase.execute).toHaveBeenCalledWith(userId)
-        expect(mockReply.status).not.toHaveBeenCalledWith(403)
+        expect(mockReply.code).not.toHaveBeenCalledWith(403)
       })
 
       it('should allow admin to access any user chat history', async () => {
@@ -759,7 +777,7 @@ describe('AIController', () => {
           data: mockChats,
         })
         expect(mockGetChatsByUserIdUseCase.execute).toHaveBeenCalledWith(targetUserId)
-        expect(mockReply.status).not.toHaveBeenCalledWith(403)
+        expect(mockReply.code).not.toHaveBeenCalledWith(403)
       })
 
       it('should allow moderator to access any user chat history', async () => {
@@ -783,7 +801,7 @@ describe('AIController', () => {
           data: mockChats,
         })
         expect(mockGetChatsByUserIdUseCase.execute).toHaveBeenCalledWith(targetUserId)
-        expect(mockReply.status).not.toHaveBeenCalledWith(403)
+        expect(mockReply.code).not.toHaveBeenCalledWith(403)
       })
 
       it('should return 403 when user tries to access another user chat history', async () => {
@@ -799,8 +817,11 @@ describe('AIController', () => {
 
         await controller.getAIChatsByUserId(mockRequest, mockReply)
 
-        expect(mockReply.status).toHaveBeenCalledWith(403)
-        expect(mockReply.send).toHaveBeenCalled()
+        expect(mockReply.code).toHaveBeenCalledWith(403)
+        expect(mockReply.send).toHaveBeenCalledWith({
+          success: false,
+          error: 'Access denied. You can only access your own chat history or must have admin/moderator role',
+        })
         expect(mockGetChatsByUserIdUseCase.execute).not.toHaveBeenCalled()
         expect(mockLogger.warn).toHaveBeenCalled()
       })
@@ -818,8 +839,11 @@ describe('AIController', () => {
 
         await controller.getAIChatsByUserId(mockRequest, mockReply)
 
-        expect(mockReply.status).toHaveBeenCalledWith(403)
-        expect(mockReply.send).toHaveBeenCalled()
+        expect(mockReply.code).toHaveBeenCalledWith(403)
+        expect(mockReply.send).toHaveBeenCalledWith({
+          success: false,
+          error: 'Access denied. You can only access your own chat history or must have admin/moderator role',
+        })
         expect(mockGetChatsByUserIdUseCase.execute).not.toHaveBeenCalled()
       })
 
@@ -831,8 +855,11 @@ describe('AIController', () => {
 
         await controller.getAIChatsByUserId(mockRequest, mockReply)
 
-        expect(mockReply.status).toHaveBeenCalledWith(401)
-        expect(mockReply.send).toHaveBeenCalled()
+        expect(mockReply.code).toHaveBeenCalledWith(401)
+        expect(mockReply.send).toHaveBeenCalledWith({
+          success: false,
+          error: 'Authentication required',
+        })
         expect(mockGetChatsByUserIdUseCase.execute).not.toHaveBeenCalled()
         expect(mockLogger.warn).toHaveBeenCalledWith(
           'Authorization check failed: User not authenticated'
@@ -860,7 +887,7 @@ describe('AIController', () => {
           data: mockChats,
         })
         expect(mockGetChatsByUserIdUseCase.execute).toHaveBeenCalledWith(targetUserId)
-        expect(mockReply.status).not.toHaveBeenCalledWith(403)
+        expect(mockReply.code).not.toHaveBeenCalledWith(403)
       })
     })
   })
