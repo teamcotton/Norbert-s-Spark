@@ -11,7 +11,7 @@ export class GetChatsByUserIdUseCase {
   async execute(userId: UserIdType): Promise<any> {
     this.logger.info(`Getting chats for chat ID: ${userId}`)
     const chats = await this.aiRepository.getChatsByUserId(userId)
-    this.logger.info(`Retrieved ${chats.length} chats for chat ID: ${userId}`)
+    this.logger.info(`Retrieved ${chats?.length} chats for chat ID: ${userId}`)
     return chats
   }
 }

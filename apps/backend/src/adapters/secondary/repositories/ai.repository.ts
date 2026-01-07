@@ -118,7 +118,7 @@ export class AIRepository implements AIServicePort {
     return chatId
   }
 
-  async getChatsByUserId(userId: UserIdType): Promise<ChatIdType[]> {
+  async getChatsByUserId(userId: UserIdType): Promise<ChatIdType[] | undefined> {
     try {
       const result = await db
         .select({
@@ -129,9 +129,7 @@ export class AIRepository implements AIServicePort {
         .orderBy(desc(chats.id))
 
       return result.map((row) => row.id as ChatIdType)
-    } catch (error) {
-      throw error
-    }
+    } catch (_error) {}
   }
 
   async getChatResponse(chatId: ChatIdType): Promise<ChatResponseResult | null> {
