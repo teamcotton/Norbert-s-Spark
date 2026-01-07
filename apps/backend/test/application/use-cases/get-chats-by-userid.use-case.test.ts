@@ -80,7 +80,7 @@ describe('GetChatsByUserIdUseCase', () => {
       expect(result).toEqual(mockChats)
       expect(result).toHaveLength(1)
       expect(mockAIRepository.getChatsByUserId).toHaveBeenCalledWith(testUserId)
-      expect(mockLogger.info).toHaveBeenCalledWith(`Retrieved 1 chats for user ID: ${testUserId}`)
+      expect(mockLogger.info).toHaveBeenCalledWith(`Retrieved 1 chat for user ID: ${testUserId}`)
     })
 
     it('should handle large number of chats', async () => {
@@ -148,7 +148,7 @@ describe('GetChatsByUserIdUseCase', () => {
       expect(mockLogger.info).toHaveBeenNthCalledWith(1, `Getting chats for user ID: ${testUserId}`)
       expect(mockLogger.info).toHaveBeenNthCalledWith(
         2,
-        `Retrieved 1 chats for user ID: ${testUserId}`
+        `Retrieved 1 chat for user ID: ${testUserId}`
       )
     })
 

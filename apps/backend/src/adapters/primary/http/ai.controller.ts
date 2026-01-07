@@ -16,10 +16,10 @@ import { HeartOfDarknessTool } from '../../../infrastructure/ai/tools/heart-of-d
 import { SaveChatUseCase } from '../../../application/use-cases/save-chat.use-case.js'
 import { GetChatUseCase } from '../../../application/use-cases/get-chat.use-case.js'
 import type { ChatIdType } from '../../../domain/value-objects/chatID.js'
+import { UserId } from '../../../domain/value-objects/userID.js'
 import { ChatId } from '../../../domain/value-objects/chatID.js'
 import { SYSTEM_PROMPT } from '../../../shared/constants/ai-constants.js'
 import { GetChatsByUserIdUseCase } from '../../../application/use-cases/get-chats-by-userid.use-case.js'
-import type { UserIdType } from '../../../domain/value-objects/userID.js'
 
 export class AIController {
   private readonly heartOfDarknessTool: HeartOfDarknessTool
@@ -235,10 +235,13 @@ export class AIController {
     this.logger.debug('Received getAIChatsByUserId request')
 
     const params = request.params as Record<string, unknown>
-    const userId = params.userId as UserIdType
-    if (!userId) {
+    const userIdParam = params.userId as string
+
+    if (!userIdParam) {
       return reply.status(400).send(FastifyUtil.createResponse('Invalid userId parameter', 400))
     }
+
+    const userId = new UserId(userIdParam).getValue()
     return this.getChatsByUserIdUseCase.execute(userId)
   }
 }
