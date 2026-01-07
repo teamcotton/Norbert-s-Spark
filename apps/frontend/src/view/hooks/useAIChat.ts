@@ -163,6 +163,8 @@ export function useAIChat({ id }: UseAIChatProps = {}) {
     mobileOpen,
     messagesEndRef,
     disabled,
+    userId: session?.user?.id ?? null,
+    currentChatId: id,
 
     // Handlers
     handleSubmit,

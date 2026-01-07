@@ -1,6 +1,7 @@
 'use client'
 
 import AddIcon from '@mui/icons-material/Add'
+import ChatIcon from '@mui/icons-material/Chat'
 import MenuIcon from '@mui/icons-material/Menu'
 import PersonIcon from '@mui/icons-material/Person'
 import SmartToyIcon from '@mui/icons-material/SmartToy'
@@ -19,8 +20,10 @@ import {
   ListItemText,
   Paper,
   Stack,
+  Typography,
 } from '@mui/material'
 import type { UIDataTypes, UIMessagePart, UITools } from 'ai'
+import { useRouter } from 'next/navigation.js'
 import React from 'react'
 
 import { ChatInput } from '@/view/client-components/ChatInputComponent.js'
@@ -28,6 +31,7 @@ import { IntroComponent } from '@/view/client-components/IntroComponent.js'
 import { Message } from '@/view/client-components/MessageComponent.js'
 import { MessageIntroComponent } from '@/view/client-components/MessageIntroComponent.js'
 import { Wrapper } from '@/view/client-components/WrapperComponent.js'
+import { useUserChats } from '@/view/hooks/useUserChats.js'
 
 const DRAWER_WIDTH = 280
 
@@ -45,6 +49,8 @@ interface AIChatViewProps {
   readonly messagesEndRef: React.RefObject<HTMLDivElement | null>
   readonly disabled: boolean
   readonly mobileOpen: boolean
+  readonly userId: string | null
+  readonly currentChatId?: string
   readonly onDrawerToggle: () => void
   readonly onErrorClose: () => void
   readonly onFileSelect: (file: File | null) => void
@@ -55,6 +61,7 @@ interface AIChatViewProps {
 }
 
 export function AIChatView({
+  currentChatId,
   disabled,
   errorMessage,
   input,
@@ -69,7 +76,23 @@ export function AIChatView({
   onNewChat,
   onSubmit,
   selectedFile,
+  userId,
 }: AIChatViewProps) {
+  const router = useRouter()
+  const {
+    data: chats,
+    error,
+    failureReason,
+    fetchStatus,
+    isError,
+    isLoading: isLoadingChats,
+  } = useUserChats(userId)
+  console.log(error, failureReason, fetchStatus, isError)
+  console.log('error loading chats:', error)
+  console.log('isLoading:', isLoading)
+  console.log('fetchStatus:', fetchStatus)
+  console.log('isError:', isError)
+  console.log(chats)
   const drawer = (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ p: 2 }}>
@@ -96,27 +119,44 @@ export function AIChatView({
 
       <Box sx={{ overflow: 'auto', flex: 1 }}>
         <List>
-          <ListItem>
-            <ListItemText
-              secondary="Previous chats will appear here"
-              sx={{ textAlign: 'center', color: 'text.secondary' }}
-            />
-          </ListItem>
-          {/* TODO: Replace with API-fetched chat sessions */}
-          {/* Example structure:
-          <ListItemButton
-            selected={session.id === id}
-            onClick={() => router.push(`/ai/${session.id}`)}
-          >
-            <ListItemIcon>
-              <ChatIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText
-              primary={<Typography variant="body2" noWrap>Chat Title</Typography>}
-              secondary={<Typography variant="caption" noWrap>Last message preview...</Typography>}
-            />
-          </ListItemButton>
-          */}
+          {isLoadingChats ? (
+            <ListItem>
+              <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%', py: 2 }}>
+                <CircularProgress size={24} />
+              </Box>
+            </ListItem>
+          ) : chats && chats.length > 0 ? (
+            chats.map((chatId) => (
+              <ListItemButton
+                key={chatId}
+                selected={currentChatId === chatId}
+                onClick={() => router.push(`/ai/${chatId}`)}
+              >
+                <ListItemIcon>
+                  <ChatIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <Typography variant="body2" noWrap>
+                      Chat {chatId.slice(0, 8)}...
+                    </Typography>
+                  }
+                  secondary={
+                    <Typography variant="caption" noWrap color="text.secondary">
+                      {currentChatId === chatId ? 'Active' : 'Previous chat'}
+                    </Typography>
+                  }
+                />
+              </ListItemButton>
+            ))
+          ) : (
+            <ListItem>
+              <ListItemText
+                secondary="No previous chats yet"
+                sx={{ textAlign: 'center', color: 'text.secondary' }}
+              />
+            </ListItem>
+          )}
         </List>
       </Box>
     </Box>

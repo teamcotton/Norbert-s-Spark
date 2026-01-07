@@ -20,6 +20,8 @@ describe('AIChatView Component', () => {
     messages: [],
     messagesEndRef: mockMessagesEndRef,
     mobileOpen: false,
+    userId: null,
+    currentChatId: undefined,
     onDrawerToggle: mockOnDrawerToggle,
     onErrorClose: mockOnErrorClose,
     onFileSelect: mockOnFileSelect,

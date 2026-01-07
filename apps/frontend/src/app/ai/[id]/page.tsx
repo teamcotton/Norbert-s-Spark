@@ -14,6 +14,7 @@ export default function AIChatPage({ params }: { params: Promise<{ id: string }>
   const { id } = use(params)
 
   const {
+    currentChatId,
     disabled,
     errorMessage,
     handleDrawerToggle,
@@ -28,6 +29,7 @@ export default function AIChatPage({ params }: { params: Promise<{ id: string }>
     messagesEndRef,
     mobileOpen,
     selectedFile,
+    userId,
   } = useAIChat({ id })
 
   return (
@@ -39,6 +41,8 @@ export default function AIChatPage({ params }: { params: Promise<{ id: string }>
       messages={messages}
       messagesEndRef={messagesEndRef}
       mobileOpen={mobileOpen}
+      userId={userId}
+      currentChatId={currentChatId}
       onDrawerToggle={handleDrawerToggle}
       onErrorClose={handleErrorClose}
       onFileSelect={handleFileSelect}
