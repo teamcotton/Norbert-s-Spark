@@ -75,9 +75,16 @@ export function SignInForm({
             variant="h4"
             component="h1"
             gutterBottom
-            sx={{ mb: 3, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}
+            sx={{
+              mb: 3,
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 1,
+            }}
           >
-            <span>Norbert&#39;s Spark</span> <Logo />
+            <span>Norbert&#39;s Spark</span> <Logo width={48} height={48} />
           </Typography>
 
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
