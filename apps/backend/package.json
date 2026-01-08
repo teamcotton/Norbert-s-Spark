@@ -20,7 +20,7 @@
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio",
+    "db:studio": "drizzle-kit studio --verbose --config ./drizzle.config.ts",
     "db:push": "drizzle-kit push",
     "db:drop": "docker exec -i norbertsSpark-postgres psql -U postgres -d norbertsSpark < drizzle/drop_all_tables.sql",
     "db:reset": "pnpm db:drop && pnpm db:push",
