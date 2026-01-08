@@ -610,10 +610,22 @@ describe('AIRepository', () => {
     it('should retrieve chat messages with parts by chat ID', async () => {
       const mockResult = [
         {
+          chat: {
+            id: mockChatIdString,
+            userId: mockUserIdString,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
           message: { id: 'msg-1', chatId: mockChatIdString, role: 'user', createdAt: new Date() },
           part: { id: 'part-1', messageId: 'msg-1', type: 'text', textText: 'Hello' },
         },
         {
+          chat: {
+            id: mockChatIdString,
+            userId: mockUserIdString,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
           message: {
             id: 'msg-2',
             chatId: mockChatIdString,
@@ -653,6 +665,12 @@ describe('AIRepository', () => {
     it('should handle messages without parts', async () => {
       const mockResult = [
         {
+          chat: {
+            id: mockChatIdString,
+            userId: mockUserIdString,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
           message: { id: 'msg-1', chatId: mockChatIdString, role: 'user', createdAt: new Date() },
           part: null,
         },
@@ -674,10 +692,22 @@ describe('AIRepository', () => {
     it('should handle multiple parts for the same message', async () => {
       const mockResult = [
         {
+          chat: {
+            id: mockChatIdString,
+            userId: mockUserIdString,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
           message: { id: 'msg-1', chatId: mockChatIdString, role: 'user', createdAt: new Date() },
           part: { id: 'part-1', messageId: 'msg-1', type: 'text', textText: 'First part' },
         },
         {
+          chat: {
+            id: mockChatIdString,
+            userId: mockUserIdString,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
           message: { id: 'msg-1', chatId: mockChatIdString, role: 'user', createdAt: new Date() },
           part: { id: 'part-2', messageId: 'msg-1', type: 'text', textText: 'Second part' },
         },
@@ -717,6 +747,12 @@ describe('AIRepository', () => {
       const specificChatId = new ChatId(specificChatIdString).getValue()
       const mockResult = [
         {
+          chat: {
+            id: specificChatIdString,
+            userId: mockUserIdString,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
           message: {
             id: 'msg-1',
             chatId: specificChatIdString,
@@ -758,10 +794,22 @@ describe('AIRepository', () => {
     it('should handle chat with multiple messages and parts', async () => {
       const mockResult = [
         {
+          chat: {
+            id: mockChatIdString,
+            userId: mockUserIdString,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
           message: { id: 'msg-1', chatId: mockChatIdString, role: 'user', createdAt: new Date() },
           part: { id: 'part-1', messageId: 'msg-1', type: 'text', textText: 'Question' },
         },
         {
+          chat: {
+            id: mockChatIdString,
+            userId: mockUserIdString,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
           message: {
             id: 'msg-2',
             chatId: mockChatIdString,
@@ -771,6 +819,12 @@ describe('AIRepository', () => {
           part: { id: 'part-2', messageId: 'msg-2', type: 'text', textText: 'Answer part 1' },
         },
         {
+          chat: {
+            id: mockChatIdString,
+            userId: mockUserIdString,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
           message: {
             id: 'msg-2',
             chatId: mockChatIdString,
@@ -797,10 +851,22 @@ describe('AIRepository', () => {
     it('should handle different part types (text, file, tool-call)', async () => {
       const mockResult = [
         {
+          chat: {
+            id: mockChatIdString,
+            userId: mockUserIdString,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
           message: { id: 'msg-1', chatId: mockChatIdString, role: 'user', createdAt: new Date() },
           part: { id: 'part-1', messageId: 'msg-1', type: 'text', textText: 'Query' },
         },
         {
+          chat: {
+            id: mockChatIdString,
+            userId: mockUserIdString,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
           message: { id: 'msg-1', chatId: mockChatIdString, role: 'user', createdAt: new Date() },
           part: {
             id: 'part-2',
@@ -810,6 +876,12 @@ describe('AIRepository', () => {
           },
         },
         {
+          chat: {
+            id: mockChatIdString,
+            userId: mockUserIdString,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
           message: {
             id: 'msg-2',
             chatId: mockChatIdString,
