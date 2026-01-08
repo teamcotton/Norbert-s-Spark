@@ -48,16 +48,18 @@ interface CredentialsInput {
 /**
  * NextAuth configuration options for authentication
  *
- * Configures authentication using credentials provider with backend API integration.
+ * Configures authentication using credentials provider with backend API integration
+ * and conditionally includes Google OAuth provider if credentials are configured.
  * Uses JWT strategy for session management with 30-day expiration.
  *
- * @property {Array} providers - Authentication providers (Credentials)
+ * @property {Array} providers - Authentication providers (Google OAuth if configured, Credentials)
  * @property {object} callbacks - Custom callbacks for JWT and session handling
  * @property {Function} callbacks.jwt - JWT callback to add custom properties (accessToken, id, roles)
  * @property {Function} callbacks.session - Session callback to expose JWT properties to client
  * @property {object} pages - Custom authentication page routes
- * @property {string} pages.signIn - Sign-in page route (/login)
- * @property {string} pages.error - Error page route (/login)
+ * @property {string} pages.signIn - Sign-in page route (/signin)
+ * @property {string} pages.signOut - Sign-out page route (/signin)
+ * @property {string} pages.error - Error page route (/error)
  * @property {object} session - Session configuration
  * @property {string} session.strategy - Session strategy ('jwt')
  * @property {number} session.maxAge - Session max age in seconds (30 days)
@@ -79,11 +81,12 @@ interface CredentialsInput {
  */
 
 // Build providers array conditionally based on available credentials
-const providers = []
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const providers: any[] = []
 
 // Add GoogleProvider only if credentials are configured
 if (hasGoogleCredentials) {
-  // @ts-expect-error - NextAuth v4 ESM/CommonJS interop issue with credentials provider
+  // @ts-expect-error - NextAuth v4 ESM/CommonJS interop issue with Google provider
   providers.push(
     GoogleProvider({
       clientId: googleId!,
