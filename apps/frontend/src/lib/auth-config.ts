@@ -81,17 +81,19 @@ interface CredentialsInput {
  */
 
 // Build providers array conditionally based on available credentials
-// Using any[] due to NextAuth v4 ESM/CommonJS interop issues with provider types
+// Using any[] because individual providers have NextAuth v4 ESM/CommonJS interop type issues
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const providers: any[] = []
 
 // Add GoogleProvider only if credentials are configured
 if (hasGoogleCredentials) {
+  // TypeScript doesn't narrow types through Boolean(), so we assert they are strings here
+  // We know they're valid because hasGoogleCredentials is true
   // @ts-expect-error - NextAuth v4 ESM/CommonJS interop issue with Google provider
   providers.push(
     GoogleProvider({
-      clientId: googleId!,
-      clientSecret: googleSecret!,
+      clientId: googleId as string,
+      clientSecret: googleSecret as string,
     })
   )
 }
