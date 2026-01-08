@@ -1,4 +1,5 @@
 import { useRouter, useSearchParams } from 'next/navigation.js'
+import { useCallback } from 'react'
 
 interface UseErrorPageProps {
   errorMessage?: string
@@ -34,13 +35,13 @@ export function useErrorPage(props: UseErrorPageProps = {}): UseErrorPageReturn 
     searchParams.get('message') || props.errorMessage || 'An unexpected error occurred'
   const errorCode = searchParams.get('code') || props.errorCode || '500'
 
-  const handleGoBack = () => {
+  const handleGoBack = useCallback(() => {
     router.back()
-  }
+  }, [router])
 
-  const handleGoHome = () => {
+  const handleGoHome = useCallback(() => {
     router.push('/')
-  }
+  }, [router])
 
   return {
     errorCode,
