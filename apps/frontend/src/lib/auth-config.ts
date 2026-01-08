@@ -8,6 +8,26 @@ const logger = createLogger({ prefix: '[auth-config]' })
 
 const backendUrl = process.env.BACKEND_AI_CALLBACK_URL
 
+// Validate required Google OAuth environment variables
+const googleId = process.env.GOOGLE_ID
+const googleSecret = process.env.GOOGLE_SECRET
+
+// Validate credentials to prevent runtime errors
+if (!googleId || !googleSecret) {
+  const errorMessage =
+    'Google OAuth credentials not configured. Please set GOOGLE_ID and GOOGLE_SECRET environment variables.'
+
+  // In production, fail fast with a clear error
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(errorMessage)
+  }
+
+  // In development/test, log a warning but allow the app to continue
+  logger.warn(
+    `${errorMessage} Google sign-in will not be available.`
+  )
+}
+
 interface BackendLoginResponse {
   success: boolean
   data?: {
@@ -58,11 +78,16 @@ interface CredentialsInput {
  */
 export const authOptions: NextAuthOptions = {
   providers: [
-    // @ts-expect-error - NextAuth v4 ESM/CommonJS interop issue with credentials provider
-    GoogleProvider({
-      clientId: process.env.GOOGLE_ID,
-      clientSecret: process.env.GOOGLE_SECRET,
-    }),
+    // Only include GoogleProvider if credentials are configured
+    ...(googleId && googleSecret
+      ? [
+          // @ts-expect-error - NextAuth v4 ESM/CommonJS interop issue with credentials provider
+          GoogleProvider({
+            clientId: googleId,
+            clientSecret: googleSecret,
+          }),
+        ]
+      : []),
     // @ts-expect-error - NextAuth v4 ESM/CommonJS interop issue with credentials provider
     CredentialsProvider({
       name: 'Credentials',
