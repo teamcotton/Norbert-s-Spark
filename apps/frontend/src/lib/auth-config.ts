@@ -115,6 +115,33 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    async signIn({ account, profile, user }) {
+      // Sync OAuth users to backend database
+      if (account?.provider !== 'credentials' && profile?.email && account) {
+        try {
+          // Call backend to create/update OAuth user
+          const response = await fetch(`${backendUrl}/auth/oauth-sync`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              provider: account.provider,
+              providerId: user.id,
+              email: profile.email,
+              name: profile.name || user.name,
+            }),
+          })
+
+          if (!response.ok) {
+            logger.error('OAuth user sync failed:', await response.text())
+            // Allow sign-in even if sync fails (user can still access frontend)
+          }
+        } catch (error) {
+          logger.error('OAuth sync error:', error)
+          // Allow sign-in even if sync fails
+        }
+      }
+      return true
+    },
     async jwt({ account, token, user }) {
       // Initial sign in
       if (user) {

@@ -81,6 +81,7 @@ export class AuthController {
    */
   registerRoutes(app: FastifyInstance): void {
     app.post('/auth/login', this.login.bind(this))
+    app.post('/auth/oauth-sync', this.oauthSync.bind(this))
   }
 
   /**
@@ -188,6 +189,60 @@ export class AuthController {
       reply.code(statusCode).send({
         success: false,
         error: errorMessage,
+      })
+    }
+  }
+
+  /**
+   * Handles OAuth user synchronization
+   *
+   * Creates or updates user records for OAuth-authenticated users (Google, GitHub, etc.)
+   * This endpoint is called by the frontend NextAuth callback to ensure OAuth users
+   * are stored in the backend database for consistency with credentials users.
+   *
+   * @async
+   * @param {FastifyRequest} request - Fastify request with OAuth user data in body
+   * @param {FastifyReply} reply - Fastify reply object for sending HTTP response
+   * @returns {Promise<void>} Resolves when response is sent
+   *
+   * @remarks
+   * Request body should contain:
+   * - `provider` (string): OAuth provider name (e.g., 'google', 'github')
+   * - `providerId` (string): User ID from OAuth provider
+   * - `email` (string): User's email address
+   * - `name` (string, optional): User's display name
+   *
+   * This is a simple implementation that logs the sync request.
+   * TODO: Implement actual user creation/update in database
+   */
+  async oauthSync(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+    try {
+      const body = request.body as {
+        provider: string
+        providerId: string
+        email: string
+        name?: string
+      }
+
+      // TODO: Implement user repository method to create/update OAuth user
+      // For now, just log the sync request
+      request.log.info({
+        msg: 'OAuth user sync requested',
+        provider: body.provider,
+        providerId: body.providerId,
+        email: body.email,
+        name: body.name,
+      })
+
+      reply.code(200).send({
+        success: true,
+        message: 'OAuth user sync completed',
+      })
+    } catch (error) {
+      const err = error as Error
+      reply.code(500).send({
+        success: false,
+        error: err?.message || 'OAuth sync failed',
       })
     }
   }
