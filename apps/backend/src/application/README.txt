@@ -32,74 +32,16 @@ application/
       ├── register-user.dto.ts
       └── create-workout.dto.ts
 
-========================================
-CODE EXAMPLES
-========================================
 
-1. PORT INTERFACE EXAMPLE (application/ports/user.repository.port.ts):
 
-import { User } from '../../domain/entities/user'
 
-export interface UserRepositoryPort {
-  save(user: User): Promise<void>
-  findById(id: string): Promise<User | null>
-  findByEmail(email: string): Promise<User | null>
-  update(user: User): Promise<void>
-  delete(id: string): Promise<void>
-  existsByEmail(email: string): Promise<boolean>
-}
 
-2. PORT INTERFACE EXAMPLE (application/ports/email.service.port.ts):
 
-export interface EmailServicePort {
-  sendWelcomeEmail(to: string, name: string): Promise<void>
-  sendPasswordResetEmail(to: string, resetToken: string): Promise<void>
-  sendWorkoutReminder(to: string, workoutDetails: any): Promise<void>
-}
 
-3. PORT INTERFACE EXAMPLE (application/ports/logger.port.ts):
 
-export interface LoggerPort {
-  info(message: string, context?: Record<string, any>): void
-  error(message: string, error?: Error, context?: Record<string, any>): void
-  warn(message: string, context?: Record<string, any>): void
-  debug(message: string, context?: Record<string, any>): void
-}
 
-4. DTO EXAMPLE (application/dtos/register-user.dto.ts):
 
-export class RegisterUserDto {
-  constructor(
-    public readonly email: string,
-    public readonly password: string,
-    public readonly name: string
-  ) {}
 
-  static validate(data: any): RegisterUserDto {
-    if (!data.email || typeof data.email !== 'string') {
-      throw new Error('Email is required and must be a string')
-    }
-    if (!data.password || typeof data.password !== 'string') {
-      throw new Error('Password is required and must be a string')
-    }
-    if (!data.name || typeof data.name !== 'string') {
-      throw new Error('Name is required and must be a string')
-    }
-    
-    return new RegisterUserDto(data.email, data.password, data.name)
-  }
-}
-
-5. DTO EXAMPLE (application/dtos/create-workout.dto.ts):
-
-export class CreateWorkoutDto {
-  constructor(
-    public readonly userId: string,
-    public readonly duration: number,
-    public readonly intensity: 'low' | 'medium' | 'high',
-    public readonly exercises: string[]
-  ) {}
-}
 
 6. USE CASE EXAMPLE (application/use-cases/register-user.use-case.ts):
 
