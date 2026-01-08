@@ -182,6 +182,7 @@ export const AIUserIdResponseSchema = z.object({
 
 export const metadataSchema = z.object({})
 
+//TODO: define proper metadata schema
 export type MyMetadata = z.infer<typeof metadataSchema>
 
 export type AISummaryWithUsageSchemaType = z.infer<typeof AISummaryWithUsageSchema>
