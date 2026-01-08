@@ -14,7 +14,7 @@ test.describe('Sign In Page', () => {
   test.describe('Page Elements', () => {
     test('should display the sign in form with all required elements', async ({ page }) => {
       // Check page title
-      await expect(page.getByRole('heading', { name: /welcome back/i })).toBeVisible()
+      await expect(page.getByRole('heading', { name: /Norbert's Spark/i })).toBeVisible()
 
       // Check email field
       const emailField = page.getByLabel(/email address/i)

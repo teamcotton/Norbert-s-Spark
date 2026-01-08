@@ -51,7 +51,7 @@ describe('SignInForm', () => {
     it.todo('should render the sign-in form with all fields', () => {
       render(<SignInForm {...defaultProps} />)
 
-      expect(screen.getByRole('heading', { name: /welcome back/i })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: /Norbert&#39;s Spark/i })).toBeInTheDocument()
       expect(screen.getByLabelText(/email address/i)).toBeInTheDocument()
       expect(screen.getByLabelText(/password/i)).toBeInTheDocument()
     })
@@ -374,7 +374,7 @@ describe('SignInForm', () => {
     it('should have proper heading structure', () => {
       render(<SignInForm {...defaultProps} />)
 
-      const heading = screen.getByRole('heading', { name: /welcome back/i })
+      const heading = screen.getByRole('heading', { name: /Norbert's Spark/i })
       expect(heading.tagName).toBe('H1')
     })
 

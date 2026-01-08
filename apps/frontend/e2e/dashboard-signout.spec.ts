@@ -50,7 +50,7 @@ test.describe('Dashboard Sign Out', () => {
     expect(page.url()).toContain('/signin')
 
     // Verify signin page is displayed
-    await expect(page.getByRole('heading', { name: /welcome back/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Norbert's Spark/i })).toBeVisible()
   })
 
   test('should not maintain session after sign out and page refresh', async ({ page }) => {
@@ -83,7 +83,7 @@ test.describe('Dashboard Sign Out', () => {
 
     // Should still be on signin page (no session maintained)
     expect(page.url()).toContain('/signin')
-    await expect(page.getByRole('heading', { name: /welcome back/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Norbert's Spark/i })).toBeVisible()
   })
 
   test('should not allow access to protected routes after sign out', async ({ page }) => {

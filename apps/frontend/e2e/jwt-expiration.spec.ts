@@ -36,7 +36,7 @@ test.describe('JWT Token Expiration', () => {
     expect(errorParam || callbackUrl).toBeTruthy()
 
     // Verify signin page is displayed
-    await expect(page.getByRole('heading', { name: /welcome back/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Norbert's Spark/i })).toBeVisible()
   })
 
   test('should redirect to signin when accessing /dashboard with expired JWT', async ({
