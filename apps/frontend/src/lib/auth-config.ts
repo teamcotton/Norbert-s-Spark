@@ -136,7 +136,10 @@ export const authOptions: NextAuthOptions = {
               const errorText = await response.text()
               logger.error('OAuth user sync failed:', errorText)
             } catch (readError) {
-              logger.error('OAuth user sync failed (unable to read response):', readError)
+              logger.error(
+                `OAuth user sync failed (HTTP ${response.status} ${response.statusText}, unable to read response body):`,
+                readError,
+              )
             }
             // Allow sign-in even if sync fails (user can still access frontend)
           }
