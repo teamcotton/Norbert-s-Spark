@@ -5,7 +5,8 @@ import { useSession } from 'next-auth/react'
 import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest'
 
 import { fileToDataURL } from '@/application/services/fileToDataURL.service.js'
-import { useAIChat } from '@/view/hooks/useAIChat.js'
+import { processUserUUID, useAIChat } from '@/view/hooks/useAIChat.js'
+import { useUserChats } from '@/view/hooks/useUserChats.js'
 
 // Mock dependencies
 vi.mock('next/navigation.js', () => ({
@@ -32,6 +33,76 @@ vi.mock('@/infrastructure/logging/logger.js', () => ({
     debug: vi.fn(),
   })),
 }))
+
+vi.mock('@/view/hooks/useUserChats.js', () => ({
+  useUserChats: vi.fn(),
+}))
+
+describe('processUserUUID', () => {
+  describe('valid UUIDv7', () => {
+    it('should return true for a valid UUIDv7 string', () => {
+      const validUuidV7 = '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e'
+      const result = processUserUUID(validUuidV7)
+      expect(result).toBe(true)
+    })
+
+    it('should return true for another valid UUIDv7 string', () => {
+      const validUuidV7 = '01942f8e-67a4-7c3d-8e5f-6a7b8c9d0e1f'
+      const result = processUserUUID(validUuidV7)
+      expect(result).toBe(true)
+    })
+  })
+
+  describe('invalid UUIDs', () => {
+    it('should return false for an invalid UUID format', () => {
+      const invalidUuid = 'not-a-valid-uuid'
+      const result = processUserUUID(invalidUuid)
+      expect(result).toBe(false)
+    })
+
+    it('should return false for empty string', () => {
+      const result = processUserUUID('')
+      expect(result).toBe(false)
+    })
+
+    it('should return false for a random string', () => {
+      const result = processUserUUID('abc-123-def-456')
+      expect(result).toBe(false)
+    })
+
+    it('should return false for a valid UUIDv4 (not v7)', () => {
+      const validUuidV4 = '550e8400-e29b-41d4-a716-446655440000'
+      const result = processUserUUID(validUuidV4)
+      expect(result).toBe(false)
+    })
+
+    it('should return false for a valid UUIDv1 (not v7)', () => {
+      const validUuidV1 = '12345678-1234-1234-1234-123456789012'
+      const result = processUserUUID(validUuidV1)
+      expect(result).toBe(false)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('should handle UUID with uppercase letters', () => {
+      const uppercaseUuid = '01942F8E-67A3-7B2C-9D4E-5F6A7B8C9D0E'
+      const result = processUserUUID(uppercaseUuid)
+      expect(result).toBe(true)
+    })
+
+    it('should return false for UUID without hyphens', () => {
+      const noHyphens = '01942f8e67a37b2c9d4e5f6a7b8c9d0e'
+      const result = processUserUUID(noHyphens)
+      expect(result).toBe(false)
+    })
+
+    it('should return false for malformed UUID', () => {
+      const malformed = '01942f8e-67a3-7b2c-9d4e-5f6a7b8c'
+      const result = processUserUUID(malformed)
+      expect(result).toBe(false)
+    })
+  })
+})
 
 describe('useAIChat', () => {
   const mockPush = vi.fn()
@@ -76,11 +147,16 @@ describe('useAIChat', () => {
       stop: vi.fn().mockResolvedValue(undefined),
     })
     ;(fileToDataURL as Mock).mockResolvedValue('data:image/png;base64,abc123')
+    ;(useUserChats as Mock).mockReturnValue({
+      data: undefined,
+      isError: false,
+      isLoading: false,
+    })
   })
 
   describe('Initial State', () => {
     it('should initialize with correct default values', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
 
       expect(result.current.input).toBe('')
       expect(result.current.isLoading).toBe(false)
@@ -91,13 +167,13 @@ describe('useAIChat', () => {
     })
 
     it('should return messages from useChat hook', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
 
       expect(result.current.messages).toEqual(mockMessages)
     })
 
     it('should expose all required handlers', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
 
       expect(typeof result.current.handleSubmit).toBe('function')
       expect(typeof result.current.handleFileSelect).toBe('function')
@@ -118,13 +194,13 @@ describe('useAIChat', () => {
     })
 
     it('should call useRouter hook', () => {
-      renderHook(() => useAIChat({ id: 'test-id' }))
+      renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
 
       expect(useRouter).toHaveBeenCalled()
     })
 
     it('should set disabled to false when id is provided', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
 
       expect(result.current.disabled).toBe(false)
     })
@@ -148,7 +224,7 @@ describe('useAIChat', () => {
 
   describe('handleInputChange', () => {
     it('should update input state when text changes', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
 
       act(() => {
         result.current.handleInputChange({
@@ -160,7 +236,7 @@ describe('useAIChat', () => {
     })
 
     it('should handle empty string input', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
 
       act(() => {
         result.current.handleInputChange({
@@ -172,7 +248,7 @@ describe('useAIChat', () => {
     })
 
     it('should handle multiple input changes', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
 
       act(() => {
         result.current.handleInputChange({
@@ -192,7 +268,7 @@ describe('useAIChat', () => {
 
   describe('handleDrawerToggle', () => {
     it('should toggle mobileOpen from false to true', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
 
       expect(result.current.mobileOpen).toBe(false)
 
@@ -204,7 +280,7 @@ describe('useAIChat', () => {
     })
 
     it('should toggle mobileOpen from true to false', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
 
       act(() => {
         result.current.handleDrawerToggle()
@@ -218,7 +294,7 @@ describe('useAIChat', () => {
     })
 
     it('should toggle multiple times correctly', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
 
       for (let i = 0; i < 5; i++) {
         act(() => {
@@ -231,7 +307,7 @@ describe('useAIChat', () => {
 
   describe('handleNewChat', () => {
     it('should navigate to /ai/{uuid} route', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
 
       act(() => {
         result.current.handleNewChat()
@@ -244,7 +320,7 @@ describe('useAIChat', () => {
     })
 
     it('should call router.push exactly once', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
 
       act(() => {
         result.current.handleNewChat()
@@ -256,7 +332,7 @@ describe('useAIChat', () => {
 
   describe('handleErrorClose', () => {
     it('should clear error message', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
 
       // Set error message first
       act(() => {
@@ -277,7 +353,7 @@ describe('useAIChat', () => {
 
   describe('handleFileSelect', () => {
     it('should set selected file when file is provided', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const file = new File(['content'], 'test.txt', { type: 'text/plain' })
 
       act(() => {
@@ -288,7 +364,7 @@ describe('useAIChat', () => {
     })
 
     it('should clear selected file when null is provided', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const file = new File(['content'], 'test.txt', { type: 'text/plain' })
 
       act(() => {
@@ -303,7 +379,7 @@ describe('useAIChat', () => {
     })
 
     it('should reject file larger than 10MB', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const largeFile = new File([new ArrayBuffer(11 * 1024 * 1024)], 'large.txt', {
         type: 'text/plain',
       })
@@ -317,7 +393,7 @@ describe('useAIChat', () => {
     })
 
     it('should accept file exactly at 10MB limit', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const maxFile = new File([new ArrayBuffer(10 * 1024 * 1024)], 'max.txt', {
         type: 'text/plain',
       })
@@ -331,7 +407,7 @@ describe('useAIChat', () => {
     })
 
     it('should accept file smaller than 10MB', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const smallFile = new File(['small content'], 'small.txt', { type: 'text/plain' })
 
       act(() => {
@@ -343,7 +419,7 @@ describe('useAIChat', () => {
     })
 
     it('should handle different file types', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
 
       const imageFile = new File(['image'], 'image.png', { type: 'image/png' })
       act(() => {
@@ -359,7 +435,7 @@ describe('useAIChat', () => {
     })
 
     it('should reject file with invalid MIME type', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const execFile = new File(['content'], 'malware.exe', { type: 'application/x-msdownload' })
 
       act(() => {
@@ -373,7 +449,7 @@ describe('useAIChat', () => {
     })
 
     it('should reject JavaScript file', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const jsFile = new File(['alert("xss")'], 'script.js', { type: 'application/javascript' })
 
       act(() => {
@@ -387,7 +463,7 @@ describe('useAIChat', () => {
     })
 
     it('should accept all allowed image types', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const imageTypes = [
         { type: 'image/jpeg', name: 'photo.jpg' },
         { type: 'image/png', name: 'image.png' },
@@ -407,7 +483,7 @@ describe('useAIChat', () => {
     })
 
     it('should accept all allowed document types', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const docTypes = [
         { type: 'application/pdf', name: 'doc.pdf' },
         { type: 'application/msword', name: 'old.doc' },
@@ -430,7 +506,7 @@ describe('useAIChat', () => {
     })
 
     it('should reject HTML file', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const htmlFile = new File(['<html></html>'], 'page.html', { type: 'text/html' })
 
       act(() => {
@@ -444,7 +520,7 @@ describe('useAIChat', () => {
     })
 
     it('should reject shell script', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const shFile = new File(['#!/bin/bash'], 'script.sh', { type: 'application/x-sh' })
 
       act(() => {
@@ -458,7 +534,7 @@ describe('useAIChat', () => {
     })
 
     it('should reject ZIP archive', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const zipFile = new File(['content'], 'archive.zip', { type: 'application/zip' })
 
       act(() => {
@@ -474,7 +550,7 @@ describe('useAIChat', () => {
 
   describe('handleSubmit', () => {
     it('should prevent default form submission', async () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const mockEvent = {
         preventDefault: vi.fn(),
       } as unknown as React.FormEvent
@@ -493,7 +569,7 @@ describe('useAIChat', () => {
     })
 
     it('should not submit when input is empty', async () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const mockEvent = {
         preventDefault: vi.fn(),
       } as unknown as React.FormEvent
@@ -506,7 +582,7 @@ describe('useAIChat', () => {
     })
 
     it('should not submit when input is only whitespace', async () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const mockEvent = {
         preventDefault: vi.fn(),
       } as unknown as React.FormEvent
@@ -525,7 +601,7 @@ describe('useAIChat', () => {
     })
 
     it('should attempt to prevent concurrent submissions via isLoading check', async () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const mockEvent = {
         preventDefault: vi.fn(),
       } as unknown as React.FormEvent
@@ -562,7 +638,7 @@ describe('useAIChat', () => {
     })
 
     it('should submit with text-only message', async () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const mockEvent = {
         preventDefault: vi.fn(),
       } as unknown as React.FormEvent
@@ -588,7 +664,7 @@ describe('useAIChat', () => {
     })
 
     it('should submit with text and file', async () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const mockEvent = {
         preventDefault: vi.fn(),
       } as unknown as React.FormEvent
@@ -622,7 +698,7 @@ describe('useAIChat', () => {
     })
 
     it('should clear input after successful submission', async () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const mockEvent = {
         preventDefault: vi.fn(),
       } as unknown as React.FormEvent
@@ -643,7 +719,7 @@ describe('useAIChat', () => {
     })
 
     it('should clear selected file after successful submission', async () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const mockEvent = {
         preventDefault: vi.fn(),
       } as unknown as React.FormEvent
@@ -666,7 +742,7 @@ describe('useAIChat', () => {
     })
 
     it('should set isLoading to true during submission and false after', async () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const mockEvent = {
         preventDefault: vi.fn(),
       } as unknown as React.FormEvent
@@ -691,7 +767,7 @@ describe('useAIChat', () => {
     })
 
     it('should set isLoading back to false after submission', async () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const mockEvent = {
         preventDefault: vi.fn(),
       } as unknown as React.FormEvent
@@ -712,7 +788,7 @@ describe('useAIChat', () => {
     })
 
     it('should set isLoading back to false even if submission fails', async () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const mockEvent = {
         preventDefault: vi.fn(),
       } as unknown as React.FormEvent
@@ -739,7 +815,7 @@ describe('useAIChat', () => {
     })
 
     it('should handle file conversion error gracefully', async () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const mockEvent = {
         preventDefault: vi.fn(),
       } as unknown as React.FormEvent
@@ -770,7 +846,7 @@ describe('useAIChat', () => {
 
   describe('Integration - Multiple Operations', () => {
     it('should handle input change, file select, and submit in sequence', async () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const mockEvent = {
         preventDefault: vi.fn(),
       } as unknown as React.FormEvent
@@ -803,7 +879,7 @@ describe('useAIChat', () => {
     })
 
     it('should allow new message after previous submission', async () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const mockEvent = {
         preventDefault: vi.fn(),
       } as unknown as React.FormEvent
@@ -836,7 +912,7 @@ describe('useAIChat', () => {
     })
 
     it('should handle drawer toggle and new chat navigation', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
 
       act(() => {
         result.current.handleDrawerToggle()
@@ -853,7 +929,7 @@ describe('useAIChat', () => {
     })
 
     it('should handle file error and error close', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const largeFile = new File([new ArrayBuffer(11 * 1024 * 1024)], 'large.txt', {
         type: 'text/plain',
       })
@@ -872,7 +948,7 @@ describe('useAIChat', () => {
 
   describe('Edge Cases', () => {
     it('should handle rapid input changes', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
 
       const inputs = ['a', 'ab', 'abc', 'abcd', 'abcde']
       inputs.forEach((value) => {
@@ -887,7 +963,7 @@ describe('useAIChat', () => {
     })
 
     it('should handle special characters in input', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const specialText = '!@#$%^&*()_+{}:"<>?[];\',./`~'
 
       act(() => {
@@ -900,7 +976,7 @@ describe('useAIChat', () => {
     })
 
     it('should handle very long input text', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const longText = 'a'.repeat(10000)
 
       act(() => {
@@ -913,7 +989,7 @@ describe('useAIChat', () => {
     })
 
     it('should handle file selection changes', () => {
-      const { result } = renderHook(() => useAIChat({ id: 'test-id' }))
+      const { result } = renderHook(() => useAIChat({ id: '01942f8e-67a3-7b2c-9d4e-5f6a7b8c9d0e' }))
       const file1 = new File(['content1'], 'file1.txt', { type: 'text/plain' })
       const file2 = new File(['content2'], 'file2.txt', { type: 'text/plain' })
 

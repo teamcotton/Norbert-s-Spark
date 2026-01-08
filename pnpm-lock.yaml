@@ -325,6 +325,9 @@ importers:
       uuidv7:
         specifier: ^1.1.0
         version: 1.1.0
+      uuidv7-utilities:
+        specifier: ^3.1.0
+        version: 3.1.0
       zod:
         specifier: ^4.3.5
         version: 4.3.5

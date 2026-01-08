@@ -174,6 +174,11 @@ export const AIReturnedResponseSchema = z.object({
   trigger: z.string(),
 })
 
+export const AIUserIdResponseSchema = z.object({
+  success: z.boolean(),
+  data: z.array(z.string().uuid()),
+})
+
 export type AISummaryWithUsageSchemaType = z.infer<typeof AISummaryWithUsageSchema>
 export type AISchemaType = z.infer<typeof AISchema>
 export type CreateAISchemaType = z.infer<typeof CreateAISchema>
@@ -183,6 +188,7 @@ export type AIListSchemaType = z.infer<typeof AIListSchema>
 export type AIUsageSchemaType = z.infer<typeof AIUsageSchema>
 export type AIUsageListSchemaType = z.infer<typeof AIUsageListSchema>
 export type AIReturnedResponseSchemaType = z.infer<typeof AIReturnedResponseSchema>
+export type AIUserIdResponseSchemaType = z.infer<typeof AIUserIdResponseSchema>
 export type AIListWithUsageSchemaType = z.infer<typeof AIListWithUsageSchema>
 export type AIModelsSchemaType = z.infer<typeof AIModelsSchema>
 export type AIRequestSchemaType = z.infer<typeof AIRequestSchema>
