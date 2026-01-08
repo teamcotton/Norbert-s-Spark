@@ -40,8 +40,8 @@ describe('authOptions Configuration', () => {
 
     it('should have custom pages configured', async () => {
       const authOptions = await getAuthOptions()
-      expect(authOptions.pages?.signIn).toBe('/login')
-      expect(authOptions.pages?.error).toBe('/login')
+      expect(authOptions.pages?.signIn).toBe('/signin')
+      expect(authOptions.pages?.error).toBe('/error')
     })
 
     it('should have providers configured', async () => {
