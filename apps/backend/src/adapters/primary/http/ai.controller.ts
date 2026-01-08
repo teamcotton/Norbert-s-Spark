@@ -445,8 +445,8 @@ export class AIController {
         }
       }
 
-      // Sort parts within each message by order (parts should have order field)
-      // and convert map to array sorted by createdAt
+      // Parts are already sorted by order field from the database query
+      // Convert map to array sorted by createdAt
       const messages = Array.from(messagesMap.values())
         .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
         .map((msg) => ({

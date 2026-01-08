@@ -1,5 +1,5 @@
 import type { AIServicePort } from 'apps/backend/src/application/ports/ai.port.js'
-import { desc, eq } from 'drizzle-orm'
+import { asc, desc, eq } from 'drizzle-orm'
 import { db } from '../../../infrastructure/database/index.js'
 import {
   chats,
@@ -142,6 +142,7 @@ export class AIRepository implements AIServicePort {
         .innerJoin(messages, eq(messages.chatId, chats.id))
         .leftJoin(parts, eq(parts.messageId, messages.id))
         .where(eq(chats.id, chatId))
+        .orderBy(asc(parts.order))
 
       return result
     } catch (error) {
