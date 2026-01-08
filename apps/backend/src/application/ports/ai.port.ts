@@ -2,6 +2,7 @@ import type { ChatResponseResult } from '../../adapters/secondary/repositories/a
 import type { UIMessage } from 'ai'
 import type { UserIdType } from '../../domain/value-objects/userID.js'
 import type { ChatIdType } from '../../domain/value-objects/chatID.js'
+import type { MyMetadata } from '@norberts-spark/shared'
 
 export interface AIServicePort {
   getChatResponse(chatId: ChatIdType): Promise<ChatResponseResult | null>
@@ -12,4 +13,5 @@ export interface AIServicePort {
   ): Promise<string>
   appendToChatMessages(chatId: ChatIdType | string, messages: UIMessage[]): Promise<string>
   getChatsByUserId(userId: UserIdType | string): Promise<ChatIdType[]>
+  /* getAIChatsByUserId(chatId: ChatIdType | string): Promise<any>*/
 }

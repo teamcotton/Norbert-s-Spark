@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { UIMessage } from 'ai'
 
 export const AISchema = z.object({
   id: z.string(),
@@ -176,8 +177,12 @@ export const AIReturnedResponseSchema = z.object({
 
 export const AIUserIdResponseSchema = z.object({
   success: z.boolean(),
-  data: z.array(z.string().uuid()),
+  data: z.array(z.uuid()),
 })
+
+export const metadataSchema = z.object({})
+
+export type MyMetadata = z.infer<typeof metadataSchema>
 
 export type AISummaryWithUsageSchemaType = z.infer<typeof AISummaryWithUsageSchema>
 export type AISchemaType = z.infer<typeof AISchema>

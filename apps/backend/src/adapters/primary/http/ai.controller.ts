@@ -16,9 +16,10 @@ import { SaveChatUseCase } from '../../../application/use-cases/save-chat.use-ca
 import { GetChatUseCase } from '../../../application/use-cases/get-chat.use-case.js'
 import type { UserIdType } from '../../../domain/value-objects/userID.js'
 import { UserId } from '../../../domain/value-objects/userID.js'
-import { ChatId } from '../../../domain/value-objects/chatID.js'
+import { ChatId, type ChatIdType } from '../../../domain/value-objects/chatID.js'
 import { SYSTEM_PROMPT } from '../../../shared/constants/ai-constants.js'
 import { GetChatsByUserIdUseCase } from '../../../application/use-cases/get-chats-by-userid.use-case.js'
+import { mapDBPartToUIMessagePart } from '../../../shared/mapper/index.js'
 
 export class AIController {
   private readonly heartOfDarknessTool: HeartOfDarknessTool
@@ -47,6 +48,13 @@ export class AIController {
         preHandler: [authMiddleware],
       },
       this.getAIChatsByUserId.bind(this)
+    )
+    app.get(
+      '/ai/fetchChat/:chatId',
+      {
+        preHandler: [authMiddleware],
+      },
+      this.getAIChatByChatId.bind(this)
     )
   }
 
@@ -110,6 +118,7 @@ export class AIController {
       }
 
       this.logger.debug('Validated messages', { messageCount: messages.length, id, trigger })
+      this.logger.debug('Validated messages content:', messages)
     } catch (e) {
       return reply.code(400).send({
         success: false,
@@ -186,7 +195,7 @@ export class AIController {
       tools: {
         heartOfDarknessQA: this.heartOfDarknessTool.getTool(),
       },
-      stopWhen: [stepCountIs(5)],
+      stopWhen: [stepCountIs(20)],
       onChunk({ chunk }) {
         // Called for each partial piece of output
         if (chunk.type === 'text-delta') {
@@ -336,6 +345,126 @@ export class AIController {
           `Error while fetching chats for userId in getAIChatsByUserId: ${userId}`,
           error
         )
+      }
+      return reply.code(500).send({
+        success: false,
+        error: 'Internal server error',
+      })
+    }
+  }
+
+  /**
+   * Retrieves a specific chat with all its messages and parts by chatId.
+   *
+   * This endpoint fetches the complete chat history including all messages and their
+   * associated parts (text, tool calls, etc.) in the UI format expected by the frontend.
+   *
+   * @param request - The Fastify request object containing the chatId parameter
+   * @param reply - The Fastify reply object for sending responses
+   * @returns A promise that resolves to the chat data with messages and parts
+   *
+   * @throws {400} When chatId parameter is missing or has invalid format (not a valid UUID v7)
+   * @throws {401} When user is not authenticated
+   * @throws {404} When no chat is found with the given chatId
+   * @throws {500} When an error occurs while fetching the chat from the repository
+   */
+  async getAIChatByChatId(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+    this.logger.debug('Received getAIChatByChatId request')
+
+    const params = request.params as Record<string, unknown>
+    const chatIdParam = params.chatId as string
+
+    if (!chatIdParam) {
+      return reply.code(400).send({
+        success: false,
+        error: 'Missing chatId parameter',
+      })
+    }
+
+    let chatId: ChatIdType
+
+    try {
+      chatId = new ChatId(chatIdParam).getValue()
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error(`Invalid chatId format in getAIChatByChatId: ${chatIdParam}`, error)
+      }
+      return reply.code(400).send({
+        success: false,
+        error: 'Invalid chatId format',
+      })
+    }
+
+    if (!request.user?.sub) {
+      this.logger.warn('Authorization check failed: User not authenticated')
+      return reply.code(401).send({
+        success: false,
+        error: 'Authentication required',
+      })
+    }
+
+    try {
+      // Use getChatUseCase to fetch the chat data
+      const chatData = await this.getChatUseCase.execute(chatId)
+
+      if (!chatData || chatData.length === 0) {
+        return reply.code(404).send({
+          success: false,
+          error: 'Chat not found',
+        })
+      }
+
+      // Transform the database response into UIMessage format
+      // Group parts by message ID
+      const messagesMap = new Map<
+        string,
+        {
+          id: string
+          role: string
+          createdAt: Date
+          parts: ReturnType<typeof mapDBPartToUIMessagePart>[]
+        }
+      >()
+
+      for (const row of chatData) {
+        const messageId = row.message.id
+
+        if (!messagesMap.has(messageId)) {
+          messagesMap.set(messageId, {
+            id: messageId,
+            role: row.message.role,
+            createdAt: row.message.createdAt,
+            parts: [],
+          })
+        }
+
+        // Add part if it exists (left join may return null parts)
+        if (row.part) {
+          const uiPart = mapDBPartToUIMessagePart(row.part)
+          messagesMap.get(messageId)!.parts.push(uiPart)
+        }
+      }
+
+      // Sort parts within each message by order (parts should have order field)
+      // and convert map to array sorted by createdAt
+      const messages = Array.from(messagesMap.values())
+        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+        .map((msg) => ({
+          id: msg.id,
+          role: msg.role,
+          parts: msg.parts,
+        }))
+
+      reply.code(200).send({
+        success: true,
+        data: {
+          id: chatId,
+          messages,
+        },
+      })
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error(`Error while fetching chat in getAIChatByChatId: ${chatId}`, error)
       }
       return reply.code(500).send({
         success: false,

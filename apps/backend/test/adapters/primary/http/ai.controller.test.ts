@@ -186,7 +186,7 @@ describe('AIController', () => {
       controller.registerRoutes(mockApp)
 
       expect(mockApp.post).toHaveBeenCalledTimes(1)
-      expect(mockApp.get).toHaveBeenCalledTimes(1)
+      expect(mockApp.get).toHaveBeenCalledTimes(2)
       expect(mockApp.put).not.toHaveBeenCalled()
       expect(mockApp.delete).not.toHaveBeenCalled()
     })
@@ -199,9 +199,25 @@ describe('AIController', () => {
 
       controller.registerRoutes(mockApp)
 
-      expect(mockApp.get).toHaveBeenCalledTimes(1)
+      expect(mockApp.get).toHaveBeenCalledTimes(2)
       expect(mockApp.get).toHaveBeenCalledWith(
         '/ai/chats/:userId',
+        expect.objectContaining({ preHandler: expect.any(Array) }),
+        expect.any(Function)
+      )
+    })
+
+    it('should register GET /ai/fetchChat/:chatId route', () => {
+      const mockApp = {
+        post: vi.fn(),
+        get: vi.fn(),
+      } as unknown as FastifyInstance
+
+      controller.registerRoutes(mockApp)
+
+      expect(mockApp.get).toHaveBeenCalledTimes(2)
+      expect(mockApp.get).toHaveBeenCalledWith(
+        '/ai/fetchChat/:chatId',
         expect.objectContaining({ preHandler: expect.any(Array) }),
         expect.any(Function)
       )
