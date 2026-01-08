@@ -184,15 +184,18 @@ export const authOptions: NextAuthOptions = {
       return session
     },
     async redirect({ baseUrl, url }) {
-      // After successful sign-in, redirect to dashboard
-      // Allows relative callback URLs like "/dashboard"
-      if (url.startsWith('/')) {
-        return `${baseUrl}${url}`
+      // Normalize the target URL against the base URL and enforce same-origin redirects
+      try {
+        const base = new URL(baseUrl)
+        const target = new URL(url, base)
+        // Only allow redirects that stay on the same origin as the base URL
+        if (target.origin === base.origin) {
+          return target.toString()
+        }
+      } catch (error) {
+        logger.error('Invalid redirect URL', { url, baseUrl, error })
       }
-      // Allows callback URLs on the same origin
-      if (new URL(url).origin === baseUrl) {
-        return url
-      }
+      // Fallback: redirect to a safe default on the base origin
       return `${baseUrl}/dashboard`
     },
   },
