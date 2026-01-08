@@ -13,6 +13,7 @@ import {
   customType,
   numeric,
 } from 'drizzle-orm/pg-core'
+import type { InferToolInput, InferToolOutput, UIMessage, UIMessageStreamWriter } from 'ai'
 
 // Define CITEXT custom type for case-insensitive text
 const citext = customType<{ data: string }>({
@@ -209,7 +210,7 @@ export const parts = pgTable(
     toolHeartOfDarknessQAOutput: jsonb('tool_heart_of_darkness_qa_output'),
     toolHeartOfDarknessQAErrorText: varchar('tool_heart_of_darkness_qa_error_text'),
 
-    // Data part fields (for custom data like darkness, weather, etc.)
+    // Data part fields (for custom data parts)
     dataContent: jsonb('data_content'),
 
     // Provider metadata

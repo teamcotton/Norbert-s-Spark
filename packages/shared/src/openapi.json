@@ -47,6 +47,10 @@
     {
       "name": "ai",
       "description": "AI-generated response operations"
+    },
+    {
+      "name": "chat",
+      "description": "Chat-related operations"
     }
   ],
   "paths": {
@@ -441,7 +445,7 @@
         "summary": "Get chat IDs for user",
         "description": "Retrieves a list of chat IDs associated with the specified user",
         "operationId": "getAIChatsByUserId",
-        "tags": ["ai"],
+        "tags": ["ai", "chat"],
         "security": [{ "bearerAuth": [] }],
         "parameters": [
           {
@@ -462,6 +466,104 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AIUserIdResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalidUserId": {
+                    "summary": "Invalid userId parameter",
+                    "value": {
+                      "success": false,
+                      "error": "Invalid userId parameter"
+                    }
+                  },
+                  "invalidFormat": {
+                    "summary": "Invalid userId format",
+                    "value": {
+                      "success": false,
+                      "error": "Invalid userId format"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Authentication required"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - User does not have required role (user, moderator or admin)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Access denied. You can only access your own chat history or must have admin/moderator role"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Internal server error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ai/fetchChat/{chatId}": {
+      "get": {
+        "summary": "Fetch chat by chatId",
+        "description": "Retrieves the chat object for the specified chatId",
+        "operationId": "getAIFetchChatByChatId",
+        "tags": ["ai", "chat"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "chatId",
+            "in": "path",
+            "required": true,
+            "description": "The chat's unique identifier",
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AI response found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIfetchChatResponse"
                 }
               }
             }
@@ -788,6 +890,25 @@
           "error": {
             "type": "string",
             "example": "Invalid request data"
+          }
+        }
+      },
+      "AIfetchChatResponse": {
+        "type": "object",
+        "description": "Response returned when fetching a chat",
+        "required": ["success", "data"],
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "example": "019b659a-2ad2-7fd8-9f32-35624caef900"
+              },
+              "messages": { "type": "array", "items": { "type": "object" } }
+            }
           }
         }
       }

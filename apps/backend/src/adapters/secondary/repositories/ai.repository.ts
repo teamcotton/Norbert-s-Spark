@@ -1,5 +1,5 @@
 import type { AIServicePort } from 'apps/backend/src/application/ports/ai.port.js'
-import { desc, eq } from 'drizzle-orm'
+import { desc, eq, asc, sql } from 'drizzle-orm'
 import { db } from '../../../infrastructure/database/index.js'
 import {
   chats,
@@ -16,6 +16,7 @@ import { mapUIMessagePartsToDBParts } from '../../../shared/mapper/index.js'
 import { isArray } from '@norberts-spark/shared'
 
 export type ChatResponseResult = {
+  chat: typeof chats.$inferSelect
   message: DBMessageSelect
   part: MyDBUIMessagePartSelect | null
 }[]
@@ -131,21 +132,28 @@ export class AIRepository implements AIServicePort {
   }
 
   async getChatResponse(chatId: ChatIdType): Promise<ChatResponseResult | null> {
-    try {
-      // Query chats table by id, then join with messages and parts
-      const result = await db
-        .select({
-          message: messages,
-          part: parts,
-        })
-        .from(chats)
-        .innerJoin(messages, eq(messages.chatId, chats.id))
-        .leftJoin(parts, eq(parts.messageId, messages.id))
-        .where(eq(chats.id, chatId))
+    // Query chats table by id, then join with messages and parts
+    const result = await db
+      .select({ chat: chats, message: messages, part: parts })
+      .from(chats)
+      .innerJoin(messages, eq(messages.chatId, chats.id))
+      .leftJoin(parts, eq(parts.messageId, messages.id))
+      .where(eq(chats.id, chatId))
+      .orderBy(asc(messages.createdAt), sql`${parts.order} ASC NULLS LAST`) // Order by message creation time first, then part order (nulls last)
 
-      return result
-    } catch (error) {
-      throw error
-    }
+    return result
+  }
+
+  async getAIChatByChatId(chatId: ChatIdType): Promise<ChatResponseResult | null> {
+    // Query chats table by id, then join with messages and parts
+    const result = await db
+      .select({ chat: chats, message: messages, part: parts })
+      .from(chats)
+      .innerJoin(messages, eq(messages.chatId, chats.id))
+      .leftJoin(parts, eq(parts.messageId, messages.id))
+      .where(eq(chats.id, chatId))
+      .orderBy(asc(messages.createdAt), sql`${parts.order} ASC NULLS LAST`) // Order by message creation time first, then part order (nulls last)
+
+    return result
   }
 }

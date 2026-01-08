@@ -25,6 +25,7 @@
     "build:openapi": "openapi-typescript ./src/openapi.json --output ./dist/generated/openapi-types.ts"
   },
   "dependencies": {
+    "ai": "^6.0.11",
     "zod": "^4.3.5"
   },
   "exports": {

@@ -9,6 +9,7 @@ import { GetChatUseCase } from '../../application/use-cases/get-chat.use-case.js
 import { AppendedChatUseCase } from '../../application/use-cases/append-chat.use-case.js'
 import { SaveChatUseCase } from '../../application/use-cases/save-chat.use-case.js'
 import { GetChatsByUserIdUseCase } from '../../application/use-cases/get-chats-by-userid.use-case.js'
+import { GetChatContentByChatIdUseCase } from '../../application/use-cases/get-chat-content-by-chat-id.use-case.js'
 
 // Adapters
 import { PostgresUserRepository } from '../../adapters/secondary/repositories/user.repository.js'
@@ -79,6 +80,7 @@ export class Container {
   private readonly appendChatUseCase: AppendedChatUseCase
   private readonly saveChatUseCase: SaveChatUseCase
   private readonly getChatsByUserIdUseCase: GetChatsByUserIdUseCase
+  private readonly getChatContentByChatIdUseCase: GetChatContentByChatIdUseCase
 
   // Controllers
   public readonly userController: UserController
@@ -183,6 +185,10 @@ cd apps/backend/certs && mkcert -key-file key.pem -cert-file cert.pem \\
     this.appendChatUseCase = new AppendedChatUseCase(this.aiRepository, this.logger)
     this.saveChatUseCase = new SaveChatUseCase(this.logger, this.aiRepository)
     this.getChatsByUserIdUseCase = new GetChatsByUserIdUseCase(this.aiRepository, this.logger)
+    this.getChatContentByChatIdUseCase = new GetChatContentByChatIdUseCase(
+      this.aiRepository,
+      this.logger
+    )
 
     // Initialize controllers (primary adapters)
     this.userController = new UserController(this.registerUserUseCase, this.getAllUsersUseCase)
@@ -192,7 +198,8 @@ cd apps/backend/certs && mkcert -key-file key.pem -cert-file cert.pem \\
       this.logger,
       this.appendChatUseCase,
       this.saveChatUseCase,
-      this.getChatsByUserIdUseCase
+      this.getChatsByUserIdUseCase,
+      this.getChatContentByChatIdUseCase
     )
 
     // Register routes

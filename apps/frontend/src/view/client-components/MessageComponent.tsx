@@ -173,6 +173,9 @@ export const Message = ({
 }) => {
   const prefix = role === 'user' ? 'User: ' : 'AI: '
 
+  // data-testid value used to identify the text container in tests
+  const testId = role === 'user' ? 'user' : 'ai'
+
   const text = parts
     .map((part) => {
       if (part.type === 'text') {
@@ -190,7 +193,10 @@ export const Message = ({
         '& *': { color: 'rgba(0, 0, 0, 0.87) !important' },
       }}
     >
-      <Streamdown>{prefix + text}</Streamdown>
+      {/* Text container with data-testid set based on role (user | ai) */}
+      <Box data-testid={testId}>
+        <Streamdown>{prefix + text}</Streamdown>
+      </Box>
       {parts.map((part, index) => renderToolPart(part, index))}
     </Box>
   )
