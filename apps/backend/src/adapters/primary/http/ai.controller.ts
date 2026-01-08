@@ -195,7 +195,7 @@ export class AIController {
       tools: {
         heartOfDarknessQA: this.heartOfDarknessTool.getTool(),
       },
-      stopWhen: [stepCountIs(20)],
+      stopWhen: [stepCountIs(5)],
       onChunk({ chunk }) {
         // Called for each partial piece of output
         if (chunk.type === 'text-delta') {
