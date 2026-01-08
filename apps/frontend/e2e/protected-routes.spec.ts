@@ -21,7 +21,7 @@ test.describe('Protected Routes Authentication', () => {
     expect(url.searchParams.get('callbackUrl')).toBe('/admin')
 
     // Verify signin page elements are visible
-    await expect(page.getByRole('heading', { name: /Welcome back/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Norbert's Spark/i })).toBeVisible()
   })
 
   test('should redirect unauthenticated user from /dashboard to signin page', async ({ page }) => {
@@ -72,12 +72,15 @@ test.describe('Protected Routes Authentication', () => {
   })
 
   test('should allow unauthenticated user to access public routes', async ({ page }) => {
-    // Navigate to homepage (public route)
+    // Navigate to homepage (public route) - homepage redirects to signin
     await page.goto('/')
 
-    // Verify user remains on homepage
-    expect(page.url()).not.toContain('/signin')
-    await expect(page.locator('h1')).toContainText("Norbert's Spark")
+    // Wait for redirect to signin page
+    await page.waitForURL(/\/signin/)
+
+    // Verify user is redirected to signin page (homepage is now redirected)
+    expect(page.url()).toContain('/signin')
+    await expect(page.getByRole('heading', { name: /Norbert's Spark/i })).toBeVisible()
   })
 
   test('should allow unauthenticated user to access registration page', async ({ page }) => {
