@@ -359,6 +359,57 @@ describe('useErrorPage', () => {
     })
   })
 
+  describe('Memoization', () => {
+    it('should maintain referential equality for handleGoBack across re-renders', () => {
+      const { rerender, result } = renderHook(() => useErrorPage())
+
+      const firstHandleGoBack = result.current.handleGoBack
+
+      rerender()
+
+      expect(result.current.handleGoBack).toBe(firstHandleGoBack)
+    })
+
+    it('should maintain referential equality for handleGoHome across re-renders', () => {
+      const { rerender, result } = renderHook(() => useErrorPage())
+
+      const firstHandleGoHome = result.current.handleGoHome
+
+      rerender()
+
+      expect(result.current.handleGoHome).toBe(firstHandleGoHome)
+    })
+
+    it('should maintain referential equality for both handlers across multiple re-renders', () => {
+      const { rerender, result } = renderHook(() => useErrorPage())
+
+      const firstHandleGoBack = result.current.handleGoBack
+      const firstHandleGoHome = result.current.handleGoHome
+
+      rerender()
+      rerender()
+      rerender()
+
+      expect(result.current.handleGoBack).toBe(firstHandleGoBack)
+      expect(result.current.handleGoHome).toBe(firstHandleGoHome)
+    })
+
+    it('should maintain handler identity when props change but router does not', () => {
+      const { rerender, result } = renderHook(
+        ({ errorCode }: { errorCode?: string }) => useErrorPage({ errorCode }),
+        { initialProps: { errorCode: '404' } }
+      )
+
+      const firstHandleGoBack = result.current.handleGoBack
+      const firstHandleGoHome = result.current.handleGoHome
+
+      rerender({ errorCode: '500' })
+
+      expect(result.current.handleGoBack).toBe(firstHandleGoBack)
+      expect(result.current.handleGoHome).toBe(firstHandleGoHome)
+    })
+  })
+
   describe('Edge Cases', () => {
     it('should handle empty string in URL params', () => {
       mockSearchParams.get.mockImplementation((key: string) => {
