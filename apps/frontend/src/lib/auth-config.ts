@@ -12,8 +12,11 @@ const backendUrl = process.env.BACKEND_AI_CALLBACK_URL
 const googleId = process.env.GOOGLE_ID
 const googleSecret = process.env.GOOGLE_SECRET
 
+// Check if Google OAuth credentials are configured
+const hasGoogleCredentials = Boolean(googleId && googleSecret)
+
 // Validate credentials to prevent runtime errors
-if (!googleId || !googleSecret) {
+if (!hasGoogleCredentials) {
   const errorMessage =
     'Google OAuth credentials not configured. Please set GOOGLE_ID and GOOGLE_SECRET environment variables.'
 
@@ -23,9 +26,7 @@ if (!googleId || !googleSecret) {
   }
 
   // In development/test, log a warning but allow the app to continue
-  logger.warn(
-    `${errorMessage} Google sign-in will not be available.`
-  )
+  logger.warn(`${errorMessage} Google sign-in will not be available.`)
 }
 
 interface BackendLoginResponse {
@@ -76,69 +77,77 @@ interface CredentialsInput {
  *
  * @see {@link https://next-auth.js.org/configuration/options|NextAuth Options}
  */
-export const authOptions: NextAuthOptions = {
-  providers: [
-    // Only include GoogleProvider if credentials are configured
-    ...(googleId && googleSecret
-      ? [
-          // @ts-expect-error - NextAuth v4 ESM/CommonJS interop issue with credentials provider
-          GoogleProvider({
-            clientId: googleId,
-            clientSecret: googleSecret,
+
+// Build providers array conditionally based on available credentials
+const providers = []
+
+// Add GoogleProvider only if credentials are configured
+if (hasGoogleCredentials) {
+  // @ts-expect-error - NextAuth v4 ESM/CommonJS interop issue with credentials provider
+  providers.push(
+    GoogleProvider({
+      clientId: googleId!,
+      clientSecret: googleSecret!,
+    })
+  )
+}
+
+// Always add CredentialsProvider
+// @ts-expect-error - NextAuth v4 ESM/CommonJS interop issue with credentials provider
+providers.push(
+  CredentialsProvider({
+    name: 'Credentials',
+    credentials: {
+      email: { label: 'Email', type: 'email', placeholder: 'user@example.com' },
+      password: { label: 'Password', type: 'password' },
+    },
+    async authorize(credentials: CredentialsInput | undefined): Promise<User | null> {
+      if (!credentials?.email || !credentials?.password) {
+        throw new Error('Missing credentials')
+      }
+
+      try {
+        // Call backend login endpoint
+        const response = await fetch(`${backendUrl}/auth/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: credentials.email,
+            password: credentials.password,
           }),
-        ]
-      : []),
-    // @ts-expect-error - NextAuth v4 ESM/CommonJS interop issue with credentials provider
-    CredentialsProvider({
-      name: 'Credentials',
-      credentials: {
-        email: { label: 'Email', type: 'email', placeholder: 'user@example.com' },
-        password: { label: 'Password', type: 'password' },
-      },
-      async authorize(credentials: CredentialsInput | undefined): Promise<User | null> {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error('Missing credentials')
+        })
+
+        const result = (await response.json()) as BackendLoginResponse
+
+        if (!response.ok) {
+          throw new Error(result.error || 'Authentication failed')
         }
 
-        try {
-          // Call backend login endpoint
-          const response = await fetch(`${backendUrl}/auth/login`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              email: credentials.email,
-              password: credentials.password,
-            }),
-          })
+        const data = result.data
 
-          const result = (await response.json()) as BackendLoginResponse
-
-          if (!response.ok) {
-            throw new Error(result.error || 'Authentication failed')
-          }
-
-          const data = result.data
-
-          // Backend should return: { userId, email, access_token, roles }
-          if (data?.access_token) {
-            return {
-              id: data.userId,
-              email: data.email,
-              accessToken: data.access_token,
-              roles: data.roles || [],
-            } as User
-          }
-
-          return null
-        } catch (error) {
-          logger.error('Authentication error:', error)
-          throw error
+        // Backend should return: { userId, email, access_token, roles }
+        if (data?.access_token) {
+          return {
+            id: data.userId,
+            email: data.email,
+            accessToken: data.access_token,
+            roles: data.roles || [],
+          } as User
         }
-      },
-    }),
-  ],
+
+        return null
+      } catch (error) {
+        logger.error('Authentication error:', error)
+        throw error
+      }
+    },
+  })
+)
+
+export const authOptions: NextAuthOptions = {
+  providers,
   callbacks: {
     async signIn({ account, profile, user }) {
       // Sync OAuth users to backend database
