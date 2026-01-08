@@ -1,6 +1,7 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import { LoginUserUseCase } from '../../../application/use-cases/login-user.use-case.js'
 import { LoginUserDto } from '../../../application/dtos/login-user.dto.js'
+import { OAuthSyncDto } from '../../../application/dtos/oauth-sync.dto.js'
 import { BaseException } from '../../../shared/exceptions/base.exception.js'
 
 /**
@@ -209,29 +210,39 @@ export class AuthController {
    * Request body should contain:
    * - `provider` (string): OAuth provider name (e.g., 'google', 'github')
    * - `providerId` (string): User ID from OAuth provider
-   * - `email` (string): User's email address
+   * - `email` (string): User's email address (must be valid email format)
    * - `name` (string, optional): User's display name
+   *
+   * Success response (200):
+   * ```json
+   * {
+   *   "success": true,
+   *   "message": "OAuth user sync completed"
+   * }
+   * ```
+   *
+   * Error responses:
+   * - 400: Validation error (invalid request body)
+   * - 500: Internal server error
    *
    * This is a simple implementation that logs the sync request.
    * TODO: Implement actual user creation/update in database
+   *
+   * @see {@link OAuthSyncDto.validate} for request body validation
    */
   async oauthSync(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
-      const body = request.body as {
-        provider: string
-        providerId: string
-        email: string
-        name?: string
-      }
+      // Validate request body using DTO
+      const dto = OAuthSyncDto.validate(request.body)
 
       // TODO: Implement user repository method to create/update OAuth user
       // For now, just log the sync request
       request.log.info({
         msg: 'OAuth user sync requested',
-        provider: body.provider,
-        providerId: body.providerId,
-        email: body.email,
-        name: body.name,
+        provider: dto.provider,
+        providerId: dto.providerId,
+        email: dto.email,
+        name: dto.name,
       })
 
       reply.code(200).send({
@@ -240,9 +251,11 @@ export class AuthController {
       })
     } catch (error) {
       const err = error as Error
-      reply.code(500).send({
+      const statusCode = err instanceof BaseException ? err.statusCode : 500
+      const errorMessage = err?.message || 'OAuth sync failed'
+      reply.code(statusCode).send({
         success: false,
-        error: err?.message || 'OAuth sync failed',
+        error: errorMessage,
       })
     }
   }
