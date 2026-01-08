@@ -541,7 +541,7 @@
         }
       }
     },
-    "/ai/fetchChat/{chatId}/{userId}": {
+    "/ai/fetchChat/{chatId}": {
       "get": {
         "summary": "Fetch chat by chatId",
         "description": "Retrieves the chat object for the specified chatId",

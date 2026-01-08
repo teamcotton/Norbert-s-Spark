@@ -31,12 +31,8 @@
     "eval:view": "evalite view"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^3.0.9",
-    "@ai-sdk/black-forest-labs": "^1.0.4",
     "@ai-sdk/google": "^3.0.3",
-    "@ai-sdk/openai": "^3.0.7",
-    "@ai-sdk/provider": "^3.0.1",
-    "@ai-sdk/xai": "^3.0.10",
+    "@ai-sdk/provider": "^3.0.2",
     "@fastify/cors": "^11.2.0",
     "@fastify/swagger": "^9.6.1",
     "@fastify/swagger-ui": "^5.2.4",
