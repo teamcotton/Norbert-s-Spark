@@ -58,7 +58,7 @@ interface CredentialsInput {
  * @property {Function} callbacks.session - Session callback to expose JWT properties to client
  * @property {object} pages - Custom authentication page routes
  * @property {string} pages.signIn - Sign-in page route (/signin)
- * @property {string} pages.signOut - Sign-out page route (/signin)
+ * @property {string} pages.signOut - Redirect after sign-out (/signin)
  * @property {string} pages.error - Error page route (/error)
  * @property {object} session - Session configuration
  * @property {string} session.strategy - Session strategy ('jwt')
@@ -81,6 +81,7 @@ interface CredentialsInput {
  */
 
 // Build providers array conditionally based on available credentials
+// Using any[] due to NextAuth v4 ESM/CommonJS interop issues with provider types
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const providers: any[] = []
 
