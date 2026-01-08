@@ -365,7 +365,9 @@ describe('OAuthSyncDto', () => {
         }
 
         expect(() => OAuthSyncDto.validate(data)).toThrow(ValidationException)
-        expect(() => OAuthSyncDto.validate(data)).toThrow('Email is required and must be a non-empty string')
+        expect(() => OAuthSyncDto.validate(data)).toThrow(
+          'Email is required and must be a non-empty string'
+        )
       })
 
       it('should throw ValidationException when email is null', () => {
@@ -376,7 +378,9 @@ describe('OAuthSyncDto', () => {
         }
 
         expect(() => OAuthSyncDto.validate(data)).toThrow(ValidationException)
-        expect(() => OAuthSyncDto.validate(data)).toThrow('Email is required and must be a non-empty string')
+        expect(() => OAuthSyncDto.validate(data)).toThrow(
+          'Email is required and must be a non-empty string'
+        )
       })
 
       it('should throw ValidationException when email is empty string', () => {
@@ -387,7 +391,9 @@ describe('OAuthSyncDto', () => {
         }
 
         expect(() => OAuthSyncDto.validate(data)).toThrow(ValidationException)
-        expect(() => OAuthSyncDto.validate(data)).toThrow('Email is required and must be a non-empty string')
+        expect(() => OAuthSyncDto.validate(data)).toThrow(
+          'Email is required and must be a non-empty string'
+        )
       })
 
       it('should throw ValidationException when email is a number', () => {
@@ -398,7 +404,9 @@ describe('OAuthSyncDto', () => {
         }
 
         expect(() => OAuthSyncDto.validate(data)).toThrow(ValidationException)
-        expect(() => OAuthSyncDto.validate(data)).toThrow('Email is required and must be a non-empty string')
+        expect(() => OAuthSyncDto.validate(data)).toThrow(
+          'Email is required and must be a non-empty string'
+        )
       })
     })
 
