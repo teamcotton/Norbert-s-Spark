@@ -31,6 +31,7 @@ describe('AIRepository', () => {
   let mockLogger: LoggerPort
   const mockChatIdString = uuidv7()
   const mockChatId = new ChatId(mockChatIdString).getValue()
+  const mockUserIdString = uuidv7()
 
   beforeEach(() => {
     vi.clearAllMocks()

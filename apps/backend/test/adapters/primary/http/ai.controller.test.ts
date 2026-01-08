@@ -1219,17 +1219,6 @@ describe('AIController', () => {
         expect(mockLogger.warn).toHaveBeenCalled()
       })
 
-        await controller.getAIChatByChatId(mockRequest, mockReply)
-
-        expect(mockReply.code).toHaveBeenCalledWith(400)
-        expect(mockReply.send).toHaveBeenCalledWith({
-          success: false,
-          error: 'Invalid userId format',
-        })
-        expect(mockGetChatContentByChatIdUseCase.execute).not.toHaveBeenCalled()
-        expect(mockLogger.error).toHaveBeenCalled()
-      })
-
       it('should log debug message on request', async () => {
         const userId = new UserId(uuidv7()).getValue()
         const chatId = new ChatId(uuidv7()).getValue()

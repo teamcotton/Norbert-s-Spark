@@ -422,7 +422,15 @@ export class AIController {
       }
 
       // Extract userId from the chat record (all rows have the same chat info)
-      const chatUserId = chatData[0].chat.userId
+      const chatUserId = chatData[0]?.chat?.userId
+      if (!chatUserId) {
+        this.logger.error(`Chat data missing userId for chatId: ${chatId}`)
+        return reply.code(500).send({
+          success: false,
+          error: 'Invalid chat data',
+        })
+      }
+
       const userRoles = request.user?.roles || []
 
       // Authorization check: User can access if they own the chat OR have admin/moderator role

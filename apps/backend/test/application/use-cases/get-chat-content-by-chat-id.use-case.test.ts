@@ -16,6 +16,7 @@ describe('GetChatContentByChatIdUseCase', () => {
   let mockLogger: LoggerPort
   let mockAIService: AIServicePort
   let testChatId: ChatIdType
+  let mockChat: { id: string; userId: string; createdAt: Date; updatedAt: Date }
 
   beforeEach(() => {
     mockLogger = {
@@ -31,6 +32,12 @@ describe('GetChatContentByChatIdUseCase', () => {
     } as unknown as AIServicePort
 
     testChatId = new ChatId(uuidv7()).getValue()
+    mockChat = {
+      id: testChatId,
+      userId: 'test-user-id',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
     useCase = new GetChatContentByChatIdUseCase(mockAIService, mockLogger)
   })
 
@@ -73,6 +80,7 @@ describe('GetChatContentByChatIdUseCase', () => {
 
       const mockResponse: ChatResponseResult = [
         {
+          chat: mockChat,
           message: mockMessage,
           part: mockPart,
         },
@@ -160,8 +168,8 @@ describe('GetChatContentByChatIdUseCase', () => {
       }
 
       const mockResponse: ChatResponseResult = [
-        { message: mockMessage1, part: mockPart1 },
-        { message: mockMessage2, part: mockPart2 },
+        { chat: mockChat, message: mockMessage1, part: mockPart1 },
+        { chat: mockChat, message: mockMessage2, part: mockPart2 },
       ]
 
       vi.mocked(mockAIService.getAIChatByChatId).mockResolvedValue(mockResponse)
@@ -184,6 +192,7 @@ describe('GetChatContentByChatIdUseCase', () => {
 
       const mockResponse: ChatResponseResult = [
         {
+          chat: mockChat,
           message: mockMessage,
           part: null,
         },
@@ -244,7 +253,9 @@ describe('GetChatContentByChatIdUseCase', () => {
         providerMetadata: null,
       }
 
-      const mockResponse: ChatResponseResult = [{ message: mockMessage, part: mockPart }]
+      const mockResponse: ChatResponseResult = [
+        { chat: mockChat, message: mockMessage, part: mockPart },
+      ]
 
       vi.mocked(mockAIService.getAIChatByChatId).mockResolvedValue(mockResponse)
 
@@ -290,7 +301,9 @@ describe('GetChatContentByChatIdUseCase', () => {
         providerMetadata: null,
       }
 
-      const mockResponse: ChatResponseResult = [{ message: mockMessage, part: mockPart }]
+      const mockResponse: ChatResponseResult = [
+        { chat: mockChat, message: mockMessage, part: mockPart },
+      ]
 
       vi.mocked(mockAIService.getAIChatByChatId).mockResolvedValue(mockResponse)
 
@@ -336,7 +349,9 @@ describe('GetChatContentByChatIdUseCase', () => {
         providerMetadata: null,
       }
 
-      const mockResponse: ChatResponseResult = [{ message: mockMessage, part: mockPart }]
+      const mockResponse: ChatResponseResult = [
+        { chat: mockChat, message: mockMessage, part: mockPart },
+      ]
 
       vi.mocked(mockAIService.getAIChatByChatId).mockResolvedValue(mockResponse)
 
@@ -383,7 +398,9 @@ describe('GetChatContentByChatIdUseCase', () => {
         providerMetadata: null,
       }
 
-      const mockResponse: ChatResponseResult = [{ message: mockMessage, part: mockPart }]
+      const mockResponse: ChatResponseResult = [
+        { chat: mockChat, message: mockMessage, part: mockPart },
+      ]
 
       vi.mocked(mockAIService.getAIChatByChatId).mockResolvedValue(mockResponse)
 
@@ -429,7 +446,9 @@ describe('GetChatContentByChatIdUseCase', () => {
         providerMetadata: null,
       }
 
-      const mockResponse: ChatResponseResult = [{ message: mockMessage, part: mockPart }]
+      const mockResponse: ChatResponseResult = [
+        { chat: mockChat, message: mockMessage, part: mockPart },
+      ]
 
       vi.mocked(mockAIService.getAIChatByChatId).mockResolvedValue(mockResponse)
 
