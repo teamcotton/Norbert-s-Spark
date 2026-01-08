@@ -20,6 +20,7 @@ import { ChatId, type ChatIdType } from '../../../domain/value-objects/chatID.js
 import { SYSTEM_PROMPT } from '../../../shared/constants/ai-constants.js'
 import { GetChatsByUserIdUseCase } from '../../../application/use-cases/get-chats-by-userid.use-case.js'
 import { mapDBPartToUIMessagePart } from '../../../shared/mapper/index.js'
+import type { GetChatContentByChatIdUseCase } from '../../../application/use-cases/get-chat-content-by-chat-id.use-case.js'
 
 export class AIController {
   private readonly heartOfDarknessTool: HeartOfDarknessTool
@@ -29,7 +30,8 @@ export class AIController {
     private readonly logger: LoggerPort,
     private readonly appendChatUseCase: AppendedChatUseCase,
     private readonly saveChatUseCase: SaveChatUseCase,
-    private readonly getChatsByUserIdUseCase: GetChatsByUserIdUseCase
+    private readonly getChatsByUserIdUseCase: GetChatsByUserIdUseCase,
+    private readonly getChatContentByChatIdUseCase: GetChatContentByChatIdUseCase
   ) {
     this.heartOfDarknessTool = new HeartOfDarknessTool(this.logger)
   }
@@ -50,7 +52,7 @@ export class AIController {
       this.getAIChatsByUserId.bind(this)
     )
     app.get(
-      '/ai/fetchChat/:chatId',
+      '/ai/fetchChat/:chatId/:userId',
       {
         preHandler: [authMiddleware],
       },
@@ -373,11 +375,33 @@ export class AIController {
 
     const params = request.params as Record<string, unknown>
     const chatIdParam = params.chatId as string
+    const userIdParam = params.userId as string
 
     if (!chatIdParam) {
       return reply.code(400).send({
         success: false,
         error: 'Missing chatId parameter',
+      })
+    }
+
+    if (!userIdParam) {
+      return reply.code(400).send({
+        success: false,
+        error: 'Invalid userId parameter',
+      })
+    }
+
+    let userId: UserIdType
+
+    try {
+      userId = new UserId(userIdParam).getValue()
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error(`Invalid userId format in getAIChatsByUserId: ${userIdParam}`, error)
+      }
+      return reply.code(400).send({
+        success: false,
+        error: 'Invalid userId format',
       })
     }
 
@@ -395,17 +419,28 @@ export class AIController {
       })
     }
 
-    if (!request.user?.sub) {
-      this.logger.warn('Authorization check failed: User not authenticated')
-      return reply.code(401).send({
+    // Authorization check: User can only access their own chat history unless they have admin/moderator role
+    const authenticatedUserId = request.user?.sub
+    const userRoles = request.user?.roles || []
+
+    // Check if user is accessing their own data OR has admin/moderator role
+    const isOwnData = authenticatedUserId === userId
+    const hasElevatedRole = userRoles.includes('admin') || userRoles.includes('moderator')
+
+    if (!isOwnData && !hasElevatedRole) {
+      this.logger.warn(
+        `Authorization check failed: User ${authenticatedUserId} attempted to access chats for user ${userId} without required permissions`
+      )
+      return reply.code(403).send({
         success: false,
-        error: 'Authentication required',
+        error:
+          'Access denied. You can only access your own chat history or must have admin/moderator role',
       })
     }
 
     try {
       // Use getChatUseCase to fetch the chat data
-      const chatData = await this.getChatUseCase.execute(chatId)
+      const chatData = await this.getChatContentByChatIdUseCase.execute(chatId)
 
       if (!chatData || chatData.length === 0) {
         return reply.code(404).send({

@@ -148,4 +148,23 @@ export class AIRepository implements AIServicePort {
       throw error
     }
   }
+
+  async getAIChatByChatId(chatId: ChatIdType): Promise<ChatResponseResult | null> {
+    try {
+      // Query chats table by id, then join with messages and parts
+      const result = await db
+        .select({
+          message: messages,
+          part: parts,
+        })
+        .from(chats)
+        .innerJoin(messages, eq(messages.chatId, chats.id))
+        .leftJoin(parts, eq(parts.messageId, messages.id))
+        .where(eq(chats.id, chatId))
+
+      return result
+    } catch (error) {
+      throw error
+    }
+  }
 }

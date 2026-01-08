@@ -541,7 +541,7 @@
         }
       }
     },
-    "/ai/fetchChat/{chatId}": {
+    "/ai/fetchChat/{chatId}/{userId}": {
       "get": {
         "summary": "Fetch chat by chatId",
         "description": "Retrieves the chat object for the specified chatId",
@@ -554,6 +554,13 @@
             "in": "path",
             "required": true,
             "description": "The chat's unique identifier",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "description": "The user's unique identifier who owns the chat",
             "schema": { "type": "string", "format": "uuid" }
           }
         ],

@@ -598,4 +598,262 @@ describe('AIRepository', () => {
       expect(result).toEqual(testChatId)
     })
   })
+
+  describe('getAIChatByChatId', () => {
+    it('should retrieve chat messages with parts by chat ID', async () => {
+      const mockResult = [
+        {
+          message: { id: 'msg-1', chatId: mockChatIdString, role: 'user', createdAt: new Date() },
+          part: { id: 'part-1', messageId: 'msg-1', type: 'text', textText: 'Hello' },
+        },
+        {
+          message: {
+            id: 'msg-2',
+            chatId: mockChatIdString,
+            role: 'assistant',
+            createdAt: new Date(),
+          },
+          part: { id: 'part-2', messageId: 'msg-2', type: 'text', textText: 'Hi there!' },
+        },
+      ]
+
+      const mockWhere = vi.fn().mockResolvedValue(mockResult)
+      const mockLeftJoin = vi.fn().mockReturnValue({ where: mockWhere })
+      const mockInnerJoin = vi.fn().mockReturnValue({ leftJoin: mockLeftJoin })
+      const mockFrom = vi.fn().mockReturnValue({ innerJoin: mockInnerJoin })
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as any)
+
+      const result = await repository.getAIChatByChatId(mockChatId)
+
+      expect(result).toEqual(mockResult)
+      expect(db.select).toHaveBeenCalledTimes(1)
+    })
+
+    it('should return empty array when chat has no messages', async () => {
+      const mockWhere = vi.fn().mockResolvedValue([])
+      const mockLeftJoin = vi.fn().mockReturnValue({ where: mockWhere })
+      const mockInnerJoin = vi.fn().mockReturnValue({ leftJoin: mockLeftJoin })
+      const mockFrom = vi.fn().mockReturnValue({ innerJoin: mockInnerJoin })
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as any)
+
+      const result = await repository.getAIChatByChatId(mockChatId)
+
+      expect(result).toEqual([])
+    })
+
+    it('should handle messages without parts', async () => {
+      const mockResult = [
+        {
+          message: { id: 'msg-1', chatId: mockChatIdString, role: 'user', createdAt: new Date() },
+          part: null,
+        },
+      ]
+
+      const mockWhere = vi.fn().mockResolvedValue(mockResult)
+      const mockLeftJoin = vi.fn().mockReturnValue({ where: mockWhere })
+      const mockInnerJoin = vi.fn().mockReturnValue({ leftJoin: mockLeftJoin })
+      const mockFrom = vi.fn().mockReturnValue({ innerJoin: mockInnerJoin })
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as any)
+
+      const result = await repository.getAIChatByChatId(mockChatId)
+
+      expect(result).toEqual(mockResult)
+      expect(result?.[0]?.part).toBeNull()
+    })
+
+    it('should handle multiple parts for the same message', async () => {
+      const mockResult = [
+        {
+          message: { id: 'msg-1', chatId: mockChatIdString, role: 'user', createdAt: new Date() },
+          part: { id: 'part-1', messageId: 'msg-1', type: 'text', textText: 'First part' },
+        },
+        {
+          message: { id: 'msg-1', chatId: mockChatIdString, role: 'user', createdAt: new Date() },
+          part: { id: 'part-2', messageId: 'msg-1', type: 'text', textText: 'Second part' },
+        },
+      ]
+
+      const mockWhere = vi.fn().mockResolvedValue(mockResult)
+      const mockLeftJoin = vi.fn().mockReturnValue({ where: mockWhere })
+      const mockInnerJoin = vi.fn().mockReturnValue({ leftJoin: mockLeftJoin })
+      const mockFrom = vi.fn().mockReturnValue({ innerJoin: mockInnerJoin })
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as any)
+
+      const result = await repository.getAIChatByChatId(mockChatId)
+
+      expect(result).toEqual(mockResult)
+      expect(result).toHaveLength(2)
+      expect(result?.[0]?.message.id).toBe(result?.[1]?.message.id)
+    })
+
+    it('should throw error when database query fails', async () => {
+      const dbError = new Error('Database connection failed')
+
+      const mockWhere = vi.fn().mockRejectedValue(dbError)
+      const mockLeftJoin = vi.fn().mockReturnValue({ where: mockWhere })
+      const mockInnerJoin = vi.fn().mockReturnValue({ leftJoin: mockLeftJoin })
+      const mockFrom = vi.fn().mockReturnValue({ innerJoin: mockInnerJoin })
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as any)
+
+      await expect(repository.getAIChatByChatId(mockChatId)).rejects.toThrow(
+        'Database connection failed'
+      )
+    })
+
+    it('should query with correct chat ID', async () => {
+      const specificChatIdString = uuidv7()
+      const specificChatId = new ChatId(specificChatIdString).getValue()
+      const mockResult = [
+        {
+          message: {
+            id: 'msg-1',
+            chatId: specificChatIdString,
+            role: 'user',
+            createdAt: new Date(),
+          },
+          part: { id: 'part-1', messageId: 'msg-1', type: 'text', textText: 'Test' },
+        },
+      ]
+
+      const mockWhere = vi.fn().mockResolvedValue(mockResult)
+      const mockLeftJoin = vi.fn().mockReturnValue({ where: mockWhere })
+      const mockInnerJoin = vi.fn().mockReturnValue({ leftJoin: mockLeftJoin })
+      const mockFrom = vi.fn().mockReturnValue({ innerJoin: mockInnerJoin })
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as any)
+
+      const result = await repository.getAIChatByChatId(specificChatId)
+
+      expect(result).toEqual(mockResult)
+      expect(mockWhere).toHaveBeenCalledTimes(1)
+    })
+
+    it('should return empty array when chat exists but has no messages', async () => {
+      const mockResult: any[] = []
+
+      const mockWhere = vi.fn().mockResolvedValue(mockResult)
+      const mockLeftJoin = vi.fn().mockReturnValue({ where: mockWhere })
+      const mockInnerJoin = vi.fn().mockReturnValue({ leftJoin: mockLeftJoin })
+      const mockFrom = vi.fn().mockReturnValue({ innerJoin: mockInnerJoin })
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as any)
+
+      const result = await repository.getAIChatByChatId(mockChatId)
+
+      expect(result).toEqual([])
+    })
+
+    it('should handle chat with multiple messages and parts', async () => {
+      const mockResult = [
+        {
+          message: { id: 'msg-1', chatId: mockChatIdString, role: 'user', createdAt: new Date() },
+          part: { id: 'part-1', messageId: 'msg-1', type: 'text', textText: 'Question' },
+        },
+        {
+          message: {
+            id: 'msg-2',
+            chatId: mockChatIdString,
+            role: 'assistant',
+            createdAt: new Date(),
+          },
+          part: { id: 'part-2', messageId: 'msg-2', type: 'text', textText: 'Answer part 1' },
+        },
+        {
+          message: {
+            id: 'msg-2',
+            chatId: mockChatIdString,
+            role: 'assistant',
+            createdAt: new Date(),
+          },
+          part: { id: 'part-3', messageId: 'msg-2', type: 'text', textText: 'Answer part 2' },
+        },
+      ]
+
+      const mockWhere = vi.fn().mockResolvedValue(mockResult)
+      const mockLeftJoin = vi.fn().mockReturnValue({ where: mockWhere })
+      const mockInnerJoin = vi.fn().mockReturnValue({ leftJoin: mockLeftJoin })
+      const mockFrom = vi.fn().mockReturnValue({ innerJoin: mockInnerJoin })
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as any)
+
+      const result = await repository.getAIChatByChatId(mockChatId)
+
+      expect(result).toEqual(mockResult)
+      expect(result).toHaveLength(3)
+    })
+
+    it('should handle different part types (text, file, tool-call)', async () => {
+      const mockResult = [
+        {
+          message: { id: 'msg-1', chatId: mockChatIdString, role: 'user', createdAt: new Date() },
+          part: { id: 'part-1', messageId: 'msg-1', type: 'text', textText: 'Query' },
+        },
+        {
+          message: { id: 'msg-1', chatId: mockChatIdString, role: 'user', createdAt: new Date() },
+          part: {
+            id: 'part-2',
+            messageId: 'msg-1',
+            type: 'file',
+            fileUrl: 'https://example.com/file.pdf',
+          },
+        },
+        {
+          message: {
+            id: 'msg-2',
+            chatId: mockChatIdString,
+            role: 'assistant',
+            createdAt: new Date(),
+          },
+          part: {
+            id: 'part-3',
+            messageId: 'msg-2',
+            type: 'tool-call',
+            toolCallId: 'call-123',
+          },
+        },
+      ]
+
+      const mockWhere = vi.fn().mockResolvedValue(mockResult)
+      const mockLeftJoin = vi.fn().mockReturnValue({ where: mockWhere })
+      const mockInnerJoin = vi.fn().mockReturnValue({ leftJoin: mockLeftJoin })
+      const mockFrom = vi.fn().mockReturnValue({ innerJoin: mockInnerJoin })
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as any)
+
+      const result = await repository.getAIChatByChatId(mockChatId)
+
+      expect(result).toEqual(mockResult)
+      expect(result).toHaveLength(3)
+    })
+
+    it('should preserve message order in results', async () => {
+      const mockResult = [
+        {
+          message: { id: 'msg-1', chatId: mockChatIdString, role: 'user', createdAt: new Date() },
+          part: { id: 'part-1', messageId: 'msg-1', type: 'text', textText: 'First' },
+        },
+        {
+          message: {
+            id: 'msg-2',
+            chatId: mockChatIdString,
+            role: 'assistant',
+            createdAt: new Date(),
+          },
+          part: { id: 'part-2', messageId: 'msg-2', type: 'text', textText: 'Second' },
+        },
+        {
+          message: { id: 'msg-3', chatId: mockChatIdString, role: 'user', createdAt: new Date() },
+          part: { id: 'part-3', messageId: 'msg-3', type: 'text', textText: 'Third' },
+        },
+      ]
+
+      const mockWhere = vi.fn().mockResolvedValue(mockResult)
+      const mockLeftJoin = vi.fn().mockReturnValue({ where: mockWhere })
+      const mockInnerJoin = vi.fn().mockReturnValue({ leftJoin: mockLeftJoin })
+      const mockFrom = vi.fn().mockReturnValue({ innerJoin: mockInnerJoin })
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom } as any)
+
+      const result = await repository.getAIChatByChatId(mockChatId)
+
+      expect(result?.[0]?.message.id).toBe('msg-1')
+      expect(result?.[1]?.message.id).toBe('msg-2')
+      expect(result?.[2]?.message.id).toBe('msg-3')
+    })
+  })
 })

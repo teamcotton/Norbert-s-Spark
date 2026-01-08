@@ -1,0 +1,481 @@
+import { uuidv7 } from 'uuidv7'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+import type { ChatResponseResult } from '../../../src/adapters/secondary/repositories/ai.repository.js'
+import type { AIServicePort } from '../../../src/application/ports/ai.port.js'
+import type { LoggerPort } from '../../../src/application/ports/logger.port.js'
+import { GetChatContentByChatIdUseCase } from '../../../src/application/use-cases/get-chat-content-by-chat-id.use-case.js'
+import { ChatId, type ChatIdType } from '../../../src/domain/value-objects/chatID.js'
+import type {
+  DBMessageSelect,
+  MyDBUIMessagePartSelect,
+} from '../../../src/infrastructure/database/schema.js'
+
+describe('GetChatContentByChatIdUseCase', () => {
+  let useCase: GetChatContentByChatIdUseCase
+  let mockLogger: LoggerPort
+  let mockAIService: AIServicePort
+  let testChatId: ChatIdType
+
+  beforeEach(() => {
+    mockLogger = {
+      info: vi.fn(),
+      error: vi.fn(),
+      warn: vi.fn(),
+      debug: vi.fn(),
+    }
+
+    mockAIService = {
+      getChatResponse: vi.fn(),
+      getAIChatByChatId: vi.fn(),
+    } as unknown as AIServicePort
+
+    testChatId = new ChatId(uuidv7()).getValue()
+    useCase = new GetChatContentByChatIdUseCase(mockAIService, mockLogger)
+  })
+
+  describe('Successful scenarios', () => {
+    it('should return chat content with single message and part', async () => {
+      const mockMessage: DBMessageSelect = {
+        id: 'msg-1',
+        chatId: testChatId,
+        role: 'user',
+        createdAt: new Date(),
+      }
+
+      const mockPart: MyDBUIMessagePartSelect = {
+        id: 'part-1',
+        messageId: 'msg-1',
+        type: 'text',
+        createdAt: new Date(),
+        order: 0,
+        textText: 'Hello',
+        reasoningText: null,
+        fileMediaType: null,
+        fileFilename: null,
+        fileUrl: null,
+        sourceUrlSourceId: null,
+        sourceUrlUrl: null,
+        sourceUrlTitle: null,
+        sourceDocumentSourceId: null,
+        sourceDocumentMediaType: null,
+        sourceDocumentTitle: null,
+        sourceDocumentFilename: null,
+        toolToolCallId: null,
+        toolState: null,
+        toolErrorText: null,
+        toolHeartOfDarknessQAInput: null,
+        toolHeartOfDarknessQAOutput: null,
+        toolHeartOfDarknessQAErrorText: null,
+        dataContent: null,
+        providerMetadata: null,
+      }
+
+      const mockResponse: ChatResponseResult = [
+        {
+          message: mockMessage,
+          part: mockPart,
+        },
+      ]
+
+      vi.mocked(mockAIService.getAIChatByChatId).mockResolvedValue(mockResponse)
+
+      const result = await useCase.execute(testChatId)
+
+      expect(result).toEqual(mockResponse)
+      expect(result![0]!.message.role).toBe('user')
+      expect(result![0]!.part?.textText).toBe('Hello')
+      expect(mockAIService.getAIChatByChatId).toHaveBeenCalledWith(testChatId)
+    })
+
+    it('should return chat content with multiple messages', async () => {
+      const mockMessage1: DBMessageSelect = {
+        id: 'msg-1',
+        chatId: testChatId,
+        role: 'user',
+        createdAt: new Date(),
+      }
+
+      const mockMessage2: DBMessageSelect = {
+        id: 'msg-2',
+        chatId: testChatId,
+        role: 'assistant',
+        createdAt: new Date(),
+      }
+
+      const mockPart1: MyDBUIMessagePartSelect = {
+        id: 'part-1',
+        messageId: 'msg-1',
+        type: 'text',
+        createdAt: new Date(),
+        order: 0,
+        textText: 'Hello',
+        reasoningText: null,
+        fileMediaType: null,
+        fileFilename: null,
+        fileUrl: null,
+        sourceUrlSourceId: null,
+        sourceUrlUrl: null,
+        sourceUrlTitle: null,
+        sourceDocumentSourceId: null,
+        sourceDocumentMediaType: null,
+        sourceDocumentTitle: null,
+        sourceDocumentFilename: null,
+        toolToolCallId: null,
+        toolState: null,
+        toolErrorText: null,
+        toolHeartOfDarknessQAInput: null,
+        toolHeartOfDarknessQAOutput: null,
+        toolHeartOfDarknessQAErrorText: null,
+        dataContent: null,
+        providerMetadata: null,
+      }
+
+      const mockPart2: MyDBUIMessagePartSelect = {
+        id: 'part-2',
+        messageId: 'msg-2',
+        type: 'text',
+        createdAt: new Date(),
+        order: 0,
+        textText: 'Hi there!',
+        reasoningText: null,
+        fileMediaType: null,
+        fileFilename: null,
+        fileUrl: null,
+        sourceUrlSourceId: null,
+        sourceUrlUrl: null,
+        sourceUrlTitle: null,
+        sourceDocumentSourceId: null,
+        sourceDocumentMediaType: null,
+        sourceDocumentTitle: null,
+        sourceDocumentFilename: null,
+        toolToolCallId: null,
+        toolState: null,
+        toolErrorText: null,
+        toolHeartOfDarknessQAInput: null,
+        toolHeartOfDarknessQAOutput: null,
+        toolHeartOfDarknessQAErrorText: null,
+        dataContent: null,
+        providerMetadata: null,
+      }
+
+      const mockResponse: ChatResponseResult = [
+        { message: mockMessage1, part: mockPart1 },
+        { message: mockMessage2, part: mockPart2 },
+      ]
+
+      vi.mocked(mockAIService.getAIChatByChatId).mockResolvedValue(mockResponse)
+
+      const result = await useCase.execute(testChatId)
+
+      expect(result).toEqual(mockResponse)
+      expect(result).toHaveLength(2)
+      expect(result![0]!.part?.textText).toBe('Hello')
+      expect(result![1]!.part?.textText).toBe('Hi there!')
+    })
+
+    it('should return chat content with message having null part', async () => {
+      const mockMessage: DBMessageSelect = {
+        id: 'msg-1',
+        chatId: testChatId,
+        role: 'user',
+        createdAt: new Date(),
+      }
+
+      const mockResponse: ChatResponseResult = [
+        {
+          message: mockMessage,
+          part: null,
+        },
+      ]
+
+      vi.mocked(mockAIService.getAIChatByChatId).mockResolvedValue(mockResponse)
+
+      const result = await useCase.execute(testChatId)
+
+      expect(result).toEqual(mockResponse)
+      expect(result![0]!.part).toBeNull()
+    })
+
+    it('should return empty array when no chat found', async () => {
+      const mockResponse: ChatResponseResult = []
+
+      vi.mocked(mockAIService.getAIChatByChatId).mockResolvedValue(mockResponse)
+
+      const result = await useCase.execute(testChatId)
+
+      expect(result).toEqual([])
+      expect(result).toHaveLength(0)
+    })
+
+    it('should handle text parts correctly', async () => {
+      const mockMessage: DBMessageSelect = {
+        id: 'msg-1',
+        chatId: testChatId,
+        role: 'user',
+        createdAt: new Date(),
+      }
+
+      const mockPart: MyDBUIMessagePartSelect = {
+        id: 'part-1',
+        messageId: 'msg-1',
+        type: 'text',
+        createdAt: new Date(),
+        order: 0,
+        textText: 'Test message',
+        reasoningText: null,
+        fileMediaType: null,
+        fileFilename: null,
+        fileUrl: null,
+        sourceUrlSourceId: null,
+        sourceUrlUrl: null,
+        sourceUrlTitle: null,
+        sourceDocumentSourceId: null,
+        sourceDocumentMediaType: null,
+        sourceDocumentTitle: null,
+        sourceDocumentFilename: null,
+        toolToolCallId: null,
+        toolState: null,
+        toolErrorText: null,
+        toolHeartOfDarknessQAInput: null,
+        toolHeartOfDarknessQAOutput: null,
+        toolHeartOfDarknessQAErrorText: null,
+        dataContent: null,
+        providerMetadata: null,
+      }
+
+      const mockResponse: ChatResponseResult = [{ message: mockMessage, part: mockPart }]
+
+      vi.mocked(mockAIService.getAIChatByChatId).mockResolvedValue(mockResponse)
+
+      const result = await useCase.execute(testChatId)
+
+      expect(result![0]!.part?.type).toBe('text')
+      expect(result![0]!.part?.textText).toBe('Test message')
+    })
+
+    it('should handle reasoning parts correctly', async () => {
+      const mockMessage: DBMessageSelect = {
+        id: 'msg-1',
+        chatId: testChatId,
+        role: 'assistant',
+        createdAt: new Date(),
+      }
+
+      const mockPart: MyDBUIMessagePartSelect = {
+        id: 'part-1',
+        messageId: 'msg-1',
+        type: 'reasoning',
+        createdAt: new Date(),
+        order: 0,
+        textText: null,
+        reasoningText: 'Thinking...',
+        fileMediaType: null,
+        fileFilename: null,
+        fileUrl: null,
+        sourceUrlSourceId: null,
+        sourceUrlUrl: null,
+        sourceUrlTitle: null,
+        sourceDocumentSourceId: null,
+        sourceDocumentMediaType: null,
+        sourceDocumentTitle: null,
+        sourceDocumentFilename: null,
+        toolToolCallId: null,
+        toolState: null,
+        toolErrorText: null,
+        toolHeartOfDarknessQAInput: null,
+        toolHeartOfDarknessQAOutput: null,
+        toolHeartOfDarknessQAErrorText: null,
+        dataContent: null,
+        providerMetadata: null,
+      }
+
+      const mockResponse: ChatResponseResult = [{ message: mockMessage, part: mockPart }]
+
+      vi.mocked(mockAIService.getAIChatByChatId).mockResolvedValue(mockResponse)
+
+      const result = await useCase.execute(testChatId)
+
+      expect(result![0]!.part?.type).toBe('reasoning')
+      expect(result![0]!.part?.reasoningText).toBe('Thinking...')
+    })
+
+    it('should handle file parts correctly', async () => {
+      const mockMessage: DBMessageSelect = {
+        id: 'msg-1',
+        chatId: testChatId,
+        role: 'user',
+        createdAt: new Date(),
+      }
+
+      const mockPart: MyDBUIMessagePartSelect = {
+        id: 'part-1',
+        messageId: 'msg-1',
+        type: 'file',
+        createdAt: new Date(),
+        order: 0,
+        textText: null,
+        reasoningText: null,
+        fileMediaType: 'application/pdf',
+        fileFilename: 'document.pdf',
+        fileUrl: 'https://example.com/doc.pdf',
+        sourceUrlSourceId: null,
+        sourceUrlUrl: null,
+        sourceUrlTitle: null,
+        sourceDocumentSourceId: null,
+        sourceDocumentMediaType: null,
+        sourceDocumentTitle: null,
+        sourceDocumentFilename: null,
+        toolToolCallId: null,
+        toolState: null,
+        toolErrorText: null,
+        toolHeartOfDarknessQAInput: null,
+        toolHeartOfDarknessQAOutput: null,
+        toolHeartOfDarknessQAErrorText: null,
+        dataContent: null,
+        providerMetadata: null,
+      }
+
+      const mockResponse: ChatResponseResult = [{ message: mockMessage, part: mockPart }]
+
+      vi.mocked(mockAIService.getAIChatByChatId).mockResolvedValue(mockResponse)
+
+      const result = await useCase.execute(testChatId)
+
+      expect(result![0]!.part?.type).toBe('file')
+      expect(result![0]!.part?.fileMediaType).toBe('application/pdf')
+      expect(result![0]!.part?.fileFilename).toBe('document.pdf')
+    })
+
+    it('should handle tool-call parts correctly', async () => {
+      const mockMessage: DBMessageSelect = {
+        id: 'msg-1',
+        chatId: testChatId,
+        role: 'assistant',
+        createdAt: new Date(),
+      }
+
+      const mockPart: MyDBUIMessagePartSelect = {
+        id: 'part-1',
+        messageId: 'msg-1',
+        type: 'tool-call',
+        createdAt: new Date(),
+        order: 0,
+        textText: null,
+        reasoningText: null,
+        fileMediaType: null,
+        fileFilename: null,
+        fileUrl: null,
+        sourceUrlSourceId: null,
+        sourceUrlUrl: null,
+        sourceUrlTitle: null,
+        sourceDocumentSourceId: null,
+        sourceDocumentMediaType: null,
+        sourceDocumentTitle: null,
+        sourceDocumentFilename: null,
+        toolToolCallId: 'call-123',
+        toolState: 'call',
+        toolErrorText: null,
+        toolHeartOfDarknessQAInput: null,
+        toolHeartOfDarknessQAOutput: null,
+        toolHeartOfDarknessQAErrorText: null,
+        dataContent: null,
+        providerMetadata: null,
+      }
+
+      const mockResponse: ChatResponseResult = [{ message: mockMessage, part: mockPart }]
+
+      vi.mocked(mockAIService.getAIChatByChatId).mockResolvedValue(mockResponse)
+
+      const result = await useCase.execute(testChatId)
+
+      expect(result![0]!.part?.type).toBe('tool-call')
+      expect(result![0]!.part?.toolToolCallId).toBe('call-123')
+    })
+
+    it('should handle tool-result parts correctly', async () => {
+      const mockMessage: DBMessageSelect = {
+        id: 'msg-1',
+        chatId: testChatId,
+        role: 'tool',
+        createdAt: new Date(),
+      }
+
+      const mockPart: MyDBUIMessagePartSelect = {
+        id: 'part-1',
+        messageId: 'msg-1',
+        type: 'tool-result',
+        createdAt: new Date(),
+        order: 0,
+        textText: null,
+        reasoningText: null,
+        fileMediaType: null,
+        fileFilename: null,
+        fileUrl: null,
+        sourceUrlSourceId: null,
+        sourceUrlUrl: null,
+        sourceUrlTitle: null,
+        sourceDocumentSourceId: null,
+        sourceDocumentMediaType: null,
+        sourceDocumentTitle: null,
+        sourceDocumentFilename: null,
+        toolToolCallId: 'call-123',
+        toolState: 'result',
+        toolErrorText: null,
+        toolHeartOfDarknessQAInput: null,
+        toolHeartOfDarknessQAOutput: null,
+        toolHeartOfDarknessQAErrorText: null,
+        dataContent: '{"result": "success"}',
+        providerMetadata: null,
+      }
+
+      const mockResponse: ChatResponseResult = [{ message: mockMessage, part: mockPart }]
+
+      vi.mocked(mockAIService.getAIChatByChatId).mockResolvedValue(mockResponse)
+
+      const result = await useCase.execute(testChatId)
+
+      expect(result![0]!.part?.type).toBe('tool-result')
+      expect(result![0]!.part?.toolToolCallId).toBe('call-123')
+      expect(result![0]!.part?.dataContent).toBe('{"result": "success"}')
+    })
+  })
+
+  describe('Error scenarios', () => {
+    it('should return null when AI service returns null', async () => {
+      vi.mocked(mockAIService.getAIChatByChatId).mockResolvedValue(null)
+
+      const result = await useCase.execute(testChatId)
+
+      expect(result).toBeNull()
+    })
+
+    it('should throw error when AI service throws error', async () => {
+      const error = new Error('Database connection failed')
+      vi.mocked(mockAIService.getAIChatByChatId).mockRejectedValue(error)
+
+      await expect(useCase.execute(testChatId)).rejects.toThrow('Database connection failed')
+    })
+
+    it('should throw error on network timeout', async () => {
+      const error = new Error('ETIMEDOUT')
+      vi.mocked(mockAIService.getAIChatByChatId).mockRejectedValue(error)
+
+      await expect(useCase.execute(testChatId)).rejects.toThrow('ETIMEDOUT')
+    })
+
+    it('should throw error on database errors', async () => {
+      const error = new Error('Connection pool exhausted')
+      vi.mocked(mockAIService.getAIChatByChatId).mockRejectedValue(error)
+
+      await expect(useCase.execute(testChatId)).rejects.toThrow('Connection pool exhausted')
+    })
+  })
+
+  describe('Constructor', () => {
+    it('should create instance with valid dependencies', () => {
+      const instance = new GetChatContentByChatIdUseCase(mockAIService, mockLogger)
+      expect(instance).toBeInstanceOf(GetChatContentByChatIdUseCase)
+    })
+  })
+})

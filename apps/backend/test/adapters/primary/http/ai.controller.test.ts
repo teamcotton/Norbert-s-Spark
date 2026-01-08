@@ -6,6 +6,7 @@ import { AIController } from '../../../../src/adapters/primary/http/ai.controlle
 import type { LoggerPort } from '../../../../src/application/ports/logger.port.js'
 import type { AppendedChatUseCase } from '../../../../src/application/use-cases/append-chat.use-case.js'
 import type { GetChatUseCase } from '../../../../src/application/use-cases/get-chat.use-case.js'
+import type { GetChatContentByChatIdUseCase } from '../../../../src/application/use-cases/get-chat-content-by-chat-id.use-case.js'
 import type { GetChatsByUserIdUseCase } from '../../../../src/application/use-cases/get-chats-by-userid.use-case.js'
 import type { SaveChatUseCase } from '../../../../src/application/use-cases/save-chat.use-case.js'
 import { ChatId } from '../../../../src/domain/value-objects/chatID.js'
@@ -53,6 +54,7 @@ describe('AIController', () => {
   let mockAppendChatUseCase: AppendedChatUseCase
   let mockSaveChatUseCase: SaveChatUseCase
   let mockGetChatsByUserIdUseCase: GetChatsByUserIdUseCase
+  let mockGetChatContentByChatIdUseCase: GetChatContentByChatIdUseCase
   let mockLogger: LoggerPort
   let mockRequest: FastifyRequest
   let mockReply: FastifyReply
@@ -78,6 +80,10 @@ describe('AIController', () => {
       execute: vi.fn(),
     } as any
 
+    mockGetChatContentByChatIdUseCase = {
+      execute: vi.fn(),
+    } as any
+
     // Create mock logger
     mockLogger = {
       info: vi.fn(),
@@ -92,7 +98,8 @@ describe('AIController', () => {
       mockLogger,
       mockAppendChatUseCase,
       mockSaveChatUseCase,
-      mockGetChatsByUserIdUseCase
+      mockGetChatsByUserIdUseCase,
+      mockGetChatContentByChatIdUseCase
     )
 
     // Create mock Fastify reply with chainable methods
@@ -121,7 +128,8 @@ describe('AIController', () => {
         mockLogger,
         mockAppendChatUseCase,
         mockSaveChatUseCase,
-        mockGetChatsByUserIdUseCase
+        mockGetChatsByUserIdUseCase,
+        mockGetChatContentByChatIdUseCase
       )
 
       expect(instance).toBeInstanceOf(AIController)
@@ -134,7 +142,8 @@ describe('AIController', () => {
         mockLogger,
         mockAppendChatUseCase,
         mockSaveChatUseCase,
-        mockGetChatsByUserIdUseCase
+        mockGetChatsByUserIdUseCase,
+        mockGetChatContentByChatIdUseCase
       )
 
       expect(instance).toBeDefined()
@@ -207,7 +216,7 @@ describe('AIController', () => {
       )
     })
 
-    it('should register GET /ai/fetchChat/:chatId route', () => {
+    it('should register GET /ai/fetchChat/:chatId/:userId route', () => {
       const mockApp = {
         post: vi.fn(),
         get: vi.fn(),
@@ -217,7 +226,7 @@ describe('AIController', () => {
 
       expect(mockApp.get).toHaveBeenCalledTimes(2)
       expect(mockApp.get).toHaveBeenCalledWith(
-        '/ai/fetchChat/:chatId',
+        '/ai/fetchChat/:chatId/:userId',
         expect.objectContaining({ preHandler: expect.any(Array) }),
         expect.any(Function)
       )
