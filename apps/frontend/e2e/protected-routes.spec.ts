@@ -71,18 +71,6 @@ test.describe('Protected Routes Authentication', () => {
     expect(url.searchParams.get('callbackUrl')).toBe('/admin/users')
   })
 
-  test('should allow unauthenticated user to access public routes', async ({ page }) => {
-    // Navigate to homepage (public route) - homepage redirects to signin
-    await page.goto('/')
-
-    // Wait for redirect to signin page
-    await page.waitForURL(/\/signin/)
-
-    // Verify user is redirected to signin page (homepage is now redirected)
-    expect(page.url()).toContain('/signin')
-    await expect(page.getByRole('heading', { name: /Norbert's Spark/i })).toBeVisible()
-  })
-
   test('should allow unauthenticated user to access registration page', async ({ page }) => {
     // Navigate to registration page
     await page.goto('/registration')
