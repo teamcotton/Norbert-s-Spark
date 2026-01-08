@@ -52,7 +52,7 @@ export class AIController {
       this.getAIChatsByUserId.bind(this)
     )
     app.get(
-      '/ai/fetchChat/:chatId/:userId',
+      '/ai/fetchChat/:chatId',
       {
         preHandler: [authMiddleware],
       },
@@ -360,6 +360,8 @@ export class AIController {
    *
    * This endpoint fetches the complete chat history including all messages and their
    * associated parts (text, tool calls, etc.) in the UI format expected by the frontend.
+   * Authorization is performed by fetching the chat and validating that the authenticated
+   * user owns the chat or has admin/moderator privileges.
    *
    * @param request - The Fastify request object containing the chatId parameter
    * @param reply - The Fastify reply object for sending responses
@@ -367,7 +369,8 @@ export class AIController {
    *
    * @throws {400} When chatId parameter is missing or has invalid format (not a valid UUID v7)
    * @throws {401} When user is not authenticated
-   * @throws {404} When no chat is found with the given chatId
+   * @throws {404} When no chat is found with the given chatId, or when the chat belongs to
+   *               a different user and the authenticated user doesn't have admin/moderator role
    * @throws {500} When an error occurs while fetching the chat from the repository
    */
   async getAIChatByChatId(request: FastifyRequest, reply: FastifyReply): Promise<void> {
@@ -375,33 +378,11 @@ export class AIController {
 
     const params = request.params as Record<string, unknown>
     const chatIdParam = params.chatId as string
-    const userIdParam = params.userId as string
 
     if (!chatIdParam) {
       return reply.code(400).send({
         success: false,
         error: 'Missing chatId parameter',
-      })
-    }
-
-    if (!userIdParam) {
-      return reply.code(400).send({
-        success: false,
-        error: 'Invalid userId parameter',
-      })
-    }
-
-    let userId: UserIdType
-
-    try {
-      userId = new UserId(userIdParam).getValue()
-    } catch (error) {
-      if (error instanceof Error) {
-        this.logger.error(`Invalid userId format in getAIChatsByUserId: ${userIdParam}`, error)
-      }
-      return reply.code(400).send({
-        success: false,
-        error: 'Invalid userId format',
       })
     }
 
@@ -419,30 +400,48 @@ export class AIController {
       })
     }
 
-    // Authorization check: User can only access their own chat history unless they have admin/moderator role
+    // Check authentication
     const authenticatedUserId = request.user?.sub
-    const userRoles = request.user?.roles || []
-
-    // Check if user is accessing their own data OR has admin/moderator role
-    const isOwnData = authenticatedUserId === userId
-    const hasElevatedRole = userRoles.includes('admin') || userRoles.includes('moderator')
-
-    if (!isOwnData && !hasElevatedRole) {
-      this.logger.warn(
-        `Authorization check failed: User ${authenticatedUserId} attempted to access chats for user ${userId} without required permissions`
-      )
-      return reply.code(403).send({
+    if (!authenticatedUserId) {
+      this.logger.warn('Authorization check failed: User not authenticated')
+      return reply.code(401).send({
         success: false,
-        error:
-          'Access denied. You can only access your own chat history or must have admin/moderator role',
+        error: 'Authentication required',
       })
     }
 
     try {
-      // Use getChatUseCase to fetch the chat data
+      // Fetch the chat data which includes the userId
       const chatData = await this.getChatContentByChatIdUseCase.execute(chatId)
 
       if (!chatData || chatData.length === 0) {
+        return reply.code(404).send({
+          success: false,
+          error: 'Chat not found',
+        })
+      }
+
+      // Extract userId from the chat record (all rows have the same chat info)
+      const chatUserId = chatData[0]?.chat?.userId
+      if (!chatUserId) {
+        this.logger.error(`Chat data missing userId for chatId: ${chatId}`)
+        return reply.code(500).send({
+          success: false,
+          error: 'Invalid chat data',
+        })
+      }
+
+      const userRoles = request.user?.roles || []
+
+      // Authorization check: User can access if they own the chat OR have admin/moderator role
+      const isOwnChat = authenticatedUserId === chatUserId
+      const hasElevatedRole = userRoles.includes('admin') || userRoles.includes('moderator')
+
+      if (!isOwnChat && !hasElevatedRole) {
+        this.logger.warn(
+          `Authorization check failed: User ${authenticatedUserId} attempted to access chat ${chatId} owned by user ${chatUserId} without required permissions`
+        )
+        // Return 404 instead of 403 to not leak information about chat existence
         return reply.code(404).send({
           success: false,
           error: 'Chat not found',

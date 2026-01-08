@@ -216,7 +216,7 @@ describe('AIController', () => {
       )
     })
 
-    it('should register GET /ai/fetchChat/:chatId/:userId route', () => {
+    it('should register GET /ai/fetchChat/:chatId route', () => {
       const mockApp = {
         post: vi.fn(),
         get: vi.fn(),
@@ -226,7 +226,7 @@ describe('AIController', () => {
 
       expect(mockApp.get).toHaveBeenCalledTimes(2)
       expect(mockApp.get).toHaveBeenCalledWith(
-        '/ai/fetchChat/:chatId/:userId',
+        '/ai/fetchChat/:chatId',
         expect.objectContaining({ preHandler: expect.any(Array) }),
         expect.any(Function)
       )
@@ -937,6 +937,12 @@ describe('AIController', () => {
         const chatId = new ChatId(uuidv7()).getValue()
         const mockChatData = [
           {
+            chat: {
+              id: chatId,
+              userId: userId,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
             message: {
               id: 'msg-1',
               chatId,
@@ -952,6 +958,12 @@ describe('AIController', () => {
             },
           },
           {
+            chat: {
+              id: chatId,
+              userId: userId,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
             message: {
               id: 'msg-2',
               chatId,
@@ -968,7 +980,7 @@ describe('AIController', () => {
           },
         ]
 
-        mockRequest.params = { chatId, userId }
+        mockRequest.params = { chatId }
         mockRequest.user = {
           sub: userId, // Same user accessing their own chat
           email: 'user@example.com',
@@ -1007,6 +1019,12 @@ describe('AIController', () => {
         const chatId = new ChatId(uuidv7()).getValue()
         const mockChatData = [
           {
+            chat: {
+              id: chatId,
+              userId: userId,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
             message: {
               id: 'msg-1',
               chatId,
@@ -1022,6 +1040,12 @@ describe('AIController', () => {
             },
           },
           {
+            chat: {
+              id: chatId,
+              userId: userId,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
             message: {
               id: 'msg-1',
               chatId,
@@ -1037,6 +1061,12 @@ describe('AIController', () => {
             },
           },
           {
+            chat: {
+              id: chatId,
+              userId: userId,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
             message: {
               id: 'msg-2',
               chatId,
@@ -1053,7 +1083,7 @@ describe('AIController', () => {
           },
         ]
 
-        mockRequest.params = { chatId, userId }
+        mockRequest.params = { chatId }
         mockRequest.user = {
           sub: userId,
           email: 'user@example.com',
@@ -1088,6 +1118,12 @@ describe('AIController', () => {
         const chatId = new ChatId(uuidv7()).getValue()
         const mockChatData = [
           {
+            chat: {
+              id: chatId,
+              userId: userId,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
             message: {
               id: 'msg-1',
               chatId,
@@ -1098,7 +1134,7 @@ describe('AIController', () => {
           },
         ]
 
-        mockRequest.params = { chatId, userId }
+        mockRequest.params = { chatId }
         mockRequest.user = {
           sub: userId,
           email: 'user@example.com',
@@ -1128,8 +1164,7 @@ describe('AIController', () => {
 
     describe('validation', () => {
       it('should return 400 if chatId parameter is missing', async () => {
-        const userId = new UserId(uuidv7()).getValue()
-        mockRequest.params = { userId } // Missing chatId
+        mockRequest.params = {} // Missing chatId
 
         await controller.getAIChatByChatId(mockRequest, mockReply)
 
@@ -1137,27 +1172,12 @@ describe('AIController', () => {
         expect(mockReply.send).toHaveBeenCalledWith({
           success: false,
           error: 'Missing chatId parameter',
-        })
-        expect(mockGetChatContentByChatIdUseCase.execute).not.toHaveBeenCalled()
-      })
-
-      it('should return 400 if userId parameter is missing', async () => {
-        const chatId = new ChatId(uuidv7()).getValue()
-        mockRequest.params = { chatId } // Missing userId
-
-        await controller.getAIChatByChatId(mockRequest, mockReply)
-
-        expect(mockReply.code).toHaveBeenCalledWith(400)
-        expect(mockReply.send).toHaveBeenCalledWith({
-          success: false,
-          error: 'Invalid userId parameter',
         })
         expect(mockGetChatContentByChatIdUseCase.execute).not.toHaveBeenCalled()
       })
 
       it('should return 400 if chatId parameter is undefined', async () => {
-        const userId = new UserId(uuidv7()).getValue()
-        mockRequest.params = { chatId: undefined, userId }
+        mockRequest.params = { chatId: undefined }
 
         await controller.getAIChatByChatId(mockRequest, mockReply)
 
@@ -1169,23 +1189,8 @@ describe('AIController', () => {
         expect(mockGetChatContentByChatIdUseCase.execute).not.toHaveBeenCalled()
       })
 
-      it('should return 400 if userId parameter is undefined', async () => {
-        const chatId = new ChatId(uuidv7()).getValue()
-        mockRequest.params = { chatId, userId: undefined }
-
-        await controller.getAIChatByChatId(mockRequest, mockReply)
-
-        expect(mockReply.code).toHaveBeenCalledWith(400)
-        expect(mockReply.send).toHaveBeenCalledWith({
-          success: false,
-          error: 'Invalid userId parameter',
-        })
-        expect(mockGetChatContentByChatIdUseCase.execute).not.toHaveBeenCalled()
-      })
-
       it('should return 400 for invalid chatId format', async () => {
-        const userId = new UserId(uuidv7()).getValue()
-        mockRequest.params = { chatId: 'invalid-uuid-format', userId }
+        mockRequest.params = { chatId: 'invalid-uuid-format' }
 
         await controller.getAIChatByChatId(mockRequest, mockReply)
 
@@ -1198,25 +1203,26 @@ describe('AIController', () => {
         expect(mockLogger.error).toHaveBeenCalled()
       })
 
-      it('should return 400 for invalid userId format', async () => {
+      it('should return 401 when user is not authenticated', async () => {
         const chatId = new ChatId(uuidv7()).getValue()
-        mockRequest.params = { chatId, userId: 'invalid-uuid-format' }
+        mockRequest.params = { chatId }
+        mockRequest.user = undefined // No authenticated user
 
         await controller.getAIChatByChatId(mockRequest, mockReply)
 
-        expect(mockReply.code).toHaveBeenCalledWith(400)
+        expect(mockReply.code).toHaveBeenCalledWith(401)
         expect(mockReply.send).toHaveBeenCalledWith({
           success: false,
-          error: 'Invalid userId format',
+          error: 'Authentication required',
         })
         expect(mockGetChatContentByChatIdUseCase.execute).not.toHaveBeenCalled()
-        expect(mockLogger.error).toHaveBeenCalled()
+        expect(mockLogger.warn).toHaveBeenCalled()
       })
 
       it('should log debug message on request', async () => {
         const userId = new UserId(uuidv7()).getValue()
         const chatId = new ChatId(uuidv7()).getValue()
-        mockRequest.params = { chatId, userId }
+        mockRequest.params = { chatId }
         mockRequest.user = {
           sub: userId,
           email: 'user@example.com',
@@ -1224,6 +1230,12 @@ describe('AIController', () => {
         }
         vi.mocked(mockGetChatContentByChatIdUseCase.execute).mockResolvedValue([
           {
+            chat: {
+              id: chatId,
+              userId: userId,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
             message: { id: 'msg-1', chatId, role: 'user', createdAt: new Date() },
             part: { id: 'part-1', messageId: 'msg-1', type: 'text', textText: 'Hello', order: 0 },
           },
@@ -1241,7 +1253,7 @@ describe('AIController', () => {
         const userId = new UserId(uuidv7()).getValue()
         const chatId = new ChatId(uuidv7()).getValue()
 
-        mockRequest.params = { chatId, userId }
+        mockRequest.params = { chatId }
         mockRequest.user = {
           sub: userId,
           email: 'user@example.com',
@@ -1263,7 +1275,7 @@ describe('AIController', () => {
         const userId = new UserId(uuidv7()).getValue()
         const chatId = new ChatId(uuidv7()).getValue()
 
-        mockRequest.params = { chatId, userId }
+        mockRequest.params = { chatId }
         mockRequest.user = {
           sub: userId,
           email: 'user@example.com',
@@ -1287,7 +1299,7 @@ describe('AIController', () => {
         const userId = new UserId(uuidv7()).getValue()
         const chatId = new ChatId(uuidv7()).getValue()
 
-        mockRequest.params = { chatId, userId }
+        mockRequest.params = { chatId }
         mockRequest.user = {
           sub: userId,
           email: 'user@example.com',
@@ -1312,7 +1324,7 @@ describe('AIController', () => {
         const userId = new UserId(uuidv7()).getValue()
         const chatId = new ChatId(uuidv7()).getValue()
 
-        mockRequest.params = { chatId, userId }
+        mockRequest.params = { chatId }
         mockRequest.user = {
           sub: userId,
           email: 'user@example.com',
@@ -1337,7 +1349,7 @@ describe('AIController', () => {
         const userId = new UserId(uuidv7()).getValue()
         const chatId = new ChatId(uuidv7()).getValue()
 
-        mockRequest.params = { chatId, userId }
+        mockRequest.params = { chatId }
         mockRequest.user = {
           sub: userId,
           email: 'user@example.com',
@@ -1367,6 +1379,12 @@ describe('AIController', () => {
         const chatId = new ChatId(uuidv7()).getValue()
         const mockChatData = [
           {
+            chat: {
+              id: chatId,
+              userId: userId,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
             message: {
               id: 'msg-1',
               chatId,
@@ -1383,7 +1401,7 @@ describe('AIController', () => {
           },
         ]
 
-        mockRequest.params = { chatId, userId }
+        mockRequest.params = { chatId }
         mockRequest.user = {
           sub: userId, // Same as requested userId
           email: 'user@example.com',
@@ -1403,6 +1421,7 @@ describe('AIController', () => {
         })
         expect(mockGetChatContentByChatIdUseCase.execute).toHaveBeenCalledWith(chatId)
         expect(mockReply.code).not.toHaveBeenCalledWith(403)
+        expect(mockReply.code).not.toHaveBeenCalledWith(404)
       })
 
       it('should allow admin to access any user chat', async () => {
@@ -1411,6 +1430,12 @@ describe('AIController', () => {
         const chatId = new ChatId(uuidv7()).getValue()
         const mockChatData = [
           {
+            chat: {
+              id: chatId,
+              userId: targetUserId, // Chat belongs to targetUserId
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
             message: {
               id: 'msg-1',
               chatId,
@@ -1427,7 +1452,7 @@ describe('AIController', () => {
           },
         ]
 
-        mockRequest.params = { chatId, userId: targetUserId }
+        mockRequest.params = { chatId }
         mockRequest.user = {
           sub: adminUserId, // Different from target userId
           email: 'admin@example.com',
@@ -1447,6 +1472,7 @@ describe('AIController', () => {
         })
         expect(mockGetChatContentByChatIdUseCase.execute).toHaveBeenCalledWith(chatId)
         expect(mockReply.code).not.toHaveBeenCalledWith(403)
+        expect(mockReply.code).not.toHaveBeenCalledWith(404)
       })
 
       it('should allow moderator to access any user chat', async () => {
@@ -1455,6 +1481,12 @@ describe('AIController', () => {
         const chatId = new ChatId(uuidv7()).getValue()
         const mockChatData = [
           {
+            chat: {
+              id: chatId,
+              userId: targetUserId, // Chat belongs to targetUserId
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
             message: {
               id: 'msg-1',
               chatId,
@@ -1471,7 +1503,7 @@ describe('AIController', () => {
           },
         ]
 
-        mockRequest.params = { chatId, userId: targetUserId }
+        mockRequest.params = { chatId }
         mockRequest.user = {
           sub: moderatorUserId, // Different from target userId
           email: 'moderator@example.com',
@@ -1491,61 +1523,21 @@ describe('AIController', () => {
         })
         expect(mockGetChatContentByChatIdUseCase.execute).toHaveBeenCalledWith(chatId)
         expect(mockReply.code).not.toHaveBeenCalledWith(403)
+        expect(mockReply.code).not.toHaveBeenCalledWith(404)
       })
 
-      it('should return 403 when user tries to access another user chat', async () => {
+      it('should return 404 when user tries to access another user chat', async () => {
         const targetUserId = new UserId(uuidv7()).getValue()
         const requestingUserId = new UserId(uuidv7()).getValue()
-        const chatId = new ChatId(uuidv7()).getValue()
-
-        mockRequest.params = { chatId, userId: targetUserId }
-        mockRequest.user = {
-          sub: requestingUserId, // Different from target userId
-          email: 'user@example.com',
-          roles: ['user'],
-        }
-
-        await controller.getAIChatByChatId(mockRequest, mockReply)
-
-        expect(mockReply.code).toHaveBeenCalledWith(403)
-        expect(mockReply.send).toHaveBeenCalledWith({
-          success: false,
-          error:
-            'Access denied. You can only access your own chat history or must have admin/moderator role',
-        })
-        expect(mockGetChatContentByChatIdUseCase.execute).not.toHaveBeenCalled()
-        expect(mockLogger.warn).toHaveBeenCalled()
-      })
-
-      it('should return 403 when user has no roles and tries to access another user chat', async () => {
-        const targetUserId = new UserId(uuidv7()).getValue()
-        const requestingUserId = new UserId(uuidv7()).getValue()
-        const chatId = new ChatId(uuidv7()).getValue()
-
-        mockRequest.params = { chatId, userId: targetUserId }
-        mockRequest.user = {
-          sub: requestingUserId,
-          email: 'user@example.com',
-          roles: [], // No roles
-        }
-
-        await controller.getAIChatByChatId(mockRequest, mockReply)
-
-        expect(mockReply.code).toHaveBeenCalledWith(403)
-        expect(mockReply.send).toHaveBeenCalledWith({
-          success: false,
-          error:
-            'Access denied. You can only access your own chat history or must have admin/moderator role',
-        })
-        expect(mockGetChatContentByChatIdUseCase.execute).not.toHaveBeenCalled()
-      })
-
-      it('should allow user with both admin and moderator roles to access any user chat', async () => {
-        const targetUserId = new UserId(uuidv7()).getValue()
-        const adminUserId = new UserId(uuidv7()).getValue()
         const chatId = new ChatId(uuidv7()).getValue()
         const mockChatData = [
           {
+            chat: {
+              id: chatId,
+              userId: targetUserId, // Chat belongs to different user
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
             message: {
               id: 'msg-1',
               chatId,
@@ -1562,7 +1554,102 @@ describe('AIController', () => {
           },
         ]
 
-        mockRequest.params = { chatId, userId: targetUserId }
+        mockRequest.params = { chatId }
+        mockRequest.user = {
+          sub: requestingUserId, // Different from target userId
+          email: 'user@example.com',
+          roles: ['user'],
+        }
+        vi.mocked(mockGetChatContentByChatIdUseCase.execute).mockResolvedValue(mockChatData as any)
+
+        await controller.getAIChatByChatId(mockRequest, mockReply)
+
+        // Returns 404 to not leak information about chat existence
+        expect(mockReply.code).toHaveBeenCalledWith(404)
+        expect(mockReply.send).toHaveBeenCalledWith({
+          success: false,
+          error: 'Chat not found',
+        })
+        expect(mockGetChatContentByChatIdUseCase.execute).toHaveBeenCalledWith(chatId)
+        expect(mockLogger.warn).toHaveBeenCalled()
+      })
+
+      it('should return 404 when user has no roles and tries to access another user chat', async () => {
+        const targetUserId = new UserId(uuidv7()).getValue()
+        const requestingUserId = new UserId(uuidv7()).getValue()
+        const chatId = new ChatId(uuidv7()).getValue()
+        const mockChatData = [
+          {
+            chat: {
+              id: chatId,
+              userId: targetUserId, // Chat belongs to different user
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
+            message: {
+              id: 'msg-1',
+              chatId,
+              role: 'user',
+              createdAt: new Date(),
+            },
+            part: {
+              id: 'part-1',
+              messageId: 'msg-1',
+              type: 'text',
+              textText: 'Hello',
+              order: 0,
+            },
+          },
+        ]
+
+        mockRequest.params = { chatId }
+        mockRequest.user = {
+          sub: requestingUserId,
+          email: 'user@example.com',
+          roles: [], // No roles
+        }
+        vi.mocked(mockGetChatContentByChatIdUseCase.execute).mockResolvedValue(mockChatData as any)
+
+        await controller.getAIChatByChatId(mockRequest, mockReply)
+
+        // Returns 404 to not leak information about chat existence
+        expect(mockReply.code).toHaveBeenCalledWith(404)
+        expect(mockReply.send).toHaveBeenCalledWith({
+          success: false,
+          error: 'Chat not found',
+        })
+        expect(mockGetChatContentByChatIdUseCase.execute).toHaveBeenCalledWith(chatId)
+      })
+
+      it('should allow user with both admin and moderator roles to access any user chat', async () => {
+        const targetUserId = new UserId(uuidv7()).getValue()
+        const adminUserId = new UserId(uuidv7()).getValue()
+        const chatId = new ChatId(uuidv7()).getValue()
+        const mockChatData = [
+          {
+            chat: {
+              id: chatId,
+              userId: targetUserId, // Chat belongs to targetUserId
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
+            message: {
+              id: 'msg-1',
+              chatId,
+              role: 'user',
+              createdAt: new Date(),
+            },
+            part: {
+              id: 'part-1',
+              messageId: 'msg-1',
+              type: 'text',
+              textText: 'Hello',
+              order: 0,
+            },
+          },
+        ]
+
+        mockRequest.params = { chatId }
         mockRequest.user = {
           sub: adminUserId,
           email: 'superuser@example.com',

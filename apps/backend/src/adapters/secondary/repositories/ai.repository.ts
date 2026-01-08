@@ -16,6 +16,7 @@ import { mapUIMessagePartsToDBParts } from '../../../shared/mapper/index.js'
 import { isArray } from '@norberts-spark/shared'
 
 export type ChatResponseResult = {
+  chat: typeof chats.$inferSelect
   message: DBMessageSelect
   part: MyDBUIMessagePartSelect | null
 }[]
@@ -133,7 +134,7 @@ export class AIRepository implements AIServicePort {
   async getChatResponse(chatId: ChatIdType): Promise<ChatResponseResult | null> {
     // Query chats table by id, then join with messages and parts
     const result = await db
-      .select({ message: messages, part: parts })
+      .select({ chat: chats, message: messages, part: parts })
       .from(chats)
       .innerJoin(messages, eq(messages.chatId, chats.id))
       .leftJoin(parts, eq(parts.messageId, messages.id))
@@ -146,7 +147,7 @@ export class AIRepository implements AIServicePort {
   async getAIChatByChatId(chatId: ChatIdType): Promise<ChatResponseResult | null> {
     // Query chats table by id, then join with messages and parts
     const result = await db
-      .select({ message: messages, part: parts })
+      .select({ chat: chats, message: messages, part: parts })
       .from(chats)
       .innerJoin(messages, eq(messages.chatId, chats.id))
       .leftJoin(parts, eq(parts.messageId, messages.id))
