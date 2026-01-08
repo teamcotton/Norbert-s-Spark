@@ -21,6 +21,8 @@ import {
 } from '@mui/material'
 import React from 'react'
 
+import { Logo } from '@/assets/logo.js'
+
 interface SignInFormProps {
   readonly formData: {
     readonly email: string
@@ -69,8 +71,13 @@ export function SignInForm({
         }}
       >
         <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
-          <Typography variant="h4" component="h1" gutterBottom sx={{ mb: 3, fontWeight: 600 }}>
-            Welcome back
+          <Typography
+            variant="h4"
+            component="h1"
+            gutterBottom
+            sx={{ mb: 3, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}
+          >
+            <span>Norbert&#39;s Spark</span> <Logo />
           </Typography>
 
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>

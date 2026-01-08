@@ -11,6 +11,16 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [],
   },
+  // Redirect homepage to sign-in page
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/signin',
+        permanent: false,
+      },
+    ]
+  },
   experimental: {
     serverActions: {
       bodySizeLimit: '10mb',
