@@ -12,19 +12,22 @@ import { EnvConfig } from '../../infrastructure/config/env.config.js'
 import type { UserIdType } from '../../domain/value-objects/userID.js'
 
 /**
- * Use case for registering a new user in the system
+ * Use case for registering a new user via OAuth provider (e.g., Google)
  *
- * This use case handles the complete user registration process including:
+ * This use case handles the complete OAuth user registration process including:
  * - Creating domain entities from DTO
- * - Validating and hashing passwords
+ * - Validating email format through value objects
  * - Persisting user to repository with duplicate email detection
  * - Sending welcome email (non-blocking)
  * - Generating JWT access token
  *
+ * Note: This use case does not handle password-based registration. OAuth users
+ * authenticate through their provider and do not have passwords stored in our system.
+ *
  * @class RegisterUserWithProviderUseCase
  * @example
  * ```typescript
- * const useCase = new RegisterUserUseCase(
+ * const useCase = new RegisterUserWithProviderUseCase(
  *   userRepository,
  *   emailService,
  *   logger,
@@ -33,14 +36,14 @@ import type { UserIdType } from '../../domain/value-objects/userID.js'
  * const result = await useCase.execute({
  *   email: 'user@example.com',
  *   name: 'John Doe',
- *   role: 'member'
+ *   role: 'member',
  *   provider: 'google'
  * })
  * ```
  */
 export class RegisterUserWithProviderUseCase {
   /**
-   * Creates an instance of RegisterUserUseCase
+   * Creates an instance of RegisterUserWithProviderUseCase
    * @param {UserRepositoryPort} userRepository - Repository for persisting user data
    * @param {EmailServicePort} emailService - Service for sending welcome emails
    * @param {LoggerPort} logger - Logger for tracking operations
@@ -54,28 +57,28 @@ export class RegisterUserWithProviderUseCase {
   ) {}
 
   /**
-   * Executes the user registration use case
+   * Executes the OAuth user registration use case
    *
-   * Creates a new user account with the provided information. The process includes:
-   * 1. Validating email format and password strength through value objects
-   * 2. Hashing the password securely
+   * Creates a new user account for OAuth provider authentication. The process includes:
+   * 1. Validating email format through value objects
+   * 2. Creating user entity with provider information (no password)
    * 3. Saving the user to the database (with duplicate email detection)
    * 4. Sending a welcome email (failure doesn't block registration)
    * 5. Generating a JWT access token for immediate login
    *
-   * @param {RegisterUserDto} dto - User registration data (email, password, name, role)
+   * @param {RegisterUserDto} dto - User registration data (email, name, role, provider)
    * @returns {Promise<{ userId: string, access_token: string, token_type: string, expires_in: number }>}   *          Registration result with user ID and authentication token
    * @throws {ConflictException} If a user with the same email already exists
-   * @throws {Error} If password validation, database operation, or token generation fails.
+   * @throws {Error} If email validation, database operation, or token generation fails.
    *                 Note: Email service failures are logged but do not throw errors or prevent registration.
    * @example
    * ```typescript
    * try {
    *   const result = await useCase.execute({
    *     email: 'newuser@example.com',
-   *     password: 'StrongPass123!',
    *     name: 'Jane Smith',
-   *     role: 'member'
+   *     role: 'member',
+   *     provider: 'google'
    *   })
    *   console.log(`User ${result.userId} registered successfully`)
    * } catch (error) {
