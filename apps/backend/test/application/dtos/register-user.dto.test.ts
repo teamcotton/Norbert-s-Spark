@@ -592,12 +592,14 @@ describe('RegisterUserDto', () => {
           email: 'oauth@example.com',
           name: 'OAuth User',
           provider: 'google',
+          providerId: '123456789',
         }
 
         const dto = RegisterUserDto.validate(data)
 
         expect(dto).toBeInstanceOf(RegisterUserDto)
         expect(dto.provider).toBe('google')
+        expect(dto.providerId).toBe('123456789')
         expect(dto.password).toBeUndefined()
       })
 

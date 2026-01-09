@@ -33,7 +33,12 @@ export class RegisterUserDto {
       throw new ValidationException('Password must be a string when provider is not provided')
     }
     // Password type validation: when a provider is present and a password is supplied, it must be a string
-    if (data.provider && data.password !== undefined && data.password !== null && !isString(data.password)) {
+    if (
+      data.provider &&
+      data.password !== undefined &&
+      data.password !== null &&
+      !isString(data.password)
+    ) {
       throw new ValidationException('Password must be a string when provided')
     }
     if (!data.name || !isString(data.name)) {
@@ -63,9 +68,18 @@ export class RegisterUserDto {
 
     // If provider is set and no password, providerId should also be set and valid
     if (data.provider && !data.password && !isValidProviderId(data.providerId)) {
-      throw new ValidationException('ProviderId is required when using OAuth provider without password')
+      throw new ValidationException(
+        'ProviderId is required when using OAuth provider without password'
+      )
     }
 
-    return new RegisterUserDto(data.email, data.name, data.role, data.password, data.provider, data.providerId)
+    return new RegisterUserDto(
+      data.email,
+      data.name,
+      data.role,
+      data.password,
+      data.provider,
+      data.providerId
+    )
   }
 }
