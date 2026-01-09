@@ -15,6 +15,7 @@ import { isString } from '@norberts-spark/shared'
  * @property {string} providerId - User ID from OAuth provider
  * @property {string} email - User's email address
  * @property {string} [name] - User's display name (optional)
+ * @property {string} [role='user'] - User role (default is 'user'; only 'user' allowed during registration)
  *
  * @example
  * ```typescript
