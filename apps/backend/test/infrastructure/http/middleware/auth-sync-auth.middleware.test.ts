@@ -1,12 +1,9 @@
-// Set environment variable BEFORE any imports to ensure EnvConfig picks it up
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { obscured } from 'obscured'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { EnvConfig } from '../../../../src/infrastructure/config/env.config.js'
 import { oauthSyncAuthMiddleware } from '../../../../src/infrastructure/http/middleware/auth-sync-auth.middleware.js'
-
-process.env.OAUTH_SYNC_SECRET = 'test-oauth-sync-secret-for-ci'
 
 describe('oauthSyncAuthMiddleware', () => {
   let mockRequest: Partial<FastifyRequest>
@@ -17,7 +14,7 @@ describe('oauthSyncAuthMiddleware', () => {
   let logWarnSpy: ReturnType<typeof vi.fn>
   let logErrorSpy: ReturnType<typeof vi.fn>
 
-  // Store the configured secret value from EnvConfig
+  // Get the configured secret from EnvConfig (set in test/setup.ts)
   const configuredSecret = obscured.value(EnvConfig.OAUTH_SYNC_SECRET)
 
   beforeEach(() => {
