@@ -22,9 +22,9 @@ export class RegisterUserDto {
     if (!data.provider && (!data.password || !isString(data.password))) {
       throw new ValidationException('Password must be a string when provider is not provided')
     }
-    // Password type validation: if password is provided, it must be a string
-    if (data.password !== undefined && !isString(data.password)) {
-      throw new ValidationException('Password must be a string when provider is not provided')
+    // Password type validation: when a provider is present and a password is supplied, it must be a string
+    if (data.provider && data.password !== undefined && data.password !== null && !isString(data.password)) {
+      throw new ValidationException('Password must be a string when provided')
     }
     if (!data.name || !isString(data.name)) {
       throw new ValidationException('Name is required and must be a string')
