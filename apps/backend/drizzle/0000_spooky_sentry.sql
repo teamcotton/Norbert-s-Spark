@@ -81,14 +81,16 @@ CREATE TABLE "parts" (
 CREATE TABLE "users" (
 	"user_id" uuid PRIMARY KEY DEFAULT uuidv7() NOT NULL,
 	"name" text NOT NULL,
-	"password" text NOT NULL,
+	"password" text,
 	"email" "citext" NOT NULL,
 	"role" text DEFAULT 'user' NOT NULL,
+	"provider" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "users_email_unique" UNIQUE("email"),
 	CONSTRAINT "password_length_check" CHECK (length("users"."password") = 60),
 	CONSTRAINT "role_check" CHECK ("users"."role" IN ('user', 'admin', 'moderator')),
-	CONSTRAINT "name_length_check" CHECK (length("users"."name") >= 2 AND length("users"."name") <= 100)
+	CONSTRAINT "name_length_check" CHECK (length("users"."name") >= 2 AND length("users"."name") <= 100),
+	CONSTRAINT "provider_check" CHECK ("users"."provider" IN ('google'))
 );
 --> statement-breakpoint
 ALTER TABLE "audit_log" ADD CONSTRAINT "audit_log_user_id_users_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("user_id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint

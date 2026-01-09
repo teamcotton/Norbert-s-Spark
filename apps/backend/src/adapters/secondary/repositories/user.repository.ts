@@ -119,6 +119,38 @@ export class PostgresUserRepository implements UserRepositoryPort {
     }
   }
 
+  async saveUserWithProvider(userEntity: User): Promise<UserIdType> {
+    try {
+      // Build values object conditionally to maintain type safety
+      // If userId is provided, include it; otherwise let PostgreSQL generate UUIDv7
+      const baseValues = {
+        email: userEntity.getEmail(),
+        name: userEntity.getName(),
+        role: userEntity.getRole(),
+        provider: userEntity.getProvider(),
+        createdAt: new Date(),
+      }
+
+      const insertValues =
+        userEntity.id !== undefined ? { ...baseValues, userId: userEntity.id } : baseValues
+
+      const result = await db.insert(user).values(insertValues).returning({ userId: user.userId })
+
+      if (!result[0]) {
+        throw new DatabaseException('Failed to retrieve generated user ID', {})
+      }
+
+      return new UserId(result[0].userId).getValue()
+    } catch (error) {
+      if (DatabaseUtil.isDuplicateKeyError(error)) {
+        throw new ConflictException('User with this email already exists', {
+          email: userEntity.getEmail(),
+        })
+      }
+      throw new DatabaseException('Failed to save user', { error })
+    }
+  }
+
   /**
    * Retrieves all users with optional pagination
    *
@@ -401,9 +433,17 @@ export class PostgresUserRepository implements UserRepositoryPort {
    */
   private toDomain(record: DBUserSelect): User {
     const email = new Email(record.email)
-    const password = Password.fromHash(record.password)
+    const password = record.password ? Password.fromHash(record.password) : undefined
     const role = new Role(record.role)
     const userId = new UserId(record.userId).getValue()
-    return new User(userId, email, password, record.name, role, record.createdAt)
+    return new User(
+      userId,
+      email,
+      record.name,
+      role,
+      password,
+      record.createdAt,
+      record.provider ?? undefined
+    )
   }
 }

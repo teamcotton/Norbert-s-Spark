@@ -39,7 +39,7 @@ describe('PostgresUserRepository', () => {
     testPassword = await Password.create('password123')
     testRole = new Role('user')
     const testUserId = new UserId(uuidv7()).getValue()
-    testUser = new User(testUserId, testEmail, testPassword, 'John Doe', testRole)
+    testUser = new User(testUserId, testEmail, 'John Doe', testRole, testPassword)
 
     // Valid bcrypt hash for testing (hash of "password123")
     validBcryptHash = '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy'
@@ -94,7 +94,7 @@ describe('PostgresUserRepository', () => {
       const email = new Email('newemail@example.com')
       const password = await Password.create('newpass123')
       const role = new Role('admin')
-      const user = new User(userId, email, password, 'Jane Doe', role)
+      const user = new User(userId, email, 'Jane Doe', role, password)
 
       const returnedUserId = await repository.save(user)
 
@@ -363,7 +363,7 @@ describe('PostgresUserRepository', () => {
 
       const newEmail = new Email('updated@example.com')
       const userId = new UserId(uuidv7()).getValue()
-      const updatedUser = new User(userId, newEmail, testPassword, 'Updated Name', testRole)
+      const updatedUser = new User(userId, newEmail, 'Updated Name', testRole, testPassword)
 
       await repository.update(updatedUser)
 
