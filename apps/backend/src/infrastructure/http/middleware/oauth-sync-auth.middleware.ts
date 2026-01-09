@@ -1,4 +1,5 @@
 import type { FastifyRequest, FastifyReply } from 'fastify'
+import { timingSafeEqual } from 'crypto'
 import { EnvConfig } from '../../config/env.config.js'
 
 /**
@@ -33,7 +34,7 @@ import { EnvConfig } from '../../config/env.config.js'
  * - Secret must match OAUTH_SYNC_SECRET environment variable exactly
  *
  * **Security Features:**
- * - Constant-time comparison to prevent timing attacks
+ * - Constant-time comparison using Node.js crypto.timingSafeEqual() to prevent timing attacks
  * - Structured logging for security monitoring
  * - Generic error messages to prevent information disclosure
  *
@@ -79,7 +80,11 @@ export async function oauthSyncAuthMiddleware(
     const configuredSecret = EnvConfig.OAUTH_SYNC_SECRET.toString()
 
     // Use constant-time comparison to prevent timing attacks
-    if (!timingSafeEqual(providedSecret, configuredSecret)) {
+    // Check length first as timingSafeEqual requires equal-length buffers
+    if (
+      providedSecret.length !== configuredSecret.length ||
+      !timingSafeEqual(Buffer.from(providedSecret), Buffer.from(configuredSecret))
+    ) {
       request.log.warn(
         {
           method: request.method,
@@ -113,27 +118,4 @@ export async function oauthSyncAuthMiddleware(
       .code(401)
       .send({ success: false, error: 'Unauthorized access to OAuth sync endpoint' })
   }
-}
-
-/**
- * Constant-time string comparison to prevent timing attacks
- *
- * Compares two strings in constant time regardless of where the first difference occurs.
- * This prevents attackers from using timing analysis to guess the secret character by character.
- *
- * @param a - First string to compare
- * @param b - Second string to compare
- * @returns true if strings are equal, false otherwise
- */
-function timingSafeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) {
-    return false
-  }
-
-  let result = 0
-  for (let i = 0; i < a.length; i++) {
-    result |= a.charCodeAt(i) ^ b.charCodeAt(i)
-  }
-
-  return result === 0
 }
