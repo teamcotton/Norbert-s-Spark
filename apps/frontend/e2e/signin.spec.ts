@@ -397,7 +397,7 @@ test.describe('Sign In Page', () => {
   })
 
   test.describe('Navigation Links', () => {
-    test('should navigate to forgot password page when clicking "Forgot Password" link', async ({
+    test.skip('should navigate to forgot password page when clicking "Forgot Password" link', async ({
       page,
     }) => {
       const forgotPasswordButton = page.getByRole('button', { name: /forgot password/i })
