@@ -1,7 +1,5 @@
 import type { FastifyRequest, FastifyReply } from 'fastify'
 import { EnvConfig } from '../../config/env.config.js'
-import { UnauthorizedException } from '../../../shared/exceptions/unauthorized.exception.js'
-import { ErrorCode } from '../../../shared/constants/error-codes.js'
 
 /**
  * Fastify middleware for OAuth sync endpoint authentication
