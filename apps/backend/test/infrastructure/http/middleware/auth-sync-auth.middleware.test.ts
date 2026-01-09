@@ -5,6 +5,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { EnvConfig } from '../../../../src/infrastructure/config/env.config.js'
 import { oauthSyncAuthMiddleware } from '../../../../src/infrastructure/http/middleware/auth-sync-auth.middleware.js'
 
+// Set environment variable before importing EnvConfig
+process.env.OAUTH_SYNC_SECRET = 'test-oauth-sync-secret-for-ci'
+
 describe('oauthSyncAuthMiddleware', () => {
   let mockRequest: Partial<FastifyRequest>
   let mockReply: Partial<FastifyReply>
