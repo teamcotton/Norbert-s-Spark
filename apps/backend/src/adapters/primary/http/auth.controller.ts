@@ -246,9 +246,16 @@ export class AuthController {
   async oauthSync(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       request.log.info({ body: request.body }, 'OAuth sync request received')
+
+      // Extract audit context from request
+      const auditContext = {
+        ipAddress: request.ip,
+        userAgent: request.headers['user-agent'] ?? null,
+      }
+
       const dto = OAuthSyncDto.validate(request.body)
 
-      const result = await this.registerUserWithProviderUseCase.execute(dto)
+      const result = await this.registerUserWithProviderUseCase.execute(dto, auditContext)
 
       reply.code(200).send({
         success: true,
