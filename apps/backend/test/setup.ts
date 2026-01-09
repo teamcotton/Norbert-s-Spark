@@ -71,6 +71,10 @@ if (!process.env.RESEND_API_KEY) {
   process.env.RESEND_API_KEY = 'test-resend-api-key'
 }
 
+if (!process.env.OAUTH_SYNC_SECRET) {
+  process.env.OAUTH_SYNC_SECRET = 'test-oauth-sync-secret-for-ci'
+}
+
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'test'
 }
