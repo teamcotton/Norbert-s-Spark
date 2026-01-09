@@ -5,9 +5,10 @@ import { isString } from '@norberts-spark/shared'
 export class RegisterUserDto {
   constructor(
     public readonly email: string,
-    public readonly password: string,
     public readonly name: string,
-    public readonly role: string = 'user'
+    public readonly role: string = 'user',
+    public readonly password?: string,
+    public readonly provider?: string
   ) {}
 
   static validate(data: any): RegisterUserDto {
@@ -17,8 +18,13 @@ export class RegisterUserDto {
     if (!data.email || !isString(data.email)) {
       throw new ValidationException('Email is required and must be a string')
     }
-    if (!data.password || !isString(data.password)) {
-      throw new ValidationException('Password is required and must be a string')
+    // Password validation: required if no provider is present
+    if (!data.provider && (!data.password || !isString(data.password))) {
+      throw new ValidationException('Password must be a string when provider is not provided')
+    }
+    // Password type validation: if password is provided, it must be a string
+    if (data.password !== undefined && !isString(data.password)) {
+      throw new ValidationException('Password must be a string when provider is not provided')
     }
     if (!data.name || !isString(data.name)) {
       throw new ValidationException('Name is required and must be a string')
@@ -30,7 +36,11 @@ export class RegisterUserDto {
     if (data.role !== undefined && data.role !== 'user') {
       throw new ValidationException('Only "user" role is allowed during registration')
     }
+    // Provider validation: if provided without password, must be a string
+    if (data.provider !== undefined && !data.password && !isString(data.provider)) {
+      throw new ValidationException('Provider must be a string when password is not provided')
+    }
 
-    return new RegisterUserDto(data.email, data.password, data.name, data.role)
+    return new RegisterUserDto(data.email, data.name, data.role, data.password, data.provider)
   }
 }

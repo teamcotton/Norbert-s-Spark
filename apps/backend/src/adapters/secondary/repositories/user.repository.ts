@@ -93,9 +93,10 @@ export class PostgresUserRepository implements UserRepositoryPort {
       // If userId is provided, include it; otherwise let PostgreSQL generate UUIDv7
       const baseValues = {
         email: userEntity.getEmail(),
-        password: userEntity.getPasswordHash(),
         name: userEntity.getName(),
         role: userEntity.getRole(),
+        password: userEntity.getPassword() ? userEntity.getPasswordHash() : null,
+        provider: userEntity.getProvider() ? userEntity.getProvider() : null,
         createdAt: new Date(),
       }
 

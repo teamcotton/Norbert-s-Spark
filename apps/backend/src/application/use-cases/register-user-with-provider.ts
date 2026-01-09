@@ -1,6 +1,5 @@
 import { User } from '../../domain/entities/user.js'
 import { Email } from '../../domain/value-objects/email.js'
-import { Password } from '../../domain/value-objects/password.js'
 import { Role } from '../../domain/value-objects/role.js'
 import type { UserRepositoryPort } from '../ports/user.repository.port.js'
 import type { EmailServicePort } from '../ports/email.service.port.js'
@@ -39,7 +38,7 @@ import type { UserIdType } from '../../domain/value-objects/userID.js'
  * })
  * ```
  */
-export class RegisterUserUseCase {
+export class RegisterUserWithProviderUseCase {
   /**
    * Creates an instance of RegisterUserUseCase
    * @param {UserRepositoryPort} userRepository - Repository for persisting user data
@@ -95,11 +94,8 @@ export class RegisterUserUseCase {
     const email = new Email(dto.email)
     const role = new Role(dto.role)
 
-    // Create password value object if provided (for credentials-based registration)
-    const password = dto.password ? await Password.create(dto.password) : undefined
-
     // Create user entity without ID - PostgreSQL will generate UUIDv7 via uuidv7() function
-    const user = new User(undefined, email, dto.name, role, password, undefined, dto.provider)
+    const user = new User(undefined, email, dto.name, role, undefined, new Date(), dto.provider)
 
     // Persist user with race condition handling
     // The database has a unique constraint on email, so if two concurrent requests
@@ -117,7 +113,8 @@ export class RegisterUserUseCase {
       throw error
     }
 
-    // Send welcome email
+    // Send welcome email. This will differ to a user registered with password.
+    // Failure to send email should not block registration.
     try {
       await this.emailService.sendWelcomeEmail(dto.email, dto.name)
     } catch (error) {
