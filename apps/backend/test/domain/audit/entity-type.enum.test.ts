@@ -267,6 +267,7 @@ describe('AuditAction Enum', () => {
           [AuditAction.LOGIN_FAILED]: 'Login Failed',
           [AuditAction.PASSWORD_CHANGE]: 'Password Changed',
           [AuditAction.EMAIL_CHANGE]: 'Email Changed',
+          [AuditAction.REGISTRATION_FAILED]: 'Registration Failed',
         }
         // eslint-disable-next-line security/detect-object-injection
         return labels[action]
@@ -336,7 +337,8 @@ describe('AuditAction Enum', () => {
       expect(values).toContain('login_failed')
       expect(values).toContain('password_change')
       expect(values).toContain('email_change')
-      expect(values).toHaveLength(8)
+      expect(values).toContain('registration_failed')
+      expect(values).toHaveLength(9)
     })
 
     it('should allow iteration for validation', () => {

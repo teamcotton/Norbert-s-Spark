@@ -226,7 +226,8 @@ describe('Container', () => {
         container.userRepository,
         container.emailService,
         container.logger,
-        container.tokenGenerator
+        container.tokenGenerator,
+        container.auditLog
       )
     })
 

@@ -76,6 +76,10 @@ describe('UserController', () => {
       body: {},
       params: {},
       query: {},
+      ip: '127.0.0.1',
+      headers: {
+        'user-agent': 'test-agent',
+      },
     } as any
   })
 
@@ -550,7 +554,10 @@ describe('UserController', () => {
         await controller.register(mockRequest, mockReply)
 
         expect(mockRegisterUserUseCase.execute).toHaveBeenCalledTimes(1)
-        expect(mockRegisterUserUseCase.execute).toHaveBeenCalledWith(expect.any(RegisterUserDto))
+        expect(mockRegisterUserUseCase.execute).toHaveBeenCalledWith(
+          expect.any(RegisterUserDto),
+          expect.objectContaining({ ipAddress: expect.any(String) })
+        )
       })
 
       it('should validate request body with RegisterUserDto', async () => {
@@ -568,7 +575,9 @@ describe('UserController', () => {
         await controller.register(mockRequest, mockReply)
 
         const executedDto = vi.mocked(mockRegisterUserUseCase.execute).mock.calls[0]?.[0]
+        const executedContext = vi.mocked(mockRegisterUserUseCase.execute).mock.calls[0]?.[1]
         expect(executedDto).toBeInstanceOf(RegisterUserDto)
+        expect(executedContext).toEqual(expect.objectContaining({ ipAddress: expect.any(String) }))
         expect(executedDto?.email).toBe('test@example.com')
         expect(executedDto?.password).toBe('SecurePass123!')
         expect(executedDto?.name).toBe('Test User')

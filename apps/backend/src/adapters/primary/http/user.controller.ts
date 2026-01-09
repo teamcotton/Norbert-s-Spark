@@ -163,8 +163,14 @@ export class UserController {
       // Convert HTTP request to DTO
       const dto = RegisterUserDto.validate(request.body)
 
+      // Extract audit context from request
+      const auditContext = {
+        ipAddress: request.ip,
+        userAgent: request.headers['user-agent'] ?? null,
+      }
+
       // Execute use case
-      const result = await this.registerUserUseCase.execute(dto)
+      const result = await this.registerUserUseCase.execute(dto, auditContext)
 
       // Convert result to HTTP response
       reply.code(201).send({
