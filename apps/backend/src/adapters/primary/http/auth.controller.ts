@@ -238,7 +238,6 @@ export class AuthController {
    * - 500: Internal server error
    *
    * This is a simple implementation that logs the sync request.
-   * TODO: Implement actual user creation/update in database
    *
    * @see {@link OAuthSyncDto.validate} for request body validation
    * @see {@link oauthSyncAuthMiddleware} for authentication implementation
