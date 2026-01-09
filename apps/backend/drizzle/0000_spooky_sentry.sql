@@ -87,7 +87,7 @@ CREATE TABLE "users" (
 	"provider" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "users_email_unique" UNIQUE("email"),
-	CONSTRAINT "password_length_check" CHECK (length("users"."password") = 60),
+	CONSTRAINT "password_length_check" CHECK ("password" IS NULL OR length("users"."password") = 60),
 	CONSTRAINT "role_check" CHECK ("users"."role" IN ('user', 'admin', 'moderator')),
 	CONSTRAINT "name_length_check" CHECK (length("users"."name") >= 2 AND length("users"."name") <= 100),
 	CONSTRAINT "provider_check" CHECK ("users"."provider" IN ('google'))
