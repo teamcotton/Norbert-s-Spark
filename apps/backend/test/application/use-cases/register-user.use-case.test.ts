@@ -8,6 +8,7 @@ import type { LoggerPort } from '../../../src/application/ports/logger.port.js'
 import type { TokenGeneratorPort } from '../../../src/application/ports/token-generator.port.js'
 import type { UserRepositoryPort } from '../../../src/application/ports/user.repository.port.js'
 import { RegisterUserUseCase } from '../../../src/application/use-cases/register-user.use-case.js'
+import { AuditAction, EntityType } from '../../../src/domain/audit/entity-type.enum.js'
 import { User } from '../../../src/domain/entities/user.js'
 import { UserId, type UserIdType } from '../../../src/domain/value-objects/userID.js'
 import { ConflictException } from '../../../src/shared/exceptions/conflict.exception.js'
@@ -92,6 +93,27 @@ describe('RegisterUserUseCase', () => {
         expect(result.userId).toMatch(
           /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
         )
+      })
+
+      it('should log successful registration to audit log', async () => {
+        const dto = new RegisterUserDto('john@example.com', 'John Doe', 'user', 'SecurePass123!')
+        const mockUserId = createMockUserId()
+
+        vi.mocked(mockUserRepository.save).mockResolvedValue(mockUserId)
+        vi.mocked(mockEmailService.sendWelcomeEmail).mockResolvedValue(undefined)
+
+        await useCase.execute(dto, auditContext)
+
+        expect(mockAuditLog.log).toHaveBeenCalledTimes(1)
+        expect(mockAuditLog.log).toHaveBeenCalledWith({
+          userId: mockUserId,
+          entityType: EntityType.USER,
+          entityId: mockUserId,
+          action: AuditAction.CREATE,
+          changes: { reason: 'new_user' },
+          ipAddress: auditContext.ipAddress,
+          userAgent: auditContext.userAgent,
+        })
       })
 
       it('should save the user to the repository', async () => {
@@ -209,6 +231,36 @@ describe('RegisterUserUseCase', () => {
         await expect(useCase.execute(dto, auditContext)).rejects.toThrow(ConflictException)
 
         expect(mockEmailService.sendWelcomeEmail).not.toHaveBeenCalled()
+      })
+
+      it('should log duplicate email failure to audit log', async () => {
+        const dto = new RegisterUserDto(
+          'duplicate@example.com',
+          'Test User',
+          'user',
+          'SecurePass123!'
+        )
+
+        const duplicateKeyError = Object.assign(
+          new Error('duplicate key value violates unique constraint'),
+          {
+            code: '23505',
+          }
+        )
+        vi.mocked(mockUserRepository.save).mockRejectedValue(duplicateKeyError)
+
+        await expect(useCase.execute(dto, auditContext)).rejects.toThrow(ConflictException)
+
+        expect(mockAuditLog.log).toHaveBeenCalledTimes(1)
+        expect(mockAuditLog.log).toHaveBeenCalledWith({
+          userId: null,
+          entityType: EntityType.USER,
+          entityId: expect.any(String), // String(email) returns "[object Object]" for Email value objects
+          action: AuditAction.REGISTRATION_FAILED,
+          changes: { reason: 'duplicate_email' },
+          ipAddress: auditContext.ipAddress,
+          userAgent: auditContext.userAgent,
+        })
       })
 
       it('should handle race condition with concurrent duplicate registrations', async () => {
@@ -351,6 +403,19 @@ describe('RegisterUserUseCase', () => {
         await expect(useCase.execute(dto, auditContext)).rejects.toThrow(
           'Database connection failed'
         )
+      })
+
+      it('should not log to audit log when repository save fails with non-duplicate error', async () => {
+        const dto = new RegisterUserDto('test@example.com', 'Test User', 'user', 'SecurePass123!')
+
+        vi.mocked(mockUserRepository.save).mockRejectedValue(
+          new Error('Database connection failed')
+        )
+
+        await expect(useCase.execute(dto, auditContext)).rejects.toThrow()
+
+        // Audit log should not be called for general database errors
+        expect(mockAuditLog.log).not.toHaveBeenCalled()
       })
 
       it('should not send email if repository save fails', async () => {
