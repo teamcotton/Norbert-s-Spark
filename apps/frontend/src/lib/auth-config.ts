@@ -155,10 +155,20 @@ export const authOptions: NextAuthOptions = {
       // Sync OAuth users to backend database
       if (account?.provider !== 'credentials' && profile?.email && account) {
         try {
-          // Call backend to create/update OAuth user
+          // Get OAuth sync shared secret from environment
+          const oauthSyncSecret = process.env.OAUTH_SYNC_SECRET
+          if (!oauthSyncSecret) {
+            logger.error('OAUTH_SYNC_SECRET not configured, skipping OAuth user sync')
+            return true
+          }
+
+          // Call backend to create/update OAuth user with authentication
           const response = await fetch(`${backendUrl}/auth/oauth-sync`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'X-OAuth-Sync-Secret': oauthSyncSecret,
+            },
             body: JSON.stringify({
               provider: account.provider,
               providerId: user.id,
