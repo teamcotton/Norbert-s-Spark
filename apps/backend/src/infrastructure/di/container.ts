@@ -174,7 +174,8 @@ cd apps/backend/certs && mkcert -key-file key.pem -cert-file cert.pem \\
       this.userRepository,
       this.emailService,
       this.logger,
-      this.tokenGenerator
+      this.tokenGenerator,
+      this.auditLog
     )
     this.getAllUsersUseCase = new GetAllUsersUseCase(this.userRepository, this.logger)
     this.loginUserUseCase = new LoginUserUseCase(

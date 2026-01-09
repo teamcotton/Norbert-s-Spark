@@ -11,6 +11,9 @@ import { ConflictException } from '../../shared/exceptions/conflict.exception.js
 import { DatabaseUtil } from '../../shared/utils/database.util.js'
 import { EnvConfig } from '../../infrastructure/config/env.config.js'
 import type { UserIdType } from '../../domain/value-objects/userID.js'
+import type { AuditLogPort } from '../ports/audit-log.port.js'
+import { EntityType } from '../../domain/audit/entity-type.enum.js'
+import { AuditAction } from '../../domain/audit/entity-type.enum.js'
 
 /**
  * Use case for registering a new user in the system
@@ -46,12 +49,14 @@ export class RegisterUserUseCase {
    * @param {EmailServicePort} emailService - Service for sending welcome emails
    * @param {LoggerPort} logger - Logger for tracking operations
    * @param {TokenGeneratorPort} tokenGenerator - Service for generating JWT tokens
+   * @param {AuditLogPort} auditLog - Service for recording audit logs
    */
   constructor(
     private readonly userRepository: UserRepositoryPort,
     private readonly emailService: EmailServicePort,
     private readonly logger: LoggerPort,
-    private readonly tokenGenerator: TokenGeneratorPort
+    private readonly tokenGenerator: TokenGeneratorPort,
+    private readonly auditLog: AuditLogPort
   ) {}
 
   /**
@@ -65,6 +70,7 @@ export class RegisterUserUseCase {
    * 5. Generating a JWT access token for immediate login
    *
    * @param {RegisterUserDto} dto - User registration data (email, password, name, role)
+   * @param auditContext
    * @returns {Promise<{ userId: string, access_token: string, token_type: string, expires_in: number }>}   *          Registration result with user ID and authentication token
    * @throws {ConflictException} If a user with the same email already exists
    * @throws {Error} If password validation, database operation, or token generation fails.
@@ -87,7 +93,8 @@ export class RegisterUserUseCase {
    * ```
    */
   async execute(
-    dto: RegisterUserDto
+    dto: RegisterUserDto,
+    auditContext: { ipAddress: string; userAgent: string | null }
   ): Promise<{ userId: string; access_token: string; token_type: string; expires_in: number }> {
     this.logger.info('Starting user registration', { email: dto.email })
 
@@ -111,11 +118,41 @@ export class RegisterUserUseCase {
       userId = await this.userRepository.save(user)
     } catch (error) {
       this.logger.error('Failed to save user', error as Error, { email: dto.email })
+      if (error instanceof Error) {
+        await this.auditLog.log({
+          userId: null,
+          entityType: EntityType.USER,
+          entityId: 'unknown',
+          action: AuditAction.REGISTRATION_FAILED,
+          changes: { reason: error.message },
+          ipAddress: auditContext.ipAddress,
+          userAgent: auditContext.userAgent ?? undefined,
+        })
+      }
       if (DatabaseUtil.isDuplicateKeyError(error)) {
+        await this.auditLog.log({
+          userId: null,
+          entityType: EntityType.USER,
+          entityId: 'unknown',
+          action: AuditAction.REGISTRATION_FAILED,
+          changes: { reason: 'duplicate_email' },
+          ipAddress: auditContext.ipAddress,
+          userAgent: auditContext.userAgent ?? undefined,
+        })
         throw new ConflictException('User with this email already exists', { email: dto.email })
       }
       throw error
     }
+
+    await this.auditLog.log({
+      userId: userId,
+      entityType: EntityType.USER,
+      entityId: 'unknown',
+      action: AuditAction.CREATE,
+      changes: { reason: 'new_user' },
+      ipAddress: auditContext.ipAddress,
+      userAgent: auditContext.userAgent ?? undefined,
+    })
 
     // Send welcome email
     try {
