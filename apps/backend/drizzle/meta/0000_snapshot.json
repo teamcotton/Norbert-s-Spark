@@ -1,9 +1,125 @@
 {
-  "id": "b21c9fb9-44ba-477b-9c13-547388a07998",
+  "id": "9d1df238-7de4-4a18-bd80-e1b7a4b184af",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.ai_options": {
+      "name": "ai_options",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "uuidv7()"
+        },
+        "message_id": {
+          "name": "message_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "prompt": {
+          "name": "prompt",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "max_tokens": {
+          "name": "max_tokens",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "temperature": {
+          "name": "temperature",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "top_p": {
+          "name": "top_p",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "frequency_penalty": {
+          "name": "frequency_penalty",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "presence_penalty": {
+          "name": "presence_penalty",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "ai_options_message_id_idx": {
+          "name": "ai_options_message_id_idx",
+          "columns": [
+            {
+              "expression": "message_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "ai_options_message_id_messages_id_fk": {
+          "name": "ai_options_message_id_messages_id_fk",
+          "tableFrom": "ai_options",
+          "tableTo": "messages",
+          "columnsFrom": ["message_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "max_tokens_check": {
+          "name": "max_tokens_check",
+          "value": "\"ai_options\".\"max_tokens\" > 0"
+        },
+        "temperature_range": {
+          "name": "temperature_range",
+          "value": "\"ai_options\".\"temperature\" >= 0 AND \"ai_options\".\"temperature\" <= 2"
+        },
+        "top_p_range": {
+          "name": "top_p_range",
+          "value": "\"ai_options\".\"top_p\" >= 0 AND \"ai_options\".\"top_p\" <= 1"
+        },
+        "frequency_penalty_range": {
+          "name": "frequency_penalty_range",
+          "value": "\"ai_options\".\"frequency_penalty\" >= -2 AND \"ai_options\".\"frequency_penalty\" <= 2"
+        },
+        "presence_penalty_range": {
+          "name": "presence_penalty_range",
+          "value": "\"ai_options\".\"presence_penalty\" >= -2 AND \"ai_options\".\"presence_penalty\" <= 2"
+        }
+      },
+      "isRLSEnabled": false
+    },
     "public.audit_log": {
       "name": "audit_log",
       "schema": "",
@@ -454,6 +570,24 @@
           "primaryKey": false,
           "notNull": false
         },
+        "tool_heart_of_darkness_qa_input": {
+          "name": "tool_heart_of_darkness_qa_input",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tool_heart_of_darkness_qa_output": {
+          "name": "tool_heart_of_darkness_qa_output",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tool_heart_of_darkness_qa_error_text": {
+          "name": "tool_heart_of_darkness_qa_error_text",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
         "data_content": {
           "name": "data_content",
           "type": "jsonb",
@@ -568,7 +702,7 @@
           "name": "password",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "email": {
           "name": "email",
@@ -582,6 +716,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'user'"
+        },
+        "provider": {
+          "name": "provider",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -603,6 +743,10 @@
       },
       "policies": {},
       "checkConstraints": {
+        "provider_check": {
+          "name": "provider_check",
+          "value": "\"users\".\"provider\" IN ('google')"
+        },
         "password_length_check": {
           "name": "password_length_check",
           "value": "length(\"users\".\"password\") = 60"

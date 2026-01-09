@@ -52,6 +52,7 @@ export class User {
    * @param name - User's display name
    * @param role - User's role (RoleType branded type for type safety)
    * @param createdAt - Timestamp when the user was created (defaults to current date/time)
+   * @param provider - Authentication provider
    *
    * @example
    * ```typescript
@@ -67,10 +68,11 @@ export class User {
   constructor(
     public readonly id: UserIdType | undefined,
     private email: EmailType,
-    private password: PasswordType,
     private name: string,
     private role: RoleType,
-    private createdAt: Date = new Date()
+    private password?: PasswordType,
+    private createdAt: Date = new Date(),
+    private provider?: string
   ) {}
 
   /**
@@ -115,6 +117,9 @@ export class User {
    */
   async updatePassword(oldPassword: string, newPassword: PasswordType): Promise<void> {
     // Business rule: Must verify old password before updating
+    if (!this.password) {
+      throw new ValidationException('Cannot update password for OAuth users')
+    }
     if (!(await this.password.matches(oldPassword))) {
       throw new ValidationException('Old password is incorrect')
     }
@@ -174,6 +179,10 @@ export class User {
     return this.role.getValue()
   }
 
+  getProvider(): string | undefined {
+    return this.provider
+  }
+
   /**
    * Updates the user's role.
    *
@@ -201,7 +210,10 @@ export class User {
    * const passwordHash = user.getPasswordHash()
    * ```
    */
-  getPasswordHash(): string {
+  getPasswordHash(): string | undefined {
+    if (!this.password) {
+      return undefined
+    }
     return this.password.getHash()
   }
 
@@ -222,6 +234,9 @@ export class User {
    * ```
    */
   async verifyPassword(plainPassword: string): Promise<boolean> {
+    if (!this.password) {
+      return false
+    }
     return this.password.matches(plainPassword)
   }
 

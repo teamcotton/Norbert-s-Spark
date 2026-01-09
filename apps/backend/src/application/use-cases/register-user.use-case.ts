@@ -97,7 +97,7 @@ export class RegisterUserUseCase {
     const role = new Role(dto.role)
 
     // Create user entity without ID - PostgreSQL will generate UUIDv7 via uuidv7() function
-    const user = new User(undefined, email, password, dto.name, role)
+    const user = new User(undefined, email, dto.name, role, password)
 
     // Persist user with race condition handling
     // The database has a unique constraint on email, so if two concurrent requests

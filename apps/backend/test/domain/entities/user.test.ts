@@ -23,7 +23,7 @@ describe('User Entity', () => {
     testEmail = new Email('test@example.com')
     testPassword = await Password.create('password123')
     testRole = new Role('user')
-    testUser = new User(createUserId(), testEmail, testPassword, 'John Doe', testRole)
+    testUser = new User(createUserId(), testEmail, 'John Doe', testRole, testPassword)
   })
 
   describe('Constructor', () => {
@@ -35,7 +35,7 @@ describe('User Entity', () => {
     })
 
     it('should create a user with default createdAt date', () => {
-      const user = new User(createUserId(), testEmail, testPassword, 'Jane Doe', testRole)
+      const user = new User(createUserId(), testEmail, 'Jane Doe', testRole, testPassword)
 
       // createdAt should be between beforeCreation and afterCreation
       // We can't directly access createdAt as it's private, but we can verify the user was created
@@ -47,9 +47,9 @@ describe('User Entity', () => {
       const user = new User(
         createUserId(),
         testEmail,
-        testPassword,
         'Bob Smith',
         testRole,
+        testPassword,
         customDate
       )
 
@@ -72,7 +72,7 @@ describe('User Entity', () => {
 
     it('should return normalized lowercase email', () => {
       const upperEmail = new Email('TEST@EXAMPLE.COM')
-      const user = new User(createUserId(), upperEmail, testPassword, 'Test User', testRole)
+      const user = new User(createUserId(), upperEmail, 'Test User', testRole, testPassword)
 
       expect(user.getEmail()).toBe('test@example.com')
     })
@@ -87,7 +87,7 @@ describe('User Entity', () => {
 
     it('should return the exact name provided in constructor', () => {
       const specialName = "José María O'Brien-Smith"
-      const user = new User(createUserId(), testEmail, testPassword, specialName, testRole)
+      const user = new User(createUserId(), testEmail, specialName, testRole, testPassword)
 
       expect(user.getName()).toBe(specialName)
     })
@@ -102,7 +102,7 @@ describe('User Entity', () => {
 
     it('should return the correct role for admin users', () => {
       const adminRole = new Role('admin')
-      const adminUser = new User(createUserId(), testEmail, testPassword, 'Admin User', adminRole)
+      const adminUser = new User(createUserId(), testEmail, 'Admin User', adminRole, testPassword)
 
       expect(adminUser.getRole()).toBe('admin')
     })
@@ -260,14 +260,14 @@ describe('User Entity', () => {
   describe('Type Safety', () => {
     it('should accept Email type for email parameter', () => {
       const email = new Email('typed@example.com')
-      const user = new User(createUserId(), email, testPassword, 'Test User', testRole)
+      const user = new User(createUserId(), email, 'Test User', testRole, testPassword)
 
       expect(user.getEmail()).toBe('typed@example.com')
     })
 
     it('should accept Password type for password parameter', async () => {
       const password = await Password.create('typedpassword')
-      const user = new User(createUserId(), testEmail, password, 'Test User', testRole)
+      const user = new User(createUserId(), testEmail, 'Test User', testRole, password)
 
       expect(user).toBeInstanceOf(User)
     })
@@ -283,14 +283,14 @@ describe('User Entity', () => {
 
   describe('Edge Cases', () => {
     it('should handle user with empty name', () => {
-      const user = new User(createUserId(), testEmail, testPassword, '', testRole)
+      const user = new User(createUserId(), testEmail, '', testRole, testPassword)
 
       expect(user.getName()).toBe('')
     })
 
     it('should handle user with very long name', () => {
       const longName = 'A'.repeat(1000)
-      const user = new User(createUserId(), testEmail, testPassword, longName, testRole)
+      const user = new User(createUserId(), testEmail, longName, testRole, testPassword)
 
       expect(user.getName()).toBe(longName)
       expect(user.getName().length).toBe(1000)
@@ -306,7 +306,7 @@ describe('User Entity', () => {
       ]
 
       for (const name of specialNames) {
-        const user = new User(createUserId(), testEmail, testPassword, name, testRole)
+        const user = new User(createUserId(), testEmail, name, testRole, testPassword)
         expect(user.getName()).toBe(name)
       }
     })
@@ -338,7 +338,7 @@ describe('User Entity', () => {
   describe('Integration with Value Objects', () => {
     it('should work with Email value object normalization', () => {
       const mixedCaseEmail = new Email('TeSt@ExAmPlE.CoM')
-      const user = new User(createUserId(), mixedCaseEmail, testPassword, 'Test User', testRole)
+      const user = new User(createUserId(), mixedCaseEmail, 'Test User', testRole, testPassword)
 
       expect(user.getEmail()).toBe('test@example.com')
     })
@@ -346,7 +346,7 @@ describe('User Entity', () => {
     it('should work with Password value object hashing', async () => {
       const plainPassword = 'mysecretpassword123'
       const hashedPassword = await Password.create(plainPassword)
-      const user = new User(createUserId(), testEmail, hashedPassword, 'Test User', testRole)
+      const user = new User(createUserId(), testEmail, 'Test User', testRole, hashedPassword)
 
       expect(user).toBeInstanceOf(User)
 
@@ -359,8 +359,8 @@ describe('User Entity', () => {
       const email1 = new Email('same@example.com')
       const email2 = new Email('same@example.com')
 
-      const user1 = new User(createUserId(), email1, testPassword, 'User 1', testRole)
-      const user2 = new User(createUserId(), email2, testPassword, 'User 2', testRole)
+      const user1 = new User(createUserId(), email1, 'User 1', testRole, testPassword)
+      const user2 = new User(createUserId(), email2, 'User 2', testRole, testPassword)
 
       expect(user1.getEmail()).toBe(user2.getEmail())
     })
@@ -397,13 +397,15 @@ describe('User Entity', () => {
     it('should return the password hash as a string', () => {
       const hash = testUser.getPasswordHash()
 
+      expect(hash).toBeDefined()
       expect(typeof hash).toBe('string')
-      expect(hash.length).toBeGreaterThan(0)
+      expect(hash!.length).toBeGreaterThan(0)
     })
 
     it('should return a bcrypt hash format', () => {
       const hash = testUser.getPasswordHash()
 
+      expect(hash).toBeDefined()
       // Bcrypt hashes start with $2a$, $2b$, or $2y$ followed by cost factor
       expect(hash).toMatch(/^\$2[aby]\$\d{2}\$/)
     })
@@ -412,15 +414,15 @@ describe('User Entity', () => {
       const password1 = await Password.create('password123')
       const password2 = await Password.create('differentpass456')
 
-      const user1 = new User(createUserId(), testEmail, password1, 'User 1', testRole)
-      const user2 = new User(createUserId(), testEmail, password2, 'User 2', testRole)
+      const user1 = new User(createUserId(), testEmail, 'User 1', testRole, password1)
+      const user2 = new User(createUserId(), testEmail, 'User 2', testRole, password2)
 
       expect(user1.getPasswordHash()).not.toBe(user2.getPasswordHash())
     })
 
     it('should return the same hash for same password input', async () => {
       const password = await Password.create('samepassword123')
-      const user = new User(createUserId(), testEmail, password, 'Test User', testRole)
+      const user = new User(createUserId(), testEmail, 'Test User', testRole, password)
 
       const hash1 = user.getPasswordHash()
       const hash2 = user.getPasswordHash()
@@ -443,6 +445,7 @@ describe('User Entity', () => {
     it('should never expose the plain text password', () => {
       const hash = testUser.getPasswordHash()
 
+      expect(hash).toBeDefined()
       expect(hash).not.toContain('password123')
       expect(hash).not.toMatch(/password123/i)
     })
@@ -450,7 +453,8 @@ describe('User Entity', () => {
     it('should return consistent hash length (bcrypt produces 60 character hashes)', () => {
       const hash = testUser.getPasswordHash()
 
-      expect(hash.length).toBe(60)
+      expect(hash).toBeDefined()
+      expect(hash!.length).toBe(60)
     })
   })
 
@@ -482,7 +486,7 @@ describe('User Entity', () => {
     it('should handle special characters correctly', async () => {
       const specialPassword = 'P@ssw0rd!#$%'
       const password = await Password.create(specialPassword)
-      const user = new User(createUserId(), testEmail, password, 'Test User', testRole)
+      const user = new User(createUserId(), testEmail, 'Test User', testRole, password)
 
       const isValid = await user.verifyPassword(specialPassword)
 
@@ -492,7 +496,7 @@ describe('User Entity', () => {
     it('should handle passwords with spaces', async () => {
       const passwordWithSpaces = 'pass word 123'
       const password = await Password.create(passwordWithSpaces)
-      const user = new User(createUserId(), testEmail, password, 'Test User', testRole)
+      const user = new User(createUserId(), testEmail, 'Test User', testRole, password)
 
       const isValid = await user.verifyPassword(passwordWithSpaces)
 
@@ -523,7 +527,7 @@ describe('User Entity', () => {
     it('should handle unicode characters in password', async () => {
       const unicodePassword = 'pässwørd123汉字'
       const password = await Password.create(unicodePassword)
-      const user = new User(createUserId(), testEmail, password, 'Test User', testRole)
+      const user = new User(createUserId(), testEmail, 'Test User', testRole, password)
 
       const isValid = await user.verifyPassword(unicodePassword)
 
@@ -574,9 +578,9 @@ describe('User Entity', () => {
       const user = new User(
         createUserId(),
         testEmail,
-        testPassword,
         'Test User',
         testRole,
+        testPassword,
         customDate
       )
 
@@ -588,7 +592,7 @@ describe('User Entity', () => {
 
     it('should return current date when no date provided in constructor', () => {
       const beforeCreation = new Date()
-      const user = new User(createUserId(), testEmail, testPassword, 'Test User', testRole)
+      const user = new User(createUserId(), testEmail, 'Test User', testRole, testPassword)
       const afterCreation = new Date()
 
       const createdAt = user.getCreatedAt()
@@ -607,12 +611,12 @@ describe('User Entity', () => {
     })
 
     it('should have different creation dates for users created at different times', async () => {
-      const user1 = new User(createUserId(), testEmail, testPassword, 'User 1', testRole)
+      const user1 = new User(createUserId(), testEmail, 'User 1', testRole, testPassword)
 
       // Wait a small amount
       await new Promise((resolve) => globalThis.setTimeout(resolve, 10))
 
-      const user2 = new User(createUserId(), testEmail, testPassword, 'User 2', testRole)
+      const user2 = new User(createUserId(), testEmail, 'User 2', testRole, testPassword)
 
       expect(user2.getCreatedAt().getTime()).toBeGreaterThan(user1.getCreatedAt().getTime())
     })
@@ -655,9 +659,9 @@ describe('User Entity', () => {
       const user = new User(
         createUserId(),
         testEmail,
-        testPassword,
         'Test User',
         testRole,
+        testPassword,
         pastDate
       )
 
@@ -672,9 +676,9 @@ describe('User Entity', () => {
       const user = new User(
         createUserId(),
         testEmail,
-        testPassword,
         'Test User',
         testRole,
+        testPassword,
         customDate
       )
 

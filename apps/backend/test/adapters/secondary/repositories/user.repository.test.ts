@@ -39,7 +39,7 @@ describe('PostgresUserRepository', () => {
     testPassword = await Password.create('password123')
     testRole = new Role('user')
     const testUserId = new UserId(uuidv7()).getValue()
-    testUser = new User(testUserId, testEmail, testPassword, 'John Doe', testRole)
+    testUser = new User(testUserId, testEmail, 'John Doe', testRole, testPassword)
 
     // Valid bcrypt hash for testing (hash of "password123")
     validBcryptHash = '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy'
@@ -94,7 +94,7 @@ describe('PostgresUserRepository', () => {
       const email = new Email('newemail@example.com')
       const password = await Password.create('newpass123')
       const role = new Role('admin')
-      const user = new User(userId, email, password, 'Jane Doe', role)
+      const user = new User(userId, email, 'Jane Doe', role, password)
 
       const returnedUserId = await repository.save(user)
 
@@ -103,6 +103,154 @@ describe('PostgresUserRepository', () => {
       expect(callArgs.email).toBe('newemail@example.com')
       expect(callArgs.name).toBe('Jane Doe')
       expect(callArgs.role).toBe('admin')
+    })
+  })
+
+  describe('saveUserWithProvider', () => {
+    it('should insert a new OAuth user without password', async () => {
+      const userId = new UserId(uuidv7()).getValue()
+      const email = new Email('oauth@example.com')
+      const role = new Role('user')
+      const oauthUser = new User(userId, email, 'OAuth User', role, undefined, undefined, 'google')
+
+      const mockReturning = vi.fn().mockResolvedValue([{ userId: userId }])
+      const mockValues = vi.fn().mockReturnValue({ returning: mockReturning })
+      const mockInsert = vi.fn().mockReturnValue({ values: mockValues })
+      vi.mocked(db.insert).mockReturnValue(mockInsert() as any)
+
+      const returnedUserId = await repository.saveUserWithProvider(oauthUser)
+
+      expect(returnedUserId).toBe(userId)
+      expect(db.insert).toHaveBeenCalledTimes(1)
+      expect(mockValues).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: userId,
+          email: 'oauth@example.com',
+          name: 'OAuth User',
+          provider: 'google',
+          createdAt: expect.any(Date),
+        })
+      )
+
+      const callArgs = mockValues.mock.calls?.[0]?.[0]
+      expect(callArgs.password).toBeUndefined()
+      expect(callArgs.role).toBe('user')
+    })
+
+    it('should save OAuth user with correct provider', async () => {
+      const userId = new UserId(uuidv7()).getValue()
+      const email = new Email('google.user@example.com')
+      const role = new Role('user')
+      const googleUser = new User(
+        userId,
+        email,
+        'Google User',
+        role,
+        undefined,
+        undefined,
+        'google'
+      )
+
+      const mockReturning = vi.fn().mockResolvedValue([{ userId: userId }])
+      const mockValues = vi.fn().mockReturnValue({ returning: mockReturning })
+      const mockInsert = vi.fn().mockReturnValue({ values: mockValues })
+      vi.mocked(db.insert).mockReturnValue(mockInsert() as any)
+
+      await repository.saveUserWithProvider(googleUser)
+
+      const callArgs = mockValues.mock.calls?.[0]?.[0]
+      expect(callArgs.provider).toBe('google')
+      expect(callArgs.email).toBe('google.user@example.com')
+      expect(callArgs.name).toBe('Google User')
+    })
+
+    it('should generate user ID when not provided', async () => {
+      const generatedUserId = uuidv7()
+      const email = new Email('newuser@example.com')
+      const role = new Role('user')
+      const userWithoutId = new User(
+        undefined,
+        email,
+        'New User',
+        role,
+        undefined,
+        undefined,
+        'google'
+      )
+
+      const mockReturning = vi.fn().mockResolvedValue([{ userId: generatedUserId }])
+      const mockValues = vi.fn().mockReturnValue({ returning: mockReturning })
+      const mockInsert = vi.fn().mockReturnValue({ values: mockValues })
+      vi.mocked(db.insert).mockReturnValue(mockInsert() as any)
+
+      const returnedUserId = await repository.saveUserWithProvider(userWithoutId)
+
+      expect(returnedUserId).toBe(generatedUserId)
+      const callArgs = mockValues.mock.calls?.[0]?.[0]
+      expect(callArgs.userId).toBeUndefined()
+    })
+
+    it('should throw ConflictException on duplicate email', async () => {
+      const userId = new UserId(uuidv7()).getValue()
+      const email = new Email('duplicate@example.com')
+      const role = new Role('user')
+      const oauthUser = new User(
+        userId,
+        email,
+        'Duplicate User',
+        role,
+        undefined,
+        undefined,
+        'google'
+      )
+
+      const duplicateError = new Error('duplicate key') as any
+      duplicateError.code = POSTGRES_ERROR_CODE.UNIQUE_VIOLATION
+
+      const mockReturning = vi.fn().mockRejectedValue(duplicateError)
+      const mockValues = vi.fn().mockReturnValue({ returning: mockReturning })
+      const mockInsert = vi.fn().mockReturnValue({ values: mockValues })
+      vi.mocked(db.insert).mockReturnValue(mockInsert() as any)
+
+      await expect(repository.saveUserWithProvider(oauthUser)).rejects.toThrow(ConflictException)
+      await expect(repository.saveUserWithProvider(oauthUser)).rejects.toThrow(
+        'User with this email already exists'
+      )
+    })
+
+    it('should throw DatabaseException on general database error', async () => {
+      const userId = new UserId(uuidv7()).getValue()
+      const email = new Email('error@example.com')
+      const role = new Role('user')
+      const oauthUser = new User(userId, email, 'Error User', role, undefined, undefined, 'google')
+
+      const dbError = new Error('Connection failed')
+
+      const mockValues = vi.fn().mockRejectedValue(dbError)
+      const mockInsert = vi.fn().mockReturnValue({ values: mockValues })
+      vi.mocked(db.insert).mockReturnValue(mockInsert() as any)
+
+      await expect(repository.saveUserWithProvider(oauthUser)).rejects.toThrow(DatabaseException)
+      await expect(repository.saveUserWithProvider(oauthUser)).rejects.toThrow(
+        'Failed to save user'
+      )
+    })
+
+    it('should throw DatabaseException if no user ID is returned', async () => {
+      const userId = new UserId(uuidv7()).getValue()
+      const email = new Email('test@example.com')
+      const role = new Role('user')
+      const oauthUser = new User(userId, email, 'Test User', role, undefined, undefined, 'google')
+
+      const mockReturning = vi.fn().mockResolvedValue([])
+      const mockValues = vi.fn().mockReturnValue({ returning: mockReturning })
+      const mockInsert = vi.fn().mockReturnValue({ values: mockValues })
+      vi.mocked(db.insert).mockReturnValue(mockInsert() as any)
+
+      await expect(repository.saveUserWithProvider(oauthUser)).rejects.toThrow(DatabaseException)
+      await expect(repository.saveUserWithProvider(oauthUser)).rejects.toThrow(
+        'Failed to save user'
+      )
     })
   })
 
@@ -363,7 +511,7 @@ describe('PostgresUserRepository', () => {
 
       const newEmail = new Email('updated@example.com')
       const userId = new UserId(uuidv7()).getValue()
-      const updatedUser = new User(userId, newEmail, testPassword, 'Updated Name', testRole)
+      const updatedUser = new User(userId, newEmail, 'Updated Name', testRole, testPassword)
 
       await repository.update(updatedUser)
 
