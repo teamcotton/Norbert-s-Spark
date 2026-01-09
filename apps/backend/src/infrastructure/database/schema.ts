@@ -42,7 +42,10 @@ export const user = pgTable(
   },
   (table) => ({
     providerCheck: check('provider_check', sql`${table.provider} IN ('google')`),
-    passwordLengthCheck: check('password_length_check', sql`length(${table.password}) = 60`),
+    passwordLengthCheck: check(
+      'password_length_check',
+      sql`${table.password} IS NULL OR length(${table.password}) = 60`
+    ),
     roleCheck: check('role_check', sql`${table.role} IN ('user', 'admin', 'moderator')`),
     nameLengthCheck: check(
       'name_length_check',
