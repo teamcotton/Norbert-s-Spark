@@ -183,8 +183,8 @@ export const AIUserIdResponseSchema = z.object({
 export const AIFetchChatResponseSchema = z.object({
   success: z.boolean(),
   data: z.object({
-    id: z.string().uuid(),
-    messages: z.array(z.unknown()), // Using unknown for now as messages can have various structures
+    id: z.uuid(),
+    messages: z.array(MessageSchema)
   }),
 })
 
