@@ -160,11 +160,6 @@ export function useRegistrationForm() {
     // TODO: Implement Google OAuth
   }
 
-  const handleGitHubSignUp = () => {
-    // Handle GitHub OAuth
-    // TODO: Implement GitHub OAuth
-  }
-
   return {
     formData,
     errors,
@@ -173,7 +168,6 @@ export function useRegistrationForm() {
     handleChange,
     handleSubmit,
     handleGoogleSignUp,
-    handleGitHubSignUp,
     handleSignIn,
     showPassword,
     showConfirmPassword,

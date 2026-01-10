@@ -42,7 +42,6 @@ test.describe('Sign In Page', () => {
 
       // Check OAuth buttons
       await expect(page.getByRole('button', { name: /google/i })).toBeVisible()
-      await expect(page.getByRole('button', { name: /github/i })).toBeVisible()
     })
 
     test('should have password visibility toggle button', async ({ page }) => {

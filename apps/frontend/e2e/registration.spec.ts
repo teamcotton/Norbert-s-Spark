@@ -11,7 +11,6 @@ test.describe('Registration Page', () => {
 
     // Check OAuth buttons
     await expect(page.getByRole('button', { name: /google/i })).toBeVisible()
-    await expect(page.getByRole('button', { name: /github/i })).toBeVisible()
 
     // Check divider text
     await expect(page.getByText(/or sign up with email/i)).toBeVisible()
@@ -149,17 +148,6 @@ test.describe('Registration Page', () => {
 
     // Check that button has the Google icon (svg)
     const svg = googleButton.locator('svg')
-    await expect(svg).toBeVisible()
-  })
-
-  test('should display GitHub OAuth button with icon', async ({ page }) => {
-    const githubButton = page.getByRole('button', { name: /github/i })
-
-    await expect(githubButton).toBeVisible()
-    await expect(githubButton).toBeEnabled()
-
-    // Check that button has the GitHub icon (svg)
-    const svg = githubButton.locator('svg')
     await expect(svg).toBeVisible()
   })
 

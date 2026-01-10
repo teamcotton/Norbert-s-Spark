@@ -219,7 +219,7 @@ export class AuthController {
    * - `X-OAuth-Sync-Secret`: Shared secret matching OAUTH_SYNC_SECRET environment variable
    *
    * Request body should contain:
-   * - `provider` (string): OAuth provider name (e.g., 'google', 'github')
+   * - `provider` (string): OAuth provider name (e.g., 'google')
    * - `providerId` (string): User ID from OAuth provider
    * - `email` (string): User's email address (must be valid email format)
    * - `name` (string, optional): User's display name

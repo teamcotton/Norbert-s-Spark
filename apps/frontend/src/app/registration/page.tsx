@@ -14,7 +14,6 @@ export default function RegistrationPage() {
     formData,
     generalError,
     handleChange,
-    handleGitHubSignUp,
     handleGoogleSignUp,
     handleSignIn,
     handleSubmit,
@@ -33,7 +32,6 @@ export default function RegistrationPage() {
       onFieldChange={handleChange}
       onSubmit={handleSubmit}
       onGoogleSignUp={handleGoogleSignUp}
-      onGitHubSignUp={handleGitHubSignUp}
       onSignIn={handleSignIn}
       showPassword={showPassword}
       showConfirmPassword={showConfirmPassword}

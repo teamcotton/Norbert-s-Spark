@@ -167,10 +167,6 @@ export function useSignInForm() {
     return signIn('google', { callbackUrl: '/dashboard' })
   }
 
-  const handleGitHubSignIn = () => {
-    // TODO: Implement GitHub OAuth
-  }
-
   const handleForgotPassword = () => {
     router.push('/forgot-password')
   }
@@ -185,7 +181,6 @@ export function useSignInForm() {
     handleChange,
     handleSubmit,
     handleGoogleSignIn,
-    handleGitHubSignIn,
     handleForgotPassword,
     handleSignUp,
     showPassword,

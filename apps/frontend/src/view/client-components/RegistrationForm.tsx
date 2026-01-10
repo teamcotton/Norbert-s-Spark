@@ -1,11 +1,6 @@
 'use client'
 
-import {
-  GitHub as GitHubIcon,
-  Google as GoogleIcon,
-  Visibility,
-  VisibilityOff,
-} from '@mui/icons-material'
+import { Google as GoogleIcon, Visibility, VisibilityOff } from '@mui/icons-material'
 import {
   Alert,
   Box,
@@ -40,7 +35,6 @@ interface RegistrationFormProps {
   ) => (event: React.ChangeEvent<HTMLInputElement>) => void
   readonly onSubmit: (event: React.FormEvent) => void
   readonly onGoogleSignUp: () => void
-  readonly onGitHubSignUp: () => void
   readonly onSignIn: () => void
   readonly showPassword: boolean
   readonly showConfirmPassword: boolean
@@ -55,7 +49,6 @@ export function RegistrationForm({
   generalError,
   isSubmitting,
   onFieldChange,
-  onGitHubSignUp,
   onGoogleSignUp,
   onSignIn,
   onSubmit,
@@ -108,13 +101,14 @@ export function RegistrationForm({
             Sign up with
           </Typography>
 
-          <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
             <Button
               variant="outlined"
-              fullWidth
+              data-testid="google-registration-button"
               startIcon={<GoogleIcon />}
               onClick={onGoogleSignUp}
               sx={{
+                width: 300,
                 py: 1.5,
                 borderColor: 'divider',
                 color: 'text.primary',
@@ -125,23 +119,6 @@ export function RegistrationForm({
               }}
             >
               Google
-            </Button>
-            <Button
-              variant="outlined"
-              fullWidth
-              startIcon={<GitHubIcon />}
-              onClick={onGitHubSignUp}
-              sx={{
-                py: 1.5,
-                borderColor: 'divider',
-                color: 'text.primary',
-                '&:hover': {
-                  borderColor: 'primary.main',
-                  backgroundColor: 'action.hover',
-                },
-              }}
-            >
-              GitHub
             </Button>
           </Box>
 
