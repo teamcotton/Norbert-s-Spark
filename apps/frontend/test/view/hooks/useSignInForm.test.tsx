@@ -75,11 +75,9 @@ describe('useSignInForm', () => {
       expect(result.current.handleChange).toBeDefined()
       expect(result.current.handleSubmit).toBeDefined()
       expect(result.current.handleGoogleSignIn).toBeDefined()
-      expect(result.current.handleGitHubSignIn).toBeDefined()
       expect(typeof result.current.handleChange).toBe('function')
       expect(typeof result.current.handleSubmit).toBe('function')
       expect(typeof result.current.handleGoogleSignIn).toBe('function')
-      expect(typeof result.current.handleGitHubSignIn).toBe('function')
     })
 
     it('should initialize showPassword to false', () => {
@@ -483,16 +481,6 @@ describe('useSignInForm', () => {
       expect(() => {
         act(() => {
           result.current.handleGoogleSignIn()
-        })
-      }).not.toThrow()
-    })
-
-    it('should provide handleGitHubSignIn without errors', () => {
-      const { result } = renderHook(() => useSignInForm(), { wrapper })
-
-      expect(() => {
-        act(() => {
-          result.current.handleGitHubSignIn()
         })
       }).not.toThrow()
     })

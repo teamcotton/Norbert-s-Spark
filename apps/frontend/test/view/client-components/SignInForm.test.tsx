@@ -60,7 +60,6 @@ describe('SignInForm', () => {
       render(<SignInForm {...defaultProps} />)
 
       expect(screen.getByRole('button', { name: /google/i })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /github/i })).toBeInTheDocument()
     })
 
     it('should render sign in button', () => {
@@ -278,23 +277,12 @@ describe('SignInForm', () => {
       expect(mockOnGoogleSignIn).toHaveBeenCalledTimes(1)
     })
 
-    it('should call onGitHubSignIn when GitHub button is clicked', () => {
-      render(<SignInForm {...defaultProps} />)
-
-      const githubButton = screen.getByRole('button', { name: /github/i })
-      fireEvent.click(githubButton)
-
-      expect(mockOnGitHubSignIn).toHaveBeenCalledTimes(1)
-    })
-
     it('should not call onSubmit when OAuth buttons are clicked', () => {
       render(<SignInForm {...defaultProps} />)
 
       const googleButton = screen.getByRole('button', { name: /google/i })
-      const githubButton = screen.getByRole('button', { name: /github/i })
 
       fireEvent.click(googleButton)
-      fireEvent.click(githubButton)
 
       expect(mockOnSubmit).not.toHaveBeenCalled()
     })
@@ -477,10 +465,8 @@ describe('SignInForm', () => {
       render(<SignInForm {...defaultProps} />)
 
       const googleButton = screen.getByRole('button', { name: /google/i })
-      const githubButton = screen.getByRole('button', { name: /github/i })
 
       expect(googleButton).not.toHaveAttribute('type', 'submit')
-      expect(githubButton).not.toHaveAttribute('type', 'submit')
     })
 
     it('should render navigation links as buttons', () => {

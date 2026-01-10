@@ -14,7 +14,6 @@ export default function SignInPage() {
     formData,
     handleChange,
     handleForgotPassword,
-    handleGitHubSignIn,
     handleGoogleSignIn,
     handleSignUp,
     handleSubmit,
@@ -30,7 +29,6 @@ export default function SignInPage() {
       onFieldChange={handleChange}
       onSubmit={handleSubmit}
       onGoogleSignIn={handleGoogleSignIn}
-      onGitHubSignIn={handleGitHubSignIn}
       onForgotPassword={handleForgotPassword}
       onSignUp={handleSignUp}
       showPassword={showPassword}

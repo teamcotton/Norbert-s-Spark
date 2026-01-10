@@ -74,11 +74,9 @@ describe('useRegistrationForm', () => {
       expect(result.current.handleChange).toBeDefined()
       expect(result.current.handleSubmit).toBeDefined()
       expect(result.current.handleGoogleSignUp).toBeDefined()
-      expect(result.current.handleGitHubSignUp).toBeDefined()
       expect(typeof result.current.handleChange).toBe('function')
       expect(typeof result.current.handleSubmit).toBe('function')
       expect(typeof result.current.handleGoogleSignUp).toBe('function')
-      expect(typeof result.current.handleGitHubSignUp).toBe('function')
     })
   })
 
@@ -656,15 +654,6 @@ describe('useRegistrationForm', () => {
       }).not.toThrow()
     })
 
-    it('should provide handleGitHubSignUp without errors', () => {
-      const { result } = renderHook(() => useRegistrationForm(), { wrapper: createWrapper() })
-
-      expect(() => {
-        act(() => {
-          result.current.handleGitHubSignUp()
-        })
-      }).not.toThrow()
-    })
   })
 
   describe('Complex Scenarios', () => {

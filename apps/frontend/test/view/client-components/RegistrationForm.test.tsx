@@ -14,7 +14,6 @@ describe('RegistrationForm', () => {
   const mockOnFieldChange = vi.fn()
   const mockOnSubmit = vi.fn()
   const mockOnGoogleSignUp = vi.fn()
-  const mockOnGitHubSignUp = vi.fn()
   const mockOnSignIn = vi.fn()
   const mockTogglePasswordVisibility = vi.fn()
   const mockToggleConfirmPasswordVisibility = vi.fn()
@@ -35,7 +34,6 @@ describe('RegistrationForm', () => {
     onFieldChange: mockOnFieldChange,
     onSubmit: mockOnSubmit,
     onGoogleSignUp: mockOnGoogleSignUp,
-    onGitHubSignUp: mockOnGitHubSignUp,
     onSignIn: mockOnSignIn,
     showPassword: false,
     showConfirmPassword: false,
@@ -68,7 +66,6 @@ describe('RegistrationForm', () => {
       render(<RegistrationForm {...defaultProps} />)
 
       expect(screen.getByRole('button', { name: /google/i })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /github/i })).toBeInTheDocument()
     })
 
     it('should render create account button', () => {
@@ -301,23 +298,12 @@ describe('RegistrationForm', () => {
       expect(mockOnGoogleSignUp).toHaveBeenCalledTimes(1)
     })
 
-    it('should call onGitHubSignUp when GitHub button is clicked', () => {
-      render(<RegistrationForm {...defaultProps} />)
-
-      const githubButton = screen.getByRole('button', { name: /github/i })
-      fireEvent.click(githubButton)
-
-      expect(mockOnGitHubSignUp).toHaveBeenCalledTimes(1)
-    })
-
     it('should not call onSubmit when OAuth buttons are clicked', () => {
       render(<RegistrationForm {...defaultProps} />)
 
       const googleButton = screen.getByRole('button', { name: /google/i })
-      const githubButton = screen.getByRole('button', { name: /github/i })
 
       fireEvent.click(googleButton)
-      fireEvent.click(githubButton)
 
       expect(mockOnSubmit).not.toHaveBeenCalled()
     })
@@ -537,11 +523,9 @@ describe('RegistrationForm', () => {
       render(<RegistrationForm {...defaultProps} />)
 
       const googleButton = screen.getByRole('button', { name: /google/i })
-      const githubButton = screen.getByRole('button', { name: /github/i })
 
       // These should not be submit buttons
       expect(googleButton).toHaveAttribute('type', 'button')
-      expect(githubButton).toHaveAttribute('type', 'button')
     })
   })
 

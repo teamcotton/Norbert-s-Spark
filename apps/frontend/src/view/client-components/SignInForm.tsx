@@ -38,7 +38,6 @@ interface SignInFormProps {
   ) => (event: React.ChangeEvent<HTMLInputElement>) => void
   readonly onSubmit: (event: React.FormEvent) => void
   readonly onGoogleSignIn: () => void
-  readonly onGitHubSignIn: () => void
   readonly onForgotPassword: () => void
   readonly onSignUp: () => void
   readonly showPassword: boolean
@@ -52,7 +51,6 @@ export function SignInForm({
   isLoading = false,
   onFieldChange,
   onForgotPassword,
-  onGitHubSignIn,
   onGoogleSignIn,
   onSignUp,
   onSubmit,
@@ -91,13 +89,14 @@ export function SignInForm({
             Sign in with
           </Typography>
 
-          <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
             <Button
               variant="outlined"
-              fullWidth
+              data-testid="google-signin-button"
               startIcon={<GoogleIcon />}
               onClick={onGoogleSignIn}
               sx={{
+                width: 300,
                 py: 1.5,
                 borderColor: 'divider',
                 color: 'text.primary',
@@ -108,23 +107,6 @@ export function SignInForm({
               }}
             >
               Google
-            </Button>
-            <Button
-              variant="outlined"
-              fullWidth
-              startIcon={<GitHubIcon />}
-              onClick={onGitHubSignIn}
-              sx={{
-                py: 1.5,
-                borderColor: 'divider',
-                color: 'text.primary',
-                '&:hover': {
-                  borderColor: 'primary.main',
-                  backgroundColor: 'action.hover',
-                },
-              }}
-            >
-              GitHub
             </Button>
           </Box>
 
