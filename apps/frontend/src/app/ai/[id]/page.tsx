@@ -52,7 +52,7 @@ export default function AIChatPage({ params }: { params: Promise<{ id: string }>
     messagesEndRef,
     mobileOpen,
     selectedFile,
-  } = useAIChat({ id })
+  } = useAIChat({ id, initialMessages: chatData?.messages })
 
   return (
     <AIChatView
@@ -64,7 +64,7 @@ export default function AIChatPage({ params }: { params: Promise<{ id: string }>
       isChatsError={isChatsError}
       isLoading={isLoading}
       isLoadingChats={isLoadingChats}
-      messages={(chatData?.messages as MessageType[]) ?? []}
+      messages={messages}
       messagesEndRef={messagesEndRef}
       mobileOpen={mobileOpen}
       onDrawerToggle={handleDrawerToggle}

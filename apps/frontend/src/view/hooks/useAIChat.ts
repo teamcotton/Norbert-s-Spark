@@ -32,6 +32,7 @@ const ALLOWED_FILE_TYPES = [
 
 interface UseAIChatProps {
   id?: string
+  initialMessages?: any[]
 }
 
 export function isValidUUIDv7(id: string | Buffer) {
@@ -47,7 +48,7 @@ export function isValidUUIDv7(id: string | Buffer) {
 export function processUserUUID(id: string | Buffer) {
   return isValidUUIDv7(id)
 }
-export function useAIChat({ id }: UseAIChatProps = {}) {
+export function useAIChat({ id, initialMessages }: UseAIChatProps = {}) {
   const router = useRouter()
   const { data: session } = useSession()
 
@@ -82,6 +83,7 @@ export function useAIChat({ id }: UseAIChatProps = {}) {
 
   const { messages, sendMessage, stop } = useChat({
     id: id,
+    messages: initialMessages,
     transport: new DefaultChatTransport({
       api: process.env.NEXT_PUBLIC_POST_AI_CALLBACK_URL,
       fetch: (url, options) => {
