@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import type { UIMessage } from 'ai'
 
 export const AISchema = z.object({
   id: z.string(),
@@ -184,7 +183,7 @@ export const AIFetchChatResponseSchema = z.object({
   success: z.boolean(),
   data: z.object({
     id: z.uuid(),
-    messages: z.array(MessageSchema)
+    messages: z.array(MessageSchema),
   }),
 })
 
