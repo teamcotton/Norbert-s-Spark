@@ -21,4 +21,5 @@ export interface UserRepositoryPort {
   update(user: User): Promise<void>
   delete(id: string): Promise<void>
   existsByEmail(email: string): Promise<boolean>
+  saveProvider(user: User): Promise<{ userId: UserIdType; isNewUser: boolean }>
 }

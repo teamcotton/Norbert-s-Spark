@@ -121,6 +121,125 @@ export class PostgresUserRepository implements UserRepositoryPort {
     }
   }
 
+  /**
+   * Saves or retrieves a user authenticated via OAuth provider
+   *
+   * Handles three scenarios:
+   * 1. User previously registered with same provider - Returns existing userId, skips registration
+   * 2. Email exists with password (non-OAuth) - Throws ConflictException
+   * 3. New user (email not in database) - Creates new user record
+   *
+   * @async
+   * @param {User} userEntity - The user domain entity with provider information
+   * @returns {Promise<{ userId: UserIdType; isNewUser: boolean }>} User ID and whether user is new
+   *
+   * @throws {ConflictException} If email exists but user registered with password (non-OAuth)
+   * @throws {DatabaseException} If database operation fails
+   *
+   * @example
+   * ```typescript
+   * const user = new User(undefined, email, 'John Doe', role, undefined, new Date(), 'google', 'google123')
+   * const { userId, isNewUser } = await userRepo.saveProvider(user)
+   * if (isNewUser) {
+   *   console.log('New user registered')
+   * } else {
+   *   console.log('Returning user, skip registration')
+   * }
+   * ```
+   */
+  async saveProvider(userEntity: User): Promise<{ userId: UserIdType; isNewUser: boolean }> {
+    try {
+      const email = userEntity.getEmail()
+      const provider = userEntity.getProvider()
+      const providerId = userEntity.getProviderId()
+
+      // Scenario 1 & 2: Check if user with this email already exists
+      const existingUsers = await db
+        .select({
+          userId: user.userId,
+          email: user.email,
+          password: user.password,
+          provider: user.provider,
+          providerId: user.providerId,
+        })
+        .from(user)
+        .where(eq(user.email, email))
+        .limit(1)
+
+      if (existingUsers.length > 0) {
+        const existingUser = existingUsers[0]!
+
+        // Scenario 1: User previously registered with same provider
+        // Password is null/empty AND provider matches
+        if (
+          (!existingUser.password || existingUser.password === '') &&
+          existingUser.provider === provider
+        ) {
+          // Existing OAuth user with same provider - allow sign in
+          return {
+            userId: new UserId(existingUser.userId).getValue(),
+            isNewUser: false,
+          }
+        }
+
+        // Scenario 2: Email exists with password (non-OAuth registration)
+        if (existingUser.password && existingUser.password !== '') {
+          throw new ConflictException(
+            'An account with this email already exists. Please sign in with your email and password.',
+            { email: email }
+          )
+        }
+
+        // Edge case: Email exists with different provider
+        if (existingUser.provider && existingUser.provider !== provider) {
+          throw new ConflictException(
+            `This email is already registered with ${existingUser.provider}. Please sign in with ${existingUser.provider}.`,
+            { email: email, provider: existingUser.provider }
+          )
+        }
+      }
+
+      // Scenario 3: Email not in database - new user registration
+      const baseValues = {
+        email: email,
+        name: userEntity.getName(),
+        role: userEntity.getRole(),
+        password: null, // OAuth users don't have passwords
+        provider: provider || null,
+        providerId: providerId || null,
+        createdAt: new Date(),
+      }
+
+      const insertValues =
+        userEntity.id !== undefined ? { ...baseValues, userId: userEntity.id } : baseValues
+
+      const result = await db.insert(user).values(insertValues).returning({ userId: user.userId })
+
+      if (!result[0]) {
+        throw new DatabaseException('Failed to retrieve generated user ID', {})
+      }
+
+      return {
+        userId: new UserId(result[0].userId).getValue(),
+        isNewUser: true,
+      }
+    } catch (error) {
+      // Re-throw ConflictException as-is
+      if (error instanceof ConflictException) {
+        throw error
+      }
+
+      // Handle duplicate key errors (shouldn't happen due to our check, but just in case)
+      if (DatabaseUtil.isDuplicateKeyError(error)) {
+        throw new ConflictException('User with this email already exists', {
+          email: userEntity.getEmail(),
+        })
+      }
+
+      throw new DatabaseException('Failed to save user with provider', { error })
+    }
+  }
+
   async saveUserWithProvider(userEntity: User): Promise<UserIdType> {
     try {
       // Build values object conditionally to maintain type safety

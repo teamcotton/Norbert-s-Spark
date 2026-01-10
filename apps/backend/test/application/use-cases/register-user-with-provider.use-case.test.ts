@@ -41,6 +41,7 @@ describe('RegisterUserWithProviderUseCase', () => {
       update: vi.fn(),
       delete: vi.fn(),
       existsByEmail: vi.fn(),
+      saveProvider: vi.fn(),
     }
 
     mockEmailService = {
@@ -81,7 +82,10 @@ describe('RegisterUserWithProviderUseCase', () => {
       it('should register a new user with provider successfully', async () => {
         const dto = new RegisterUserDto('john@example.com', 'John Doe', 'user', undefined, 'google')
 
-        vi.mocked(mockUserRepository.save).mockResolvedValue(createMockUserId())
+        vi.mocked(mockUserRepository.saveProvider).mockResolvedValue({
+          userId: createMockUserId(),
+          isNewUser: true,
+        })
         vi.mocked(mockEmailService.sendWelcomeEmail).mockResolvedValue(undefined)
 
         const result = await useCase.execute(dto, auditContext)
@@ -99,7 +103,10 @@ describe('RegisterUserWithProviderUseCase', () => {
         const dto = new RegisterUserDto('john@example.com', 'John Doe', 'user', undefined, 'google')
         const mockUserId = createMockUserId()
 
-        vi.mocked(mockUserRepository.save).mockResolvedValue(mockUserId)
+        vi.mocked(mockUserRepository.saveProvider).mockResolvedValue({
+          userId: mockUserId,
+          isNewUser: true,
+        })
         vi.mocked(mockEmailService.sendWelcomeEmail).mockResolvedValue(undefined)
 
         await useCase.execute(dto, auditContext)
@@ -119,7 +126,10 @@ describe('RegisterUserWithProviderUseCase', () => {
       it('should return an access token', async () => {
         const dto = new RegisterUserDto('john@example.com', 'John Doe', 'user', undefined, 'google')
 
-        vi.mocked(mockUserRepository.save).mockResolvedValue(createMockUserId())
+        vi.mocked(mockUserRepository.saveProvider).mockResolvedValue({
+          userId: createMockUserId(),
+          isNewUser: true,
+        })
         vi.mocked(mockEmailService.sendWelcomeEmail).mockResolvedValue(undefined)
 
         const result = await useCase.execute(dto, auditContext)
@@ -132,14 +142,17 @@ describe('RegisterUserWithProviderUseCase', () => {
       it('should save the user to the repository without password', async () => {
         const dto = new RegisterUserDto('john@example.com', 'John Doe', 'user', undefined, 'google')
 
-        vi.mocked(mockUserRepository.save).mockResolvedValue(createMockUserId())
+        vi.mocked(mockUserRepository.saveProvider).mockResolvedValue({
+          userId: createMockUserId(),
+          isNewUser: true,
+        })
         vi.mocked(mockEmailService.sendWelcomeEmail).mockResolvedValue(undefined)
 
         await useCase.execute(dto, auditContext)
 
-        expect(mockUserRepository.save).toHaveBeenCalledTimes(1)
+        expect(mockUserRepository.saveProvider).toHaveBeenCalledTimes(1)
 
-        const savedUser = vi.mocked(mockUserRepository.save).mock.calls?.[0]?.[0]
+        const savedUser = vi.mocked(mockUserRepository.saveProvider).mock.calls?.[0]?.[0]
         expect(savedUser).toBeInstanceOf(User)
         expect(savedUser?.getEmail()).toBe('john@example.com')
         expect(savedUser?.getName()).toBe('John Doe')
@@ -151,7 +164,10 @@ describe('RegisterUserWithProviderUseCase', () => {
       it('should send a welcome email to the user', async () => {
         const dto = new RegisterUserDto('john@example.com', 'John Doe', 'user', undefined, 'google')
 
-        vi.mocked(mockUserRepository.save).mockResolvedValue(createMockUserId())
+        vi.mocked(mockUserRepository.saveProvider).mockResolvedValue({
+          userId: createMockUserId(),
+          isNewUser: true,
+        })
         vi.mocked(mockEmailService.sendWelcomeEmail).mockResolvedValue(undefined)
 
         await useCase.execute(dto, auditContext)
@@ -166,7 +182,10 @@ describe('RegisterUserWithProviderUseCase', () => {
       it('should log registration start with email', async () => {
         const dto = new RegisterUserDto('john@example.com', 'John Doe', 'user', undefined, 'google')
 
-        vi.mocked(mockUserRepository.save).mockResolvedValue(createMockUserId())
+        vi.mocked(mockUserRepository.saveProvider).mockResolvedValue({
+          userId: createMockUserId(),
+          isNewUser: true,
+        })
         vi.mocked(mockEmailService.sendWelcomeEmail).mockResolvedValue(undefined)
 
         await useCase.execute(dto, auditContext)
@@ -179,7 +198,10 @@ describe('RegisterUserWithProviderUseCase', () => {
       it('should log successful registration with userId', async () => {
         const dto = new RegisterUserDto('john@example.com', 'John Doe', 'user', undefined, 'google')
 
-        vi.mocked(mockUserRepository.save).mockResolvedValue(createMockUserId())
+        vi.mocked(mockUserRepository.saveProvider).mockResolvedValue({
+          userId: createMockUserId(),
+          isNewUser: true,
+        })
         vi.mocked(mockEmailService.sendWelcomeEmail).mockResolvedValue(undefined)
 
         const result = await useCase.execute(dto, auditContext)
@@ -193,7 +215,10 @@ describe('RegisterUserWithProviderUseCase', () => {
         const dto = new RegisterUserDto('john@example.com', 'John Doe', 'user', undefined, 'google')
 
         const mockUserId = createMockUserId()
-        vi.mocked(mockUserRepository.save).mockResolvedValue(mockUserId)
+        vi.mocked(mockUserRepository.saveProvider).mockResolvedValue({
+          userId: mockUserId,
+          isNewUser: true,
+        })
         vi.mocked(mockEmailService.sendWelcomeEmail).mockResolvedValue(undefined)
 
         await useCase.execute(dto, auditContext)
@@ -222,8 +247,8 @@ describe('RegisterUserWithProviderUseCase', () => {
           'github'
         )
 
-        vi.mocked(mockUserRepository.save).mockImplementation(() =>
-          Promise.resolve(createMockUserId())
+        vi.mocked(mockUserRepository.saveProvider).mockImplementation(() =>
+          Promise.resolve({ userId: createMockUserId(), isNewUser: true })
         )
         vi.mocked(mockEmailService.sendWelcomeEmail).mockResolvedValue(undefined)
 
@@ -245,13 +270,16 @@ describe('RegisterUserWithProviderUseCase', () => {
             provider
           )
 
-          vi.mocked(mockUserRepository.save).mockResolvedValue(createMockUserId())
+          vi.mocked(mockUserRepository.saveProvider).mockResolvedValue({
+            userId: createMockUserId(),
+            isNewUser: true,
+          })
           vi.mocked(mockEmailService.sendWelcomeEmail).mockResolvedValue(undefined)
 
           await useCase.execute(dto, auditContext)
 
-          const savedUser = vi.mocked(mockUserRepository.save).mock.calls?.[
-            vi.mocked(mockUserRepository.save).mock.calls.length - 1
+          const savedUser = vi.mocked(mockUserRepository.saveProvider).mock.calls?.[
+            vi.mocked(mockUserRepository.saveProvider).mock.calls.length - 1
           ]?.[0]
           expect(savedUser?.getProvider()).toBe(provider)
         }
@@ -275,7 +303,7 @@ describe('RegisterUserWithProviderUseCase', () => {
             code: '23505',
           }
         )
-        vi.mocked(mockUserRepository.save).mockRejectedValue(duplicateKeyError)
+        vi.mocked(mockUserRepository.saveProvider).mockRejectedValue(duplicateKeyError)
 
         await expect(useCase.execute(dto, auditContext)).rejects.toThrow(ConflictException)
         await expect(useCase.execute(dto, auditContext)).rejects.toThrow(
@@ -298,7 +326,7 @@ describe('RegisterUserWithProviderUseCase', () => {
             code: '23505',
           }
         )
-        vi.mocked(mockUserRepository.save).mockRejectedValue(duplicateKeyError)
+        vi.mocked(mockUserRepository.saveProvider).mockRejectedValue(duplicateKeyError)
 
         await expect(useCase.execute(dto, auditContext)).rejects.toThrow(ConflictException)
 
@@ -320,7 +348,7 @@ describe('RegisterUserWithProviderUseCase', () => {
             code: '23505',
           }
         )
-        vi.mocked(mockUserRepository.save).mockRejectedValue(duplicateKeyError)
+        vi.mocked(mockUserRepository.saveProvider).mockRejectedValue(duplicateKeyError)
 
         await expect(useCase.execute(dto, auditContext)).rejects.toThrow(ConflictException)
 
@@ -351,7 +379,7 @@ describe('RegisterUserWithProviderUseCase', () => {
             code: '23505',
           }
         )
-        vi.mocked(mockUserRepository.save).mockRejectedValue(duplicateKeyError)
+        vi.mocked(mockUserRepository.saveProvider).mockRejectedValue(duplicateKeyError)
 
         await expect(useCase.execute(dto, auditContext)).rejects.toThrow(ConflictException)
 
@@ -365,7 +393,10 @@ describe('RegisterUserWithProviderUseCase', () => {
       it('should complete registration even if welcome email fails', async () => {
         const dto = new RegisterUserDto('john@example.com', 'John Doe', 'user', undefined, 'google')
 
-        vi.mocked(mockUserRepository.save).mockResolvedValue(createMockUserId())
+        vi.mocked(mockUserRepository.saveProvider).mockResolvedValue({
+          userId: createMockUserId(),
+          isNewUser: true,
+        })
         vi.mocked(mockEmailService.sendWelcomeEmail).mockRejectedValue(new Error('SMTP error'))
 
         const result = await useCase.execute(dto, auditContext)
@@ -379,7 +410,10 @@ describe('RegisterUserWithProviderUseCase', () => {
         const dto = new RegisterUserDto('john@example.com', 'John Doe', 'user', undefined, 'google')
 
         const mockUserId = createMockUserId()
-        vi.mocked(mockUserRepository.save).mockResolvedValue(mockUserId)
+        vi.mocked(mockUserRepository.saveProvider).mockResolvedValue({
+          userId: mockUserId,
+          isNewUser: true,
+        })
 
         const emailError = new Error('SMTP connection failed')
         vi.mocked(mockEmailService.sendWelcomeEmail).mockRejectedValue(emailError)
@@ -398,7 +432,7 @@ describe('RegisterUserWithProviderUseCase', () => {
         const dto = new RegisterUserDto('john@example.com', 'John Doe', 'user', undefined, 'google')
 
         const dbError = new Error('Connection timeout')
-        vi.mocked(mockUserRepository.save).mockRejectedValue(dbError)
+        vi.mocked(mockUserRepository.saveProvider).mockRejectedValue(dbError)
 
         await expect(useCase.execute(dto, auditContext)).rejects.toThrow('Connection timeout')
         expect(mockLogger.error).toHaveBeenCalledWith('Failed to save user', dbError, {
@@ -409,7 +443,7 @@ describe('RegisterUserWithProviderUseCase', () => {
       it('should not send email when repository save fails', async () => {
         const dto = new RegisterUserDto('john@example.com', 'John Doe', 'user', undefined, 'google')
 
-        vi.mocked(mockUserRepository.save).mockRejectedValue(new Error('Database error'))
+        vi.mocked(mockUserRepository.saveProvider).mockRejectedValue(new Error('Database error'))
 
         await expect(useCase.execute(dto, auditContext)).rejects.toThrow()
         expect(mockEmailService.sendWelcomeEmail).not.toHaveBeenCalled()
@@ -424,7 +458,7 @@ describe('RegisterUserWithProviderUseCase', () => {
           'google'
         )
 
-        vi.mocked(mockUserRepository.save).mockRejectedValue(
+        vi.mocked(mockUserRepository.saveProvider).mockRejectedValue(
           new Error('Database connection failed')
         )
 
@@ -439,12 +473,15 @@ describe('RegisterUserWithProviderUseCase', () => {
       it('should register user with default user role', async () => {
         const dto = new RegisterUserDto('john@example.com', 'John Doe', 'user', undefined, 'google')
 
-        vi.mocked(mockUserRepository.save).mockResolvedValue(createMockUserId())
+        vi.mocked(mockUserRepository.saveProvider).mockResolvedValue({
+          userId: createMockUserId(),
+          isNewUser: true,
+        })
         vi.mocked(mockEmailService.sendWelcomeEmail).mockResolvedValue(undefined)
 
         await useCase.execute(dto, auditContext)
 
-        const savedUser = vi.mocked(mockUserRepository.save).mock.calls?.[0]?.[0]
+        const savedUser = vi.mocked(mockUserRepository.saveProvider).mock.calls?.[0]?.[0]
         expect(savedUser?.getRole()).toBe('user')
       })
 
@@ -457,12 +494,15 @@ describe('RegisterUserWithProviderUseCase', () => {
           'google'
         )
 
-        vi.mocked(mockUserRepository.save).mockResolvedValue(createMockUserId())
+        vi.mocked(mockUserRepository.saveProvider).mockResolvedValue({
+          userId: createMockUserId(),
+          isNewUser: true,
+        })
         vi.mocked(mockEmailService.sendWelcomeEmail).mockResolvedValue(undefined)
 
         await useCase.execute(dto, auditContext)
 
-        const savedUser = vi.mocked(mockUserRepository.save).mock.calls?.[0]?.[0]
+        const savedUser = vi.mocked(mockUserRepository.saveProvider).mock.calls?.[0]?.[0]
         expect(savedUser?.getRole()).toBe('admin')
       })
     })
@@ -482,7 +522,10 @@ describe('RegisterUserWithProviderUseCase', () => {
           'user_name@subdomain.example.com',
         ]
 
-        vi.mocked(mockUserRepository.save).mockResolvedValue(createMockUserId())
+        vi.mocked(mockUserRepository.saveProvider).mockResolvedValue({
+          userId: createMockUserId(),
+          isNewUser: true,
+        })
         vi.mocked(mockEmailService.sendWelcomeEmail).mockResolvedValue(undefined)
 
         for (const email of validEmails) {
@@ -506,7 +549,10 @@ describe('RegisterUserWithProviderUseCase', () => {
       it('should accept various provider names', async () => {
         const providers = ['google', 'github', 'facebook', 'microsoft', 'apple']
 
-        vi.mocked(mockUserRepository.save).mockResolvedValue(createMockUserId())
+        vi.mocked(mockUserRepository.saveProvider).mockResolvedValue({
+          userId: createMockUserId(),
+          isNewUser: true,
+        })
         vi.mocked(mockEmailService.sendWelcomeEmail).mockResolvedValue(undefined)
 
         for (const provider of providers) {
