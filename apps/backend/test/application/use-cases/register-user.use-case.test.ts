@@ -41,6 +41,7 @@ describe('RegisterUserUseCase', () => {
       update: vi.fn(),
       delete: vi.fn(),
       existsByEmail: vi.fn(),
+      saveProvider: vi.fn(),
     }
 
     mockEmailService = {

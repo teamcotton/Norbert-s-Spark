@@ -254,6 +254,561 @@ describe('PostgresUserRepository', () => {
     })
   })
 
+  describe('saveProvider', () => {
+    describe('Scenario 1: Existing OAuth user with same provider', () => {
+      it('should return existing userId with isNewUser: false when user previously registered with same provider', async () => {
+        const existingUserId = uuidv7()
+        const email = new Email('existing@example.com')
+        const role = new Role('user')
+        const oauthUser = new User(
+          undefined,
+          email,
+          'Test User',
+          role,
+          undefined,
+          undefined,
+          'google',
+          'google123'
+        )
+
+        // Mock select query to return existing OAuth user
+        const mockLimit = vi.fn().mockResolvedValue([
+          {
+            userId: existingUserId,
+            email: 'existing@example.com',
+            password: null,
+            provider: 'google',
+            providerId: 'google123',
+          },
+        ])
+        const mockWhere = vi.fn().mockReturnValue({ limit: mockLimit })
+        const mockFrom = vi.fn().mockReturnValue({ where: mockWhere })
+        const mockSelect = vi.fn().mockReturnValue({ from: mockFrom })
+        vi.mocked(db.select).mockReturnValue(mockSelect() as any)
+
+        const result = await repository.saveProvider(oauthUser)
+
+        expect(result.isNewUser).toBe(false)
+        expect(result.userId).toBe(existingUserId)
+        expect(db.select).toHaveBeenCalledTimes(1)
+      })
+
+      it('should return existing userId when password is empty string', async () => {
+        const existingUserId = uuidv7()
+        const email = new Email('existing@example.com')
+        const role = new Role('user')
+        const oauthUser = new User(
+          undefined,
+          email,
+          'Test User',
+          role,
+          undefined,
+          undefined,
+          'google',
+          'google123'
+        )
+
+        const mockLimit = vi.fn().mockResolvedValue([
+          {
+            userId: existingUserId,
+            email: 'existing@example.com',
+            password: '',
+            provider: 'google',
+            providerId: 'google123',
+          },
+        ])
+        const mockWhere = vi.fn().mockReturnValue({ limit: mockLimit })
+        const mockFrom = vi.fn().mockReturnValue({ where: mockWhere })
+        const mockSelect = vi.fn().mockReturnValue({ from: mockFrom })
+        vi.mocked(db.select).mockReturnValue(mockSelect() as any)
+
+        const result = await repository.saveProvider(oauthUser)
+
+        expect(result.isNewUser).toBe(false)
+        expect(result.userId).toBe(existingUserId)
+      })
+
+      it('should not call insert when returning existing user', async () => {
+        const existingUserId = uuidv7()
+        const email = new Email('existing@example.com')
+        const role = new Role('user')
+        const oauthUser = new User(
+          undefined,
+          email,
+          'Test User',
+          role,
+          undefined,
+          undefined,
+          'google'
+        )
+
+        const mockLimit = vi.fn().mockResolvedValue([
+          {
+            userId: existingUserId,
+            email: 'existing@example.com',
+            password: null,
+            provider: 'google',
+            providerId: null,
+          },
+        ])
+        const mockWhere = vi.fn().mockReturnValue({ limit: mockLimit })
+        const mockFrom = vi.fn().mockReturnValue({ where: mockWhere })
+        const mockSelect = vi.fn().mockReturnValue({ from: mockFrom })
+        vi.mocked(db.select).mockReturnValue(mockSelect() as any)
+
+        await repository.saveProvider(oauthUser)
+
+        expect(db.insert).not.toHaveBeenCalled()
+      })
+    })
+
+    describe('Scenario 2: Email exists with password (non-OAuth)', () => {
+      it('should throw ConflictException when email exists with password', async () => {
+        const email = new Email('password-user@example.com')
+        const role = new Role('user')
+        const oauthUser = new User(
+          undefined,
+          email,
+          'Test User',
+          role,
+          undefined,
+          undefined,
+          'google'
+        )
+
+        // Mock select query to return user with password
+        const mockLimit = vi.fn().mockResolvedValue([
+          {
+            userId: uuidv7(),
+            email: 'password-user@example.com',
+            password: validBcryptHash,
+            provider: null,
+            providerId: null,
+          },
+        ])
+        const mockWhere = vi.fn().mockReturnValue({ limit: mockLimit })
+        const mockFrom = vi.fn().mockReturnValue({ where: mockWhere })
+        const mockSelect = vi.fn().mockReturnValue({ from: mockFrom })
+        vi.mocked(db.select).mockReturnValue(mockSelect() as any)
+
+        await expect(repository.saveProvider(oauthUser)).rejects.toThrow(ConflictException)
+        await expect(repository.saveProvider(oauthUser)).rejects.toThrow(
+          'An account with this email already exists. Please sign in with your email and password.'
+        )
+      })
+
+      it('should include email in ConflictException context', async () => {
+        const email = new Email('password-user@example.com')
+        const role = new Role('user')
+        const oauthUser = new User(
+          undefined,
+          email,
+          'Test User',
+          role,
+          undefined,
+          undefined,
+          'google'
+        )
+
+        const mockLimit = vi.fn().mockResolvedValue([
+          {
+            userId: uuidv7(),
+            email: 'password-user@example.com',
+            password: validBcryptHash,
+            provider: null,
+            providerId: null,
+          },
+        ])
+        const mockWhere = vi.fn().mockReturnValue({ limit: mockLimit })
+        const mockFrom = vi.fn().mockReturnValue({ where: mockWhere })
+        const mockSelect = vi.fn().mockReturnValue({ from: mockFrom })
+        vi.mocked(db.select).mockReturnValue(mockSelect() as any)
+
+        await expect(repository.saveProvider(oauthUser)).rejects.toThrow(ConflictException)
+
+        // Extract exception for assertions
+        let exception: ConflictException | undefined
+        try {
+          await repository.saveProvider(oauthUser)
+        } catch (e) {
+          exception = e as ConflictException
+        }
+        expect(exception).toBeDefined()
+        expect(exception!.details?.email).toBe('password-user@example.com')
+      })
+    })
+
+    describe('Scenario 2b: Email exists with different provider', () => {
+      it('should throw ConflictException when email registered with different OAuth provider', async () => {
+        const email = new Email('github-user@example.com')
+        const role = new Role('user')
+        const oauthUser = new User(
+          undefined,
+          email,
+          'Test User',
+          role,
+          undefined,
+          undefined,
+          'google'
+        )
+
+        const mockLimit = vi.fn().mockResolvedValue([
+          {
+            userId: uuidv7(),
+            email: 'github-user@example.com',
+            password: null,
+            provider: 'github',
+            providerId: 'github123',
+          },
+        ])
+        const mockWhere = vi.fn().mockReturnValue({ limit: mockLimit })
+        const mockFrom = vi.fn().mockReturnValue({ where: mockWhere })
+        const mockSelect = vi.fn().mockReturnValue({ from: mockFrom })
+        vi.mocked(db.select).mockReturnValue(mockSelect() as any)
+
+        await expect(repository.saveProvider(oauthUser)).rejects.toThrow(ConflictException)
+        await expect(repository.saveProvider(oauthUser)).rejects.toThrow(
+          'This email is already registered with github. Please sign in with github.'
+        )
+      })
+
+      it('should include both email and provider in exception context', async () => {
+        const email = new Email('github-user@example.com')
+        const role = new Role('user')
+        const oauthUser = new User(
+          undefined,
+          email,
+          'Test User',
+          role,
+          undefined,
+          undefined,
+          'google'
+        )
+
+        const mockLimit = vi.fn().mockResolvedValue([
+          {
+            userId: uuidv7(),
+            email: 'github-user@example.com',
+            password: null,
+            provider: 'github',
+            providerId: 'github123',
+          },
+        ])
+        const mockWhere = vi.fn().mockReturnValue({ limit: mockLimit })
+        const mockFrom = vi.fn().mockReturnValue({ where: mockWhere })
+        const mockSelect = vi.fn().mockReturnValue({ from: mockFrom })
+        vi.mocked(db.select).mockReturnValue(mockSelect() as any)
+
+        await expect(repository.saveProvider(oauthUser)).rejects.toThrow(ConflictException)
+
+        // Extract exception for assertions
+        let exception: ConflictException | undefined
+        try {
+          await repository.saveProvider(oauthUser)
+        } catch (e) {
+          exception = e as ConflictException
+        }
+        expect(exception).toBeDefined()
+        expect(exception!.details?.email).toBe('github-user@example.com')
+        expect(exception!.details?.provider).toBe('github')
+      })
+    })
+
+    describe('Scenario 3: New user registration', () => {
+      it('should create new user and return userId with isNewUser: true', async () => {
+        const newUserId = uuidv7()
+        const email = new Email('newuser@example.com')
+        const role = new Role('user')
+        const oauthUser = new User(
+          undefined,
+          email,
+          'New User',
+          role,
+          undefined,
+          undefined,
+          'google',
+          'google123'
+        )
+
+        // Mock select query to return no existing users
+        const mockLimit = vi.fn().mockResolvedValue([])
+        const mockWhere = vi.fn().mockReturnValue({ limit: mockLimit })
+        const mockFrom = vi.fn().mockReturnValue({ where: mockWhere })
+        const mockSelect = vi.fn().mockReturnValue({ from: mockFrom })
+        vi.mocked(db.select).mockReturnValue(mockSelect() as any)
+
+        // Mock insert query
+        const mockReturning = vi.fn().mockResolvedValue([{ userId: newUserId }])
+        const mockValues = vi.fn().mockReturnValue({ returning: mockReturning })
+        const mockInsert = vi.fn().mockReturnValue({ values: mockValues })
+        vi.mocked(db.insert).mockReturnValue(mockInsert() as any)
+
+        const result = await repository.saveProvider(oauthUser)
+
+        expect(result.isNewUser).toBe(true)
+        expect(result.userId).toBe(newUserId)
+        expect(db.insert).toHaveBeenCalledTimes(1)
+      })
+
+      it('should insert user with correct OAuth data', async () => {
+        const email = new Email('newuser@example.com')
+        const role = new Role('user')
+        const oauthUser = new User(
+          undefined,
+          email,
+          'New User',
+          role,
+          undefined,
+          undefined,
+          'google',
+          'google123'
+        )
+
+        const mockLimit = vi.fn().mockResolvedValue([])
+        const mockWhere = vi.fn().mockReturnValue({ limit: mockLimit })
+        const mockFrom = vi.fn().mockReturnValue({ where: mockWhere })
+        const mockSelect = vi.fn().mockReturnValue({ from: mockFrom })
+        vi.mocked(db.select).mockReturnValue(mockSelect() as any)
+
+        const mockReturning = vi.fn().mockResolvedValue([{ userId: uuidv7() }])
+        const mockValues = vi.fn().mockReturnValue({ returning: mockReturning })
+        const mockInsert = vi.fn().mockReturnValue({ values: mockValues })
+        vi.mocked(db.insert).mockReturnValue(mockInsert() as any)
+
+        await repository.saveProvider(oauthUser)
+
+        expect(mockValues).toHaveBeenCalledWith(
+          expect.objectContaining({
+            email: 'newuser@example.com',
+            name: 'New User',
+            role: 'user',
+            password: null,
+            provider: 'google',
+            providerId: 'google123',
+            createdAt: expect.any(Date),
+          })
+        )
+      })
+
+      it('should set password to null for OAuth users', async () => {
+        const email = new Email('newuser@example.com')
+        const role = new Role('user')
+        const oauthUser = new User(
+          undefined,
+          email,
+          'New User',
+          role,
+          undefined,
+          undefined,
+          'google'
+        )
+
+        const mockLimit = vi.fn().mockResolvedValue([])
+        const mockWhere = vi.fn().mockReturnValue({ limit: mockLimit })
+        const mockFrom = vi.fn().mockReturnValue({ where: mockWhere })
+        const mockSelect = vi.fn().mockReturnValue({ from: mockFrom })
+        vi.mocked(db.select).mockReturnValue(mockSelect() as any)
+
+        const mockReturning = vi.fn().mockResolvedValue([{ userId: uuidv7() }])
+        const mockValues = vi.fn().mockReturnValue({ returning: mockReturning })
+        const mockInsert = vi.fn().mockReturnValue({ values: mockValues })
+        vi.mocked(db.insert).mockReturnValue(mockInsert() as any)
+
+        await repository.saveProvider(oauthUser)
+
+        const callArgs = mockValues.mock.calls?.[0]?.[0]
+        expect(callArgs.password).toBeNull()
+      })
+
+      it('should include userId in insert when provided', async () => {
+        const providedUserId = new UserId(uuidv7()).getValue()
+        const email = new Email('newuser@example.com')
+        const role = new Role('user')
+        const oauthUser = new User(
+          providedUserId,
+          email,
+          'New User',
+          role,
+          undefined,
+          undefined,
+          'google'
+        )
+
+        const mockLimit = vi.fn().mockResolvedValue([])
+        const mockWhere = vi.fn().mockReturnValue({ limit: mockLimit })
+        const mockFrom = vi.fn().mockReturnValue({ where: mockWhere })
+        const mockSelect = vi.fn().mockReturnValue({ from: mockFrom })
+        vi.mocked(db.select).mockReturnValue(mockSelect() as any)
+
+        const mockReturning = vi.fn().mockResolvedValue([{ userId: providedUserId }])
+        const mockValues = vi.fn().mockReturnValue({ returning: mockReturning })
+        const mockInsert = vi.fn().mockReturnValue({ values: mockValues })
+        vi.mocked(db.insert).mockReturnValue(mockInsert() as any)
+
+        await repository.saveProvider(oauthUser)
+
+        const callArgs = mockValues.mock.calls?.[0]?.[0]
+        expect(callArgs.userId).toBe(providedUserId)
+      })
+
+      it('should throw DatabaseException when insert returns no userId', async () => {
+        const email = new Email('newuser@example.com')
+        const role = new Role('user')
+        const oauthUser = new User(
+          undefined,
+          email,
+          'New User',
+          role,
+          undefined,
+          undefined,
+          'google'
+        )
+
+        const mockLimit = vi.fn().mockResolvedValue([])
+        const mockWhere = vi.fn().mockReturnValue({ limit: mockLimit })
+        const mockFrom = vi.fn().mockReturnValue({ where: mockWhere })
+        const mockSelect = vi.fn().mockReturnValue({ from: mockFrom })
+        vi.mocked(db.select).mockReturnValue(mockSelect() as any)
+
+        const mockReturning = vi.fn().mockResolvedValue([])
+        const mockValues = vi.fn().mockReturnValue({ returning: mockReturning })
+        const mockInsert = vi.fn().mockReturnValue({ values: mockValues })
+        vi.mocked(db.insert).mockReturnValue(mockInsert() as any)
+
+        await expect(repository.saveProvider(oauthUser)).rejects.toThrow(DatabaseException)
+        await expect(repository.saveProvider(oauthUser)).rejects.toThrow(
+          'Failed to save user with provider'
+        )
+      })
+    })
+
+    describe('Error handling', () => {
+      it('should throw ConflictException on duplicate key error', async () => {
+        const email = new Email('duplicate@example.com')
+        const role = new Role('user')
+        const oauthUser = new User(
+          undefined,
+          email,
+          'Test User',
+          role,
+          undefined,
+          undefined,
+          'google'
+        )
+
+        const mockLimit = vi.fn().mockResolvedValue([])
+        const mockWhere = vi.fn().mockReturnValue({ limit: mockLimit })
+        const mockFrom = vi.fn().mockReturnValue({ where: mockWhere })
+        const mockSelect = vi.fn().mockReturnValue({ from: mockFrom })
+        vi.mocked(db.select).mockReturnValue(mockSelect() as any)
+
+        const duplicateError = {
+          code: POSTGRES_ERROR_CODE.UNIQUE_VIOLATION,
+          message: 'duplicate key value violates unique constraint',
+        }
+        const mockReturning = vi.fn().mockRejectedValue(duplicateError)
+        const mockValues = vi.fn().mockReturnValue({ returning: mockReturning })
+        const mockInsert = vi.fn().mockReturnValue({ values: mockValues })
+        vi.mocked(db.insert).mockReturnValue(mockInsert() as any)
+
+        await expect(repository.saveProvider(oauthUser)).rejects.toThrow(ConflictException)
+        await expect(repository.saveProvider(oauthUser)).rejects.toThrow(
+          'User with this email already exists'
+        )
+      })
+
+      it('should throw DatabaseException on generic database error during select', async () => {
+        const email = new Email('error@example.com')
+        const role = new Role('user')
+        const oauthUser = new User(
+          undefined,
+          email,
+          'Test User',
+          role,
+          undefined,
+          undefined,
+          'google'
+        )
+
+        const dbError = new Error('Connection timeout')
+        const mockLimit = vi.fn().mockRejectedValue(dbError)
+        const mockWhere = vi.fn().mockReturnValue({ limit: mockLimit })
+        const mockFrom = vi.fn().mockReturnValue({ where: mockWhere })
+        const mockSelect = vi.fn().mockReturnValue({ from: mockFrom })
+        vi.mocked(db.select).mockReturnValue(mockSelect() as any)
+
+        await expect(repository.saveProvider(oauthUser)).rejects.toThrow(DatabaseException)
+        await expect(repository.saveProvider(oauthUser)).rejects.toThrow(
+          'Failed to save user with provider'
+        )
+      })
+
+      it('should throw DatabaseException on generic database error during insert', async () => {
+        const email = new Email('error@example.com')
+        const role = new Role('user')
+        const oauthUser = new User(
+          undefined,
+          email,
+          'Test User',
+          role,
+          undefined,
+          undefined,
+          'google'
+        )
+
+        const mockLimit = vi.fn().mockResolvedValue([])
+        const mockWhere = vi.fn().mockReturnValue({ limit: mockLimit })
+        const mockFrom = vi.fn().mockReturnValue({ where: mockWhere })
+        const mockSelect = vi.fn().mockReturnValue({ from: mockFrom })
+        vi.mocked(db.select).mockReturnValue(mockSelect() as any)
+
+        const dbError = new Error('Insert failed')
+        const mockReturning = vi.fn().mockRejectedValue(dbError)
+        const mockValues = vi.fn().mockReturnValue({ returning: mockReturning })
+        const mockInsert = vi.fn().mockReturnValue({ values: mockValues })
+        vi.mocked(db.insert).mockReturnValue(mockInsert() as any)
+
+        await expect(repository.saveProvider(oauthUser)).rejects.toThrow(DatabaseException)
+        await expect(repository.saveProvider(oauthUser)).rejects.toThrow(
+          'Failed to save user with provider'
+        )
+      })
+
+      it('should re-throw ConflictException without wrapping', async () => {
+        const email = new Email('conflict@example.com')
+        const role = new Role('user')
+        const oauthUser = new User(
+          undefined,
+          email,
+          'Test User',
+          role,
+          undefined,
+          undefined,
+          'google'
+        )
+
+        const mockLimit = vi.fn().mockResolvedValue([
+          {
+            userId: uuidv7(),
+            email: 'conflict@example.com',
+            password: validBcryptHash,
+            provider: null,
+            providerId: null,
+          },
+        ])
+        const mockWhere = vi.fn().mockReturnValue({ limit: mockLimit })
+        const mockFrom = vi.fn().mockReturnValue({ where: mockWhere })
+        const mockSelect = vi.fn().mockReturnValue({ from: mockFrom })
+        vi.mocked(db.select).mockReturnValue(mockSelect() as any)
+
+        await expect(repository.saveProvider(oauthUser)).rejects.toThrow(ConflictException)
+        await expect(repository.saveProvider(oauthUser)).rejects.toThrow(
+          'An account with this email already exists'
+        )
+      })
+    })
+  })
+
   describe('findAll', () => {
     it('should return paginated users with default limit and offset', async () => {
       const userId1 = uuidv7()

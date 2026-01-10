@@ -117,14 +117,17 @@ export class RegisterUserWithProviderUseCase {
       dto.providerId
     )
 
-    // Persist user with race condition handling
-    // The database has a unique constraint on email, so if two concurrent requests
-    // try to register the same email, one will succeed and the other will fail
-    // with a duplicate key error. We catch that error and convert it to a
-    // user-friendly ConflictException.
+    // Persist user with OAuth provider handling
+    // The saveProvider method handles three scenarios:
+    // 1. Existing OAuth user with same provider - returns existing userId, isNewUser: false
+    // 2. Email exists with password (non-OAuth) - throws ConflictException
+    // 3. New user - creates new record, returns new userId, isNewUser: true
     let userId: UserIdType
+    let isNewUser: boolean
     try {
-      userId = await this.userRepository.save(user)
+      const result = await this.userRepository.saveProvider(user)
+      userId = result.userId
+      isNewUser = result.isNewUser
     } catch (error) {
       this.logger.error('Failed to save user', error as Error, { email: dto.email })
       if (DatabaseUtil.isDuplicateKeyError(error)) {
@@ -142,37 +145,43 @@ export class RegisterUserWithProviderUseCase {
       throw error
     }
 
-    try {
-      await this.auditLog.log({
-        userId: userId,
-        entityType: EntityType.USER,
-        entityId: userId,
-        action: AuditAction.CREATE,
-        changes: { reason: 'new_user' },
-        ipAddress: auditContext.ipAddress,
-        userAgent: auditContext.userAgent ?? undefined,
-      })
-    } catch (error) {
-      this.logger.error('Failed to write audit log for user registration', error as Error, {
-        userId: userId,
-        email: dto.email,
-      })
-      // Don't fail registration if audit logging fails
+    // Only log audit for new user registrations, not returning users
+    if (isNewUser) {
+      try {
+        await this.auditLog.log({
+          userId: userId,
+          entityType: EntityType.USER,
+          entityId: userId,
+          action: AuditAction.CREATE,
+          changes: { reason: 'new_user' },
+          ipAddress: auditContext.ipAddress,
+          userAgent: auditContext.userAgent ?? undefined,
+        })
+      } catch (error) {
+        this.logger.error('Failed to write audit log for user registration', error as Error, {
+          userId: userId,
+          email: dto.email,
+        })
+        // Don't fail registration if audit logging fails
+      }
     }
 
-    // Send welcome email. This will differ to a user registered with password.
-    // Failure to send email should not block registration.
-    try {
-      await this.emailService.sendWelcomeEmail(dto.email, dto.name)
-    } catch (error) {
-      this.logger.error('Failed to send welcome email', error as Error, {
-        userId: userId,
-        email: dto.email,
-      })
-      // Don't fail registration if email fails
+    // Send welcome email only for new users
+    if (isNewUser) {
+      try {
+        await this.emailService.sendWelcomeEmail(dto.email, dto.name)
+      } catch (error) {
+        this.logger.error('Failed to send welcome email', error as Error, {
+          userId: userId,
+          email: dto.email,
+        })
+        // Don't fail registration if email fails
+      }
     }
 
-    this.logger.info('User registered successfully', { userId: userId })
+    this.logger.info(isNewUser ? 'User registered successfully' : 'Returning user signed in', {
+      userId: userId,
+    })
 
     // Generate JWT access token
     const accessToken = this.tokenGenerator.generateToken({
