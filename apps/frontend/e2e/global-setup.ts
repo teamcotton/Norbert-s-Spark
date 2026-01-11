@@ -114,7 +114,7 @@ async function globalSetup() {
         USE_HTTPS: 'false', // Use HTTP for E2E tests
         JWT_SECRET: 'test-jwt-secret-for-e2e-tests-minimum-256-bits',
         JWT_ISSUER: 'norbertsSpark-test',
-        JWT_EXPIRATION: '1h',
+        JWT_EXPIRATION: '3600', // 1 hour in seconds (backend expects seconds, not '1h' format)
         GOOGLE_GENERATIVE_AI_API_KEY: 'test-google-api-key-for-e2e',
         MODEL_NAME: 'gemini-1.5-flash',
         RESEND_API_KEY: 'test-resend-api-key-for-e2e',

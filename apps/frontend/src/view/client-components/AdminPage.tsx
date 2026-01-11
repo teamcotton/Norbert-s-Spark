@@ -1,6 +1,23 @@
 'use client'
-import { Alert, Box, Container, TextField, Typography } from '@mui/material'
-import { DataGrid, type GridColDef, type GridPaginationModel } from '@mui/x-data-grid'
+import {
+  Alert,
+  Box,
+  Button,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  TextField,
+  Typography,
+} from '@mui/material'
+import {
+  DataGrid,
+  type GridColDef,
+  type GridPaginationModel,
+  type GridRowSelectionModel,
+} from '@mui/x-data-grid'
 
 import type { User } from '@/domain/user/user.js'
 
@@ -12,8 +29,14 @@ interface AdminPageProps {
   paginationModel: GridPaginationModel
   rowCount: number
   currentUserRole: 'admin' | 'moderator' | 'user'
+  selectedUserIds: GridRowSelectionModel
+  showConfirmDialog: boolean
   onSearchChange: (query: string) => void
   onPaginationChange: (model: GridPaginationModel) => void
+  onSelectionChange: (ids: GridRowSelectionModel) => void
+  onDeleteClick: () => void
+  onConfirmDelete: () => void
+  onCancelDelete: () => void
 }
 
 /**
@@ -24,11 +47,17 @@ export function AdminPage({
   currentUserRole,
   error,
   loading,
+  onCancelDelete,
+  onConfirmDelete,
+  onDeleteClick,
   onPaginationChange,
   onSearchChange,
+  onSelectionChange,
   paginationModel,
   rowCount,
   searchQuery,
+  selectedUserIds,
+  showConfirmDialog,
   users,
 }: AdminPageProps) {
   // Define columns
@@ -102,6 +131,8 @@ export function AdminPage({
           pageSizeOptions={[10, 25, 50, 100]}
           checkboxSelection={currentUserRole === 'admin'}
           disableRowSelectionOnClick
+          rowSelectionModel={selectedUserIds}
+          onRowSelectionModelChange={onSelectionChange}
           sx={{
             '& .MuiDataGrid-cell': {
               cursor: currentUserRole === 'admin' ? 'pointer' : 'default',
@@ -109,6 +140,51 @@ export function AdminPage({
           }}
         />
       </Box>
+
+      {currentUserRole === 'admin' && (
+        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+          <Button
+            variant="contained"
+            color="error"
+            disabled={selectedUserIds.ids.size === 0}
+            onClick={onDeleteClick}
+            data-testid="delete-users-button"
+          >
+            Delete Users ({selectedUserIds.ids.size})
+          </Button>
+        </Box>
+      )}
+
+      <Dialog
+        open={showConfirmDialog}
+        onClose={onCancelDelete}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle id="delete-dialog-title">Confirm Delete</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            Are you sure you want to delete{' '}
+            {selectedUserIds.ids.size > 1 ? 'these users' : 'this user'}? All activity from{' '}
+            {selectedUserIds.ids.size > 1 ? 'these users' : 'this user'} will also be deleted.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="outlined" onClick={onCancelDelete} data-testid="cancel-delete-button">
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={onConfirmDelete}
+            data-testid="confirm-delete-button"
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {currentUserRole === 'moderator' && (
         <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: 'block' }}>

@@ -11,12 +11,18 @@ export function AdminPageClient() {
   const {
     currentUserRole,
     error,
+    handleCancelDelete,
+    handleConfirmDelete,
+    handleDeleteClick,
     handlePaginationChange,
     handleSearchChange,
+    handleSelectionChange,
     loading,
     paginationModel,
     rowCount,
     searchQuery,
+    selectedUserIds,
+    showConfirmDialog,
     users,
   } = useAdminPage()
 
@@ -29,8 +35,14 @@ export function AdminPageClient() {
       paginationModel={paginationModel}
       rowCount={rowCount}
       currentUserRole={currentUserRole}
+      selectedUserIds={selectedUserIds}
+      showConfirmDialog={showConfirmDialog}
       onSearchChange={handleSearchChange}
       onPaginationChange={handlePaginationChange}
+      onSelectionChange={handleSelectionChange}
+      onDeleteClick={handleDeleteClick}
+      onConfirmDelete={handleConfirmDelete}
+      onCancelDelete={handleCancelDelete}
     />
   )
 }
