@@ -81,6 +81,8 @@ export function useAIChat({ id, initialMessages }: UseAIChatProps = {}) {
     }
   }, [id])
 
+  console.log('Initial messages in useAIChat:', initialMessages)
+
   const { messages, sendMessage, stop } = useChat({
     id: id,
     messages: initialMessages,

@@ -54,6 +54,8 @@ export default function AIChatPage({ params }: { params: Promise<{ id: string }>
     selectedFile,
   } = useAIChat({ id, initialMessages: chatData?.messages })
 
+  logger.info('Rendering AIChatPage with messages:', messages)
+
   return (
     <AIChatView
       chats={chats}

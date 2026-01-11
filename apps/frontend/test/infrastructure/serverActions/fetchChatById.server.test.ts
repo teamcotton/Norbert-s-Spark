@@ -165,7 +165,7 @@ describe('fetchChatByIdAction', () => {
               role: 'user',
               parts: [
                 { type: 'text', text: 'Check this file' },
-                { type: 'file', mediaType: 'image/png', url: 'data:image/png;base64,...' },
+                { type: 'file', mediaType: 'image/png', url: 'data:image/png;base64,...' } as any,
               ],
             },
           ],
@@ -484,7 +484,7 @@ describe('fetchChatByIdAction', () => {
               parts: [
                 { type: 'text', text: 'Complex message' },
                 { type: 'reasoning', text: 'Some reasoning' },
-                { type: 'data', data: { key: 'value' } },
+                { type: 'data', data: { key: 'value' } } as any,
               ],
             },
           ],
