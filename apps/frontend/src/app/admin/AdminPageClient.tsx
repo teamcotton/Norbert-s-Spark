@@ -11,12 +11,15 @@ export function AdminPageClient() {
   const {
     currentUserRole,
     error,
+    handleDeleteUsers,
     handlePaginationChange,
     handleSearchChange,
+    handleSelectionChange,
     loading,
     paginationModel,
     rowCount,
     searchQuery,
+    selectedUserIds,
     users,
   } = useAdminPage()
 
@@ -29,8 +32,11 @@ export function AdminPageClient() {
       paginationModel={paginationModel}
       rowCount={rowCount}
       currentUserRole={currentUserRole}
+      selectedUserIds={selectedUserIds}
       onSearchChange={handleSearchChange}
       onPaginationChange={handlePaginationChange}
+      onSelectionChange={handleSelectionChange}
+      onDeleteUsers={handleDeleteUsers}
     />
   )
 }

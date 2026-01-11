@@ -1,4 +1,4 @@
-import type { GridPaginationModel } from '@mui/x-data-grid'
+import type { GridPaginationModel, GridRowSelectionModel } from '@mui/x-data-grid'
 import { useState } from 'react'
 
 import type { User } from '@/domain/user/user.js'
@@ -9,10 +9,13 @@ interface UseAdminPageReturn {
   error: string | null
   handlePaginationChange: (model: GridPaginationModel) => void
   handleSearchChange: (query: string) => void
+  handleSelectionChange: (ids: GridRowSelectionModel) => void
+  handleDeleteUsers: () => void
   loading: boolean
   paginationModel: GridPaginationModel
   rowCount: number
   searchQuery: string
+  selectedUserIds: GridRowSelectionModel
   users: readonly User[]
 }
 
@@ -26,6 +29,10 @@ export function useAdminPage(): UseAdminPageReturn {
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
     pageSize: 10,
+  })
+  const [selectedUserIds, setSelectedUserIds] = useState<GridRowSelectionModel>({
+    type: 'include',
+    ids: new Set(),
   })
 
   // TODO: Replace with actual user role from authentication
@@ -45,15 +52,27 @@ export function useAdminPage(): UseAdminPageReturn {
     setPaginationModel(model)
   }
 
+  const handleSelectionChange = (ids: GridRowSelectionModel) => {
+    setSelectedUserIds(ids)
+  }
+
+  const handleDeleteUsers = () => {
+    // TODO: Implement delete users functionality
+    console.log('Delete users:', selectedUserIds)
+  }
+
   return {
     currentUserRole,
     error,
     handlePaginationChange,
     handleSearchChange,
+    handleSelectionChange,
+    handleDeleteUsers,
     loading: isLoading,
     paginationModel,
     rowCount: total,
     searchQuery,
+    selectedUserIds,
     users,
   }
 }

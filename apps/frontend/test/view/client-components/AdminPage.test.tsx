@@ -1,4 +1,4 @@
-import type { GridPaginationModel } from '@mui/x-data-grid'
+import type { GridPaginationModel, GridRowSelectionModel } from '@mui/x-data-grid'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -8,6 +8,8 @@ import { AdminPage } from '@/view/client-components/AdminPage.js'
 describe('AdminPage', () => {
   const mockOnSearchChange = vi.fn()
   const mockOnPaginationChange = vi.fn()
+  const mockOnSelectionChange = vi.fn()
+  const mockOnDeleteUsers = vi.fn()
 
   const mockUsers: readonly User[] = [
     {
@@ -46,8 +48,11 @@ describe('AdminPage', () => {
     paginationModel: defaultPaginationModel,
     rowCount: 3,
     currentUserRole: 'admin' as const,
+    selectedUserIds: { type: 'include', ids: new Set() } as GridRowSelectionModel,
     onSearchChange: mockOnSearchChange,
     onPaginationChange: mockOnPaginationChange,
+    onSelectionChange: mockOnSelectionChange,
+    onDeleteUsers: mockOnDeleteUsers,
   }
 
   beforeEach(() => {
