@@ -94,7 +94,7 @@ export class UserController {
       if (result) {
         reply.code(200).send({
           success: true,
-          data: 'Users have been successully deleted',
+          data: 'Users have been successfully deleted',
         })
         return
       }
