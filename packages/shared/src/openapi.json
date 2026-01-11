@@ -268,9 +268,14 @@
                     "type": "array",
                     "items": {
                       "type": "string",
-                      "format": "uuid"
+                      "format": "uuid",
+                      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+                      "minLength": 36,
+                      "maxLength": 36
                     },
-                    "description": "Array of user IDs to delete",
+                    "minItems": 1,
+                    "maxItems": 100,
+                    "description": "Array of user IDs to delete (1-100 items)",
                     "example": ["123e4567-e89b-12d3-a456-426614174000"]
                   }
                 },
