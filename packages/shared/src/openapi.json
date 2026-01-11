@@ -304,8 +304,8 @@
               }
             }
           },
-          "401": {
-            "description": "Unauthorized - Missing or invalid authentication token",
+          "400": {
+            "description": "Bad Request - Invalid request data (empty array or invalid UUID format)",
             "content": {
               "application/json": {
                 "schema": {
@@ -314,8 +314,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request - Invalid request data (empty array or invalid UUID format)",
+          "401": {
+            "description": "Unauthorized - Missing or invalid authentication token",
             "content": {
               "application/json": {
                 "schema": {
