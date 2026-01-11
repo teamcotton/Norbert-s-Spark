@@ -1,9 +1,9 @@
 import { TypeException } from '../../shared/exceptions/type.exception.js'
 import { Uuid7Util } from '../../shared/utils/uuid7.util.js'
-import type { UUIDType } from '../../domain/value-objects/uuid.js'
+import type { UserIdType } from '../../domain/value-objects/userID.js'
 
 export class DeleteUsersDto {
-  constructor(public readonly userIds: UUIDType[]) {}
+  constructor(public readonly userIds: UserIdType[]) {}
 
   static validate(data: any): DeleteUsersDto {
     if (!data || typeof data !== 'object' || Array.isArray(data)) {

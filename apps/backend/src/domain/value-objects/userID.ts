@@ -126,27 +126,6 @@ export class UserId<T extends string = string> {
   }
 
   /**
-   * Creates a UserId instance from a pre-validated UUIDType.
-   * This factory method avoids unnecessary re-validation when the UUID
-   * has already been validated (e.g., by a DTO).
-   *
-   * @param uuid - A pre-validated UUIDType (already confirmed to be v7)
-   * @returns A new UserId instance wrapping the UUID
-   *
-   * @example
-   * ```typescript
-   * const dto = DeleteUsersDto.validate({ userIds: ['019b8589-7670-725e-b51b-2fcb23f9c593'] });
-   * const userId = UserId.fromUUID(dto.userIds[0]);
-   * ```
-   */
-  static fromUUID<T extends string = string>(uuid: UUIDType<T>): UserId<T> {
-    // UUIDType is a branded string that has already been validated.
-    // We cast through unknown to satisfy TypeScript's structural typing,
-    // but at runtime this is just a string-to-string pass-through.
-    return new UserId<T>(uuid as unknown as string)
-  }
-
-  /**
    * Validates and processes a UUID string to ensure it meets user ID requirements.
    *
    * This method performs two validation steps:

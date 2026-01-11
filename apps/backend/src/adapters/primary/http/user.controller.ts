@@ -87,8 +87,8 @@ export class UserController {
     }
 
     try {
-      // Convert pre-validated UUIDs to UserIds using factory method
-      const userIds = dto.userIds.map((uuid) => UserId.fromUUID(uuid).getValue())
+      // Convert UUIDs to UserIdType
+      const userIds = dto.userIds.map((id) => new UserId(id).getValue())
       const result = await this.deleteUsersUseCase.execute(userIds, auditContext)
 
       if (result) {
