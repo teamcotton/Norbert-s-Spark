@@ -6,7 +6,6 @@ import {
   type GridPaginationModel,
   type GridRowSelectionModel,
 } from '@mui/x-data-grid'
-import { useState } from 'react'
 
 import type { User } from '@/domain/user/user.js'
 
@@ -19,10 +18,13 @@ interface AdminPageProps {
   rowCount: number
   currentUserRole: 'admin' | 'moderator' | 'user'
   selectedUserIds: GridRowSelectionModel
+  showConfirmDialog: boolean
   onSearchChange: (query: string) => void
   onPaginationChange: (model: GridPaginationModel) => void
   onSelectionChange: (ids: GridRowSelectionModel) => void
-  onDeleteUsers: () => void
+  onDeleteClick: () => void
+  onConfirmDelete: () => void
+  onCancelDelete: () => void
 }
 
 /**
@@ -33,7 +35,9 @@ export function AdminPage({
   currentUserRole,
   error,
   loading,
-  onDeleteUsers,
+  onCancelDelete,
+  onConfirmDelete,
+  onDeleteClick,
   onPaginationChange,
   onSearchChange,
   onSelectionChange,
@@ -41,22 +45,9 @@ export function AdminPage({
   rowCount,
   searchQuery,
   selectedUserIds,
+  showConfirmDialog,
   users,
 }: AdminPageProps) {
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
-
-  const handleDeleteClick = () => {
-    setShowConfirmDialog(true)
-  }
-
-  const handleConfirmDelete = () => {
-    setShowConfirmDialog(false)
-    onDeleteUsers()
-  }
-
-  const handleCancelDelete = () => {
-    setShowConfirmDialog(false)
-  }
   // Define columns
   const columns: GridColDef<User>[] = [
     { field: 'name', headerName: 'Name', width: 200 },
@@ -144,7 +135,7 @@ export function AdminPage({
             variant="contained"
             color="error"
             disabled={selectedUserIds.ids.size === 0}
-            onClick={handleDeleteClick}
+            onClick={onDeleteClick}
             data-testid="delete-users-button"
           >
             Delete Users ({selectedUserIds.ids.size})
@@ -166,7 +157,7 @@ export function AdminPage({
             justifyContent: 'center',
             zIndex: 9999,
           }}
-          onClick={handleCancelDelete}
+          onClick={onCancelDelete}
         >
           <Box
             sx={{
@@ -183,19 +174,13 @@ export function AdminPage({
             </Typography>
             <Typography variant="body1" sx={{ mb: 3 }}>
               Are you sure you want to delete{' '}
-              {Array.isArray(selectedUserIds) && selectedUserIds.length > 1
-                ? 'these users'
-                : 'this user'}
-              ? All activity from{' '}
-              {Array.isArray(selectedUserIds) && selectedUserIds.length > 1
-                ? 'these users'
-                : 'this user'}{' '}
-              will also be deleted.
+              {selectedUserIds.ids.size > 1 ? 'these users' : 'this user'}? All activity from{' '}
+              {selectedUserIds.ids.size > 1 ? 'these users' : 'this user'} will also be deleted.
             </Typography>
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
               <Button
                 variant="outlined"
-                onClick={handleCancelDelete}
+                onClick={onCancelDelete}
                 data-testid="cancel-delete-button"
               >
                 Cancel
@@ -203,7 +188,7 @@ export function AdminPage({
               <Button
                 variant="contained"
                 color="error"
-                onClick={handleConfirmDelete}
+                onClick={onConfirmDelete}
                 data-testid="confirm-delete-button"
               >
                 Delete
