@@ -350,20 +350,17 @@ This app follows an API-First development workflow. This means that the API spec
 
 Firstly, create an endpoint specification in the OpenAPI format and add it to `packages/shared/src/openapi.json`.
 
-In this example I've added a delete operation to an exising endpoint:
-
-![Screenshot 2026-01-11 at 10.07.21.png](../../../../Users/andywalpole/Desktop/Screenshot%202026-01-11%20at%2010.07.21.png)
+In this example I've added a delete operation to an exising endpoint. After your change, the OpenAPI spec should include a `delete` operation on the chosen path with an appropriate `operationId`.
 
 In the shared package run 'pnpm run lint:api'. It uses Spectral to validate the OpenAPI spec.
 
 Then run 'pnpm run build' in the shared package to generate types from the OpenAPI spec. These types are available to use in both the frontend and backend packages.
 
+Then run 'pnpm run build' in the shared package to generate types from the OpenAPI spec. These types are available to use in both the frontend and backend packages.
+
 In 'apps/backend/src/adapters/primary/http' find the correct controller to add the new operation to.
 
-For this example, I've added a delete operation to 'apps/backend/src/adapters/primary/http/controllers/customers.controller.ts':
-
-![Screenshot 2026-01-11 at 11.27.39.png](../../../../Users/andywalpole/Desktop/Screenshot%202026-01-11%20at%2011.27.39.png)
-
+For this example, I've added a delete operation to 'apps/backend/src/adapters/primary/http/controllers/customers.controller.ts'. The controller now includes a handler method for the `delete` operation that matches the `operationId` defined in the OpenAPI spec.
 The operationId in the OpenAPI spec should be the same as the method name in the controller.
 
 You can create a Data Transfer Objects in 'apps/backend/src/application/dtos' for runtime validation if needed, or you can use Drizzle schemas directly.
