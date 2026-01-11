@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { UserController } from '../../../../src/adapters/primary/http/user.controller.js'
 import { RegisterUserDto } from '../../../../src/application/dtos/register-user.dto.js'
+import { DeleteUsersUseCase } from '../../../../src/application/use-cases/delete-users.use-case.js'
 import { GetAllUsersUseCase } from '../../../../src/application/use-cases/get-all-users.use-case.js'
 import { RegisterUserUseCase } from '../../../../src/application/use-cases/register-user.use-case.js'
 import { UserId } from '../../../../src/domain/value-objects/userID.js'
@@ -45,6 +46,7 @@ describe('UserController', () => {
   let controller: UserController
   let mockRegisterUserUseCase: RegisterUserUseCase
   let mockGetAllUsersUseCase: GetAllUsersUseCase
+  let mockDeleteUsersUseCase: DeleteUsersUseCase
   let mockRequest: FastifyRequest
   let mockReply: FastifyReply
 
@@ -62,8 +64,17 @@ describe('UserController', () => {
       execute: vi.fn(),
     } as any
 
+    // Create mock delete users use case
+    mockDeleteUsersUseCase = {
+      execute: vi.fn(),
+    } as any
+
     // Create controller instance with mocked use case
-    controller = new UserController(mockRegisterUserUseCase, mockGetAllUsersUseCase)
+    controller = new UserController(
+      mockRegisterUserUseCase,
+      mockGetAllUsersUseCase,
+      mockDeleteUsersUseCase
+    )
 
     // Create mock Fastify reply with chainable methods
     mockReply = {
@@ -85,7 +96,11 @@ describe('UserController', () => {
 
   describe('constructor', () => {
     it('should create instance with RegisterUserUseCase dependency', () => {
-      const instance = new UserController(mockRegisterUserUseCase, mockGetAllUsersUseCase)
+      const instance = new UserController(
+        mockRegisterUserUseCase,
+        mockGetAllUsersUseCase,
+        mockDeleteUsersUseCase
+      )
 
       expect(instance).toBeInstanceOf(UserController)
       expect(instance).toBeDefined()
@@ -97,6 +112,7 @@ describe('UserController', () => {
       const mockApp = {
         post: vi.fn(),
         get: vi.fn(),
+        delete: vi.fn(),
       } as unknown as FastifyInstance
 
       controller.registerRoutes(mockApp)
@@ -109,6 +125,7 @@ describe('UserController', () => {
       const mockApp = {
         post: vi.fn(),
         get: vi.fn(),
+        delete: vi.fn(),
       } as unknown as FastifyInstance
 
       controller.registerRoutes(mockApp)
@@ -135,6 +152,7 @@ describe('UserController', () => {
       const mockApp = {
         post: vi.fn(),
         get: vi.fn(),
+        delete: vi.fn(),
       } as unknown as FastifyInstance
 
       controller.registerRoutes(mockApp)
@@ -155,6 +173,7 @@ describe('UserController', () => {
       const mockApp = {
         post: vi.fn(),
         get: vi.fn(),
+        delete: vi.fn(),
       } as unknown as FastifyInstance
 
       controller.registerRoutes(mockApp)
@@ -472,6 +491,7 @@ describe('UserController', () => {
         const mockApp = {
           post: vi.fn(),
           get: vi.fn(),
+          delete: vi.fn(),
         } as unknown as FastifyInstance
 
         controller.registerRoutes(mockApp)
@@ -507,6 +527,7 @@ describe('UserController', () => {
         const mockApp = {
           post: vi.fn(),
           get: vi.fn(),
+          delete: vi.fn(),
         } as unknown as FastifyInstance
 
         controller.registerRoutes(mockApp)
@@ -1022,6 +1043,7 @@ describe('UserController', () => {
       const mockApp = {
         post: vi.fn(),
         get: vi.fn(),
+        delete: vi.fn(),
       } as unknown as FastifyInstance
 
       // Register routes
@@ -1059,6 +1081,7 @@ describe('UserController', () => {
       const mockApp = {
         post: vi.fn(),
         get: vi.fn(),
+        delete: vi.fn(),
       } as unknown as FastifyInstance
 
       controller.registerRoutes(mockApp)

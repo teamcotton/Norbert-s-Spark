@@ -12,7 +12,6 @@ import { GetChatsByUserIdUseCase } from '../../application/use-cases/get-chats-b
 import { GetChatContentByChatIdUseCase } from '../../application/use-cases/get-chat-content-by-chat-id.use-case.js'
 import { RegisterUserWithProviderUseCase } from '../../application/use-cases/register-user-with-provider.use-case.js'
 import { DeleteUsersUseCase } from '../../application/use-cases/delete-users.use-case.js'
-
 // Adapters
 import { PostgresUserRepository } from '../../adapters/secondary/repositories/user.repository.js'
 import { AIRepository } from '../../adapters/secondary/repositories/ai.repository.js'
@@ -83,7 +82,7 @@ export class Container {
   private readonly getChatsByUserIdUseCase: GetChatsByUserIdUseCase
   private readonly getChatContentByChatIdUseCase: GetChatContentByChatIdUseCase
   private readonly registerUserWithProviderUseCase: RegisterUserWithProviderUseCase
-  private readonly deleteUsersUseCase: DeleteUsersUseCase
+  public readonly deleteUsersUseCase: DeleteUsersUseCase
 
   // Controllers
   public readonly userController: UserController
@@ -166,10 +165,6 @@ cd apps/backend/certs && mkcert -key-file key.pem -cert-file cert.pem \\
     this.userRepository = new PostgresUserRepository()
     this.aiRepository = new AIRepository(this.logger)
     this.auditLog = new AuditLogRepository(this.logger)
-
-    // Initialize domain services
-    // this.workoutCalculator = new WorkoutCalculator()
-
     // Initialize use cases
     this.registerUserUseCase = new RegisterUserUseCase(
       this.userRepository,
@@ -205,9 +200,12 @@ cd apps/backend/certs && mkcert -key-file key.pem -cert-file cert.pem \\
       this.logger,
       this.auditLog
     )
-
     // Initialize controllers (primary adapters)
-    this.userController = new UserController(this.registerUserUseCase, this.getAllUsersUseCase)
+    this.userController = new UserController(
+      this.registerUserUseCase,
+      this.getAllUsersUseCase,
+      this.deleteUsersUseCase
+    )
     this.authController = new AuthController(
       this.loginUserUseCase,
       this.registerUserWithProviderUseCase

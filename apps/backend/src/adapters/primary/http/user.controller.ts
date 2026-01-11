@@ -2,10 +2,12 @@ import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import { RegisterUserUseCase } from '../../../application/use-cases/register-user.use-case.js'
 import { GetAllUsersUseCase } from '../../../application/use-cases/get-all-users.use-case.js'
 import { RegisterUserDto } from '../../../application/dtos/register-user.dto.js'
+import { DeleteUsersDto } from '../../../application/dtos/delete.users.dto.js'
+import { UserId } from '../../../domain/value-objects/userID.js'
 import { BaseException } from '../../../shared/exceptions/base.exception.js'
 import { authMiddleware } from '../../../infrastructure/http/middleware/auth.middleware.js'
 import { requireRole } from '../../../infrastructure/http/middleware/role.middleware.js'
-
+import { DeleteUsersUseCase } from '../../../application/use-cases/delete-users.use-case.js'
 /**
  * HTTP controller for user-related endpoints
  *
@@ -25,10 +27,12 @@ export class UserController {
    * Creates an instance of UserController
    * @param {RegisterUserUseCase} registerUserUseCase - Use case for registering new users
    * @param {GetAllUsersUseCase} getAllUsersUseCase - Use case for retrieving all users
+   * @param {DeleteUsersUseCase} deleteUsersUseCase - Use case for deleting users
    */
   constructor(
     private readonly registerUserUseCase: RegisterUserUseCase,
-    private readonly getAllUsersUseCase: GetAllUsersUseCase
+    private readonly getAllUsersUseCase: GetAllUsersUseCase,
+    private readonly deleteUsersUseCase: DeleteUsersUseCase
   ) {}
 
   /**
@@ -72,12 +76,36 @@ export class UserController {
   }
 
   async deleteUsers(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+    // Extract audit context from request
+    // Convert HTTP request to DTO
+    const dto = DeleteUsersDto.validate(request.body)
+
+    // Extract audit context from request
+    const auditContext = {
+      ipAddress: request.ip,
+      userAgent: request.headers['user-agent'] ?? null,
+    }
+
     try {
-      // Placeholder for delete users logic
-      reply.code(200).send({
-        success: true,
-        data: 'Delete users endpoint is not yet implemented.',
-      })
+      // Convert UUIDs to UserIdType
+      const userIds = dto.userIds.map((id) => new UserId(id as unknown as string).getValue())
+      const result = await this.deleteUsersUseCase.execute(userIds, auditContext)
+
+      if (result) {
+        reply.code(200).send({
+          success: true,
+          data: 'Users have been successully deleted',
+        })
+        return
+      }
+
+      if (!result) {
+        reply.code(500).send({
+          success: false,
+          error: 'Failed to delete users',
+        })
+        return
+      }
     } catch (error) {
       throw error
     }
