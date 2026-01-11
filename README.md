@@ -344,6 +344,10 @@ pnpm mermaid src/infrastructure/di/container.md
 
 - [Prerequisites](#prerequisites)
 
+### How to create an API endpoint
+
+This app follows an API-First development workflow. This means that the API specification is written first and is the the single source of truth for the API. The API specification is written in the OpenAPI format and is located in `packages/shared/src/openapi.json`.
+
 Firstly, create an endpoint specification in the OpenAPI format and add it to `packages/shared/src/openapi.json`.
 
 In this example I've added a delete operation to an exising endpoint:
