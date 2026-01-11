@@ -12,8 +12,12 @@ import {
   check,
   customType,
   numeric,
+  pgEnum,
+  boolean,
+  date,
+  uniqueIndex,
+  char,
 } from 'drizzle-orm/pg-core'
-import type { InferToolInput, InferToolOutput, UIMessage, UIMessageStreamWriter } from 'ai'
 
 // Define CITEXT custom type for case-insensitive text
 const citext = customType<{ data: string }>({
@@ -21,6 +25,127 @@ const citext = customType<{ data: string }>({
     return 'citext'
   },
 })
+
+export const customerStatusEnum = pgEnum('customer_status', [
+  'prospect',
+  'active',
+  'paused',
+  'churned',
+])
+
+export const contactRoleEnum = pgEnum('contact_role', [
+  'primary_contact',
+  'decision_maker',
+  'billing_contact',
+  'technical_contact',
+  'stakeholder',
+])
+
+/**
+ * Customers table: Stores customer information
+ */
+
+export const customers = pgTable(
+  'customers',
+  {
+    customerId: uuid('customer_id').primaryKey().defaultRandom(),
+    legalName: text('legal_name').notNull(),
+    displayName: text('display_name').notNull(),
+    status: customerStatusEnum('status').notNull().default('prospect'),
+    industry: text('industry'),
+    companySize: integer('company_size'),
+    websiteUrl: text('website_url'),
+    billingCountry: char('billing_country', { length: 2 }),
+    timezone: text('timezone').notNull().default('UTC'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => ({
+    billingCountryIdx: index('customers_billing_country_idx').on(table.billingCountry),
+  })
+)
+
+/**
+ * People table: Stores contacts associated with customers
+ */
+
+export const people = pgTable(
+  'people',
+  {
+    personId: uuid('person_id').primaryKey().defaultRandom(),
+    firstName: text('first_name').notNull(),
+    lastName: text('last_name').notNull(),
+    email: text('email'),
+    phone: text('phone'),
+    jobTitle: text('job_title'),
+    linkedinUrl: text('linkedin_url'),
+    isActive: boolean('is_active').notNull().default(true),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => ({
+    uniqueEmail: uniqueIndex('people_unique_email').on(table.email),
+  })
+)
+
+/**
+ * Customer - People join table
+ */
+
+export const customerPeople = pgTable(
+  'customer_people',
+  {
+    customerPersonId: uuid('customer_person_id').primaryKey().defaultRandom(),
+    customerId: uuid('customer_id')
+      .notNull()
+      .references(() => customers.customerId, {
+        onDelete: 'cascade',
+      }),
+    personId: uuid('person_id')
+      .notNull()
+      .references(() => people.personId, {
+        onDelete: 'cascade',
+      }),
+    role: contactRoleEnum('role').notNull(),
+    isPrimary: boolean('is_primary').notNull().default(false),
+    startDate: date('start_date').notNull().defaultNow(),
+    endDate: date('end_date'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => ({
+    uniqueCustomerPersonRole: uniqueIndex('customer_people_unique').on(
+      table.customerId,
+      table.personId,
+      table.role
+    ),
+    onePrimaryPerCustomer: uniqueIndex('one_primary_contact_per_customer')
+      .on(table.customerId)
+      .where(sql`is_primary = true`),
+  })
+)
+
+/**
+ * Relations
+ */
+
+export const customerRelations = relations(customers, ({ many }) => ({
+  contacts: many(customerPeople),
+}))
+
+export const personRelations = relations(people, ({ many }) => ({
+  customers: many(customerPeople),
+}))
+
+export const customerPeopleRelations = relations(customerPeople, ({ one }) => ({
+  customer: one(customers, {
+    fields: [customerPeople.customerId],
+    references: [customers.customerId],
+  }),
+  person: one(people, {
+    fields: [customerPeople.personId],
+    references: [people.personId],
+  }),
+}))
 
 /**
  * User table: Stores user account information
