@@ -76,18 +76,18 @@ export class UserController {
   }
 
   async deleteUsers(request: FastifyRequest, reply: FastifyReply): Promise<void> {
-    // Extract audit context from request
-    // Convert HTTP request to DTO
-    const dto = DeleteUsersDto.validate(request.body)
-
-    // Extract audit context from request
-    const auditContext = {
-      ipAddress: request.ip,
-      userAgent: request.headers['user-agent'] ?? null,
-    }
-
     try {
-      // Convert UUIDs to UserIdType
+      // Extract audit context from request
+      // Convert HTTP request to DTO
+      const dto = DeleteUsersDto.validate(request.body)
+
+      // Extract audit context from request
+      const auditContext = {
+        ipAddress: request.ip,
+        userAgent: request.headers['user-agent'] ?? null,
+      }
+
+      // Convert UserIdType
       const userIds = dto.userIds.map((id) => new UserId(id).getValue())
       const result = await this.deleteUsersUseCase.execute(userIds, auditContext)
 
