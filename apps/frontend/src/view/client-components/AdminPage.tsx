@@ -182,8 +182,15 @@ export function AdminPage({
               Confirm Delete
             </Typography>
             <Typography variant="body1" sx={{ mb: 3 }}>
-              Are you sure you want to delete these users? All activity from this user will also be
-              deleted.
+              Are you sure you want to delete{' '}
+              {Array.isArray(selectedUserIds) && selectedUserIds.length > 1
+                ? 'these users'
+                : 'this user'}
+              ? All activity from{' '}
+              {Array.isArray(selectedUserIds) && selectedUserIds.length > 1
+                ? 'these users'
+                : 'this user'}{' '}
+              will also be deleted.
             </Typography>
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
               <Button
