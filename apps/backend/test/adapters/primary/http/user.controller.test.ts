@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { UserController } from '../../../../src/adapters/primary/http/user.controller.js'
 import { RegisterUserDto } from '../../../../src/application/dtos/register-user.dto.js'
+import { DeleteUsersUseCase } from '../../../../src/application/use-cases/delete-users.use-case.js'
 import { GetAllUsersUseCase } from '../../../../src/application/use-cases/get-all-users.use-case.js'
 import { RegisterUserUseCase } from '../../../../src/application/use-cases/register-user.use-case.js'
 import { UserId } from '../../../../src/domain/value-objects/userID.js'
@@ -45,6 +46,7 @@ describe('UserController', () => {
   let controller: UserController
   let mockRegisterUserUseCase: RegisterUserUseCase
   let mockGetAllUsersUseCase: GetAllUsersUseCase
+  let mockDeleteUsersUseCase: DeleteUsersUseCase
   let mockRequest: FastifyRequest
   let mockReply: FastifyReply
 
@@ -62,8 +64,17 @@ describe('UserController', () => {
       execute: vi.fn(),
     } as any
 
+    // Create mock delete users use case
+    mockDeleteUsersUseCase = {
+      execute: vi.fn(),
+    } as any
+
     // Create controller instance with mocked use case
-    controller = new UserController(mockRegisterUserUseCase, mockGetAllUsersUseCase)
+    controller = new UserController(
+      mockRegisterUserUseCase,
+      mockGetAllUsersUseCase,
+      mockDeleteUsersUseCase
+    )
 
     // Create mock Fastify reply with chainable methods
     mockReply = {
@@ -85,7 +96,11 @@ describe('UserController', () => {
 
   describe('constructor', () => {
     it('should create instance with RegisterUserUseCase dependency', () => {
-      const instance = new UserController(mockRegisterUserUseCase, mockGetAllUsersUseCase)
+      const instance = new UserController(
+        mockRegisterUserUseCase,
+        mockGetAllUsersUseCase,
+        mockDeleteUsersUseCase
+      )
 
       expect(instance).toBeInstanceOf(UserController)
       expect(instance).toBeDefined()
@@ -97,6 +112,7 @@ describe('UserController', () => {
       const mockApp = {
         post: vi.fn(),
         get: vi.fn(),
+        delete: vi.fn(),
       } as unknown as FastifyInstance
 
       controller.registerRoutes(mockApp)
@@ -109,6 +125,7 @@ describe('UserController', () => {
       const mockApp = {
         post: vi.fn(),
         get: vi.fn(),
+        delete: vi.fn(),
       } as unknown as FastifyInstance
 
       controller.registerRoutes(mockApp)
@@ -135,6 +152,7 @@ describe('UserController', () => {
       const mockApp = {
         post: vi.fn(),
         get: vi.fn(),
+        delete: vi.fn(),
       } as unknown as FastifyInstance
 
       controller.registerRoutes(mockApp)
@@ -155,6 +173,7 @@ describe('UserController', () => {
       const mockApp = {
         post: vi.fn(),
         get: vi.fn(),
+        delete: vi.fn(),
       } as unknown as FastifyInstance
 
       controller.registerRoutes(mockApp)
@@ -472,6 +491,7 @@ describe('UserController', () => {
         const mockApp = {
           post: vi.fn(),
           get: vi.fn(),
+          delete: vi.fn(),
         } as unknown as FastifyInstance
 
         controller.registerRoutes(mockApp)
@@ -507,6 +527,7 @@ describe('UserController', () => {
         const mockApp = {
           post: vi.fn(),
           get: vi.fn(),
+          delete: vi.fn(),
         } as unknown as FastifyInstance
 
         controller.registerRoutes(mockApp)
@@ -1022,6 +1043,7 @@ describe('UserController', () => {
       const mockApp = {
         post: vi.fn(),
         get: vi.fn(),
+        delete: vi.fn(),
       } as unknown as FastifyInstance
 
       // Register routes
@@ -1059,6 +1081,7 @@ describe('UserController', () => {
       const mockApp = {
         post: vi.fn(),
         get: vi.fn(),
+        delete: vi.fn(),
       } as unknown as FastifyInstance
 
       controller.registerRoutes(mockApp)
@@ -1081,6 +1104,410 @@ describe('UserController', () => {
 
       // Should successfully execute without context errors
       expect(mockRegisterUserUseCase.execute).toHaveBeenCalled()
+    })
+  })
+
+  describe('deleteUsers()', () => {
+    describe('successful deletion', () => {
+      it('should delete single user successfully', async () => {
+        const userId = uuidv7()
+        mockRequest.body = { userIds: [userId] }
+
+        vi.mocked(mockDeleteUsersUseCase.execute).mockResolvedValue(true)
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        expect(mockDeleteUsersUseCase.execute).toHaveBeenCalledTimes(1)
+        expect(mockDeleteUsersUseCase.execute).toHaveBeenCalledWith(
+          expect.any(Array),
+          expect.objectContaining({
+            ipAddress: '127.0.0.1',
+            userAgent: 'test-agent',
+          })
+        )
+        expect(mockReply.code).toHaveBeenCalledWith(200)
+        expect(mockReply.send).toHaveBeenCalledWith({
+          success: true,
+          data: 'Users have been successfully deleted',
+        })
+      })
+
+      it('should delete multiple users successfully', async () => {
+        const userIds = [uuidv7(), uuidv7(), uuidv7()]
+        mockRequest.body = { userIds }
+
+        vi.mocked(mockDeleteUsersUseCase.execute).mockResolvedValue(true)
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        expect(mockDeleteUsersUseCase.execute).toHaveBeenCalledTimes(1)
+        expect(mockReply.code).toHaveBeenCalledWith(200)
+        expect(mockReply.send).toHaveBeenCalledWith({
+          success: true,
+          data: 'Users have been successfully deleted',
+        })
+      })
+
+      it('should return 200 status code on successful deletion', async () => {
+        mockRequest.body = { userIds: [uuidv7()] }
+        vi.mocked(mockDeleteUsersUseCase.execute).mockResolvedValue(true)
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        expect(mockReply.code).toHaveBeenCalledWith(200)
+      })
+
+      it('should return success message', async () => {
+        mockRequest.body = { userIds: [uuidv7()] }
+        vi.mocked(mockDeleteUsersUseCase.execute).mockResolvedValue(true)
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        expect(mockReply.send).toHaveBeenCalledWith({
+          success: true,
+          data: 'Users have been successfully deleted',
+        })
+      })
+
+      it('should convert UUIDs to UserIdType before calling use case', async () => {
+        const userId = uuidv7()
+        mockRequest.body = { userIds: [userId] }
+        vi.mocked(mockDeleteUsersUseCase.execute).mockResolvedValue(true)
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        const callArgs = vi.mocked(mockDeleteUsersUseCase.execute).mock.calls[0]
+        expect(callArgs).toBeDefined()
+        expect(callArgs![0]).toBeInstanceOf(Array)
+        expect(callArgs![0].length).toBe(1)
+      })
+    })
+
+    describe('audit context', () => {
+      it('should extract IP address from request', async () => {
+        mockRequest.body = { userIds: [uuidv7()] }
+        Object.assign(mockRequest, { ip: '192.168.1.100' })
+        vi.mocked(mockDeleteUsersUseCase.execute).mockResolvedValue(true)
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        expect(mockDeleteUsersUseCase.execute).toHaveBeenCalledWith(
+          expect.any(Array),
+          expect.objectContaining({
+            ipAddress: '192.168.1.100',
+          })
+        )
+      })
+
+      it('should extract user agent from request headers', async () => {
+        mockRequest.body = { userIds: [uuidv7()] }
+        mockRequest.headers = { 'user-agent': 'Mozilla/5.0' }
+        vi.mocked(mockDeleteUsersUseCase.execute).mockResolvedValue(true)
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        expect(mockDeleteUsersUseCase.execute).toHaveBeenCalledWith(
+          expect.any(Array),
+          expect.objectContaining({
+            userAgent: 'Mozilla/5.0',
+          })
+        )
+      })
+
+      it('should handle missing user agent', async () => {
+        mockRequest.body = { userIds: [uuidv7()] }
+        mockRequest.headers = {}
+        vi.mocked(mockDeleteUsersUseCase.execute).mockResolvedValue(true)
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        expect(mockDeleteUsersUseCase.execute).toHaveBeenCalledWith(
+          expect.any(Array),
+          expect.objectContaining({
+            userAgent: null,
+          })
+        )
+      })
+
+      it('should pass both IP and user agent to use case', async () => {
+        mockRequest.body = { userIds: [uuidv7()] }
+        Object.assign(mockRequest, { ip: '10.0.0.1' })
+        mockRequest.headers = { 'user-agent': 'Chrome/100' }
+        vi.mocked(mockDeleteUsersUseCase.execute).mockResolvedValue(true)
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        expect(mockDeleteUsersUseCase.execute).toHaveBeenCalledWith(expect.any(Array), {
+          ipAddress: '10.0.0.1',
+          userAgent: 'Chrome/100',
+        })
+      })
+    })
+
+    describe('validation errors', () => {
+      it('should handle invalid request body', async () => {
+        mockRequest.body = null
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        expect(mockReply.code).toHaveBeenCalledWith(500)
+        expect(mockReply.send).toHaveBeenCalledWith(
+          expect.objectContaining({
+            success: false,
+            error: 'Data must be a valid array of user IDs',
+          })
+        )
+      })
+
+      it('should handle missing userIds field', async () => {
+        mockRequest.body = {}
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        expect(mockReply.code).toHaveBeenCalledWith(500)
+        expect(mockReply.send).toHaveBeenCalledWith(
+          expect.objectContaining({
+            success: false,
+            error: 'userIds must be an array of strings',
+          })
+        )
+      })
+
+      it('should handle invalid UUID format', async () => {
+        mockRequest.body = { userIds: ['not-a-uuid'] }
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        expect(mockReply.code).toHaveBeenCalledWith(500)
+        expect(mockReply.send).toHaveBeenCalledWith(
+          expect.objectContaining({
+            success: false,
+            error: expect.stringContaining('Invalid UUIDv7 format'),
+          })
+        )
+      })
+
+      it('should handle UUIDv4 instead of UUIDv7', async () => {
+        const uuidv4 = '550e8400-e29b-41d4-a716-446655440000'
+        mockRequest.body = { userIds: [uuidv4] }
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        expect(mockReply.code).toHaveBeenCalledWith(500)
+        expect(mockReply.send).toHaveBeenCalledWith(
+          expect.objectContaining({
+            success: false,
+            error: expect.stringContaining('Invalid UUIDv7 format'),
+          })
+        )
+      })
+
+      it('should handle empty userIds array', async () => {
+        mockRequest.body = { userIds: [] }
+        vi.mocked(mockDeleteUsersUseCase.execute).mockResolvedValue(true)
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        expect(mockDeleteUsersUseCase.execute).toHaveBeenCalledWith([], expect.any(Object))
+        expect(mockReply.code).toHaveBeenCalledWith(200)
+      })
+    })
+
+    describe('use case errors', () => {
+      it('should handle database errors from use case', async () => {
+        mockRequest.body = { userIds: [uuidv7()] }
+        const dbError = new Error('Database connection failed')
+        vi.mocked(mockDeleteUsersUseCase.execute).mockRejectedValue(dbError)
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        expect(mockReply.code).toHaveBeenCalledWith(500)
+        expect(mockReply.send).toHaveBeenCalledWith({
+          success: false,
+          error: 'Database connection failed',
+        })
+      })
+
+      it('should handle BaseException errors with status code', async () => {
+        mockRequest.body = { userIds: [uuidv7()] }
+        const validationError = new ValidationException('Validation failed')
+        vi.mocked(mockDeleteUsersUseCase.execute).mockRejectedValue(validationError)
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        expect(mockReply.code).toHaveBeenCalledWith(400)
+        expect(mockReply.send).toHaveBeenCalledWith({
+          success: false,
+          error: 'Validation failed',
+        })
+      })
+
+      it('should use default error message for errors without message', async () => {
+        mockRequest.body = { userIds: [uuidv7()] }
+        const errorWithoutMessage = { name: 'Error' } as Error
+        vi.mocked(mockDeleteUsersUseCase.execute).mockRejectedValue(errorWithoutMessage)
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        expect(mockReply.send).toHaveBeenCalledWith({
+          success: false,
+          error: 'An unexpected error occurred',
+        })
+      })
+
+      it('should return 500 for generic errors', async () => {
+        mockRequest.body = { userIds: [uuidv7()] }
+        const genericError = new Error('Something went wrong')
+        vi.mocked(mockDeleteUsersUseCase.execute).mockRejectedValue(genericError)
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        expect(mockReply.code).toHaveBeenCalledWith(500)
+      })
+
+      it('should not call reply.send twice on error', async () => {
+        mockRequest.body = { userIds: [uuidv7()] }
+        vi.mocked(mockDeleteUsersUseCase.execute).mockRejectedValue(new Error('Test error'))
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        expect(mockReply.send).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    describe('edge cases', () => {
+      it('should handle duplicate user IDs', async () => {
+        const userId = uuidv7()
+        mockRequest.body = { userIds: [userId, userId, userId] }
+        vi.mocked(mockDeleteUsersUseCase.execute).mockResolvedValue(true)
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        expect(mockDeleteUsersUseCase.execute).toHaveBeenCalled()
+        expect(mockReply.code).toHaveBeenCalledWith(200)
+      })
+
+      it('should handle large batch of user IDs', async () => {
+        const userIds = Array.from({ length: 100 }, () => uuidv7())
+        mockRequest.body = { userIds }
+        vi.mocked(mockDeleteUsersUseCase.execute).mockResolvedValue(true)
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        expect(mockDeleteUsersUseCase.execute).toHaveBeenCalled()
+        expect(mockReply.code).toHaveBeenCalledWith(200)
+      })
+
+      it('should handle IPv6 addresses', async () => {
+        mockRequest.body = { userIds: [uuidv7()] }
+        Object.assign(mockRequest, { ip: '2001:0db8:85a3:0000:0000:8a2e:0370:7334' })
+        vi.mocked(mockDeleteUsersUseCase.execute).mockResolvedValue(true)
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        expect(mockDeleteUsersUseCase.execute).toHaveBeenCalledWith(
+          expect.any(Array),
+          expect.objectContaining({
+            ipAddress: '2001:0db8:85a3:0000:0000:8a2e:0370:7334',
+          })
+        )
+      })
+
+      it('should handle very long user agent strings', async () => {
+        mockRequest.body = { userIds: [uuidv7()] }
+        const longUserAgent = 'A'.repeat(500)
+        mockRequest.headers = { 'user-agent': longUserAgent }
+        vi.mocked(mockDeleteUsersUseCase.execute).mockResolvedValue(true)
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        expect(mockDeleteUsersUseCase.execute).toHaveBeenCalledWith(
+          expect.any(Array),
+          expect.objectContaining({
+            userAgent: longUserAgent,
+          })
+        )
+      })
+    })
+
+    describe('response format', () => {
+      it('should return consistent success response structure', async () => {
+        mockRequest.body = { userIds: [uuidv7()] }
+        vi.mocked(mockDeleteUsersUseCase.execute).mockResolvedValue(true)
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        expect(mockReply.send).toHaveBeenCalledWith({
+          success: true,
+          data: expect.any(String),
+        })
+      })
+
+      it('should return consistent error response structure', async () => {
+        mockRequest.body = { userIds: [uuidv7()] }
+        vi.mocked(mockDeleteUsersUseCase.execute).mockRejectedValue(new Error('Test error'))
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        expect(mockReply.send).toHaveBeenCalledWith({
+          success: false,
+          error: expect.any(String),
+        })
+      })
+
+      it('should chain code and send methods', async () => {
+        mockRequest.body = { userIds: [uuidv7()] }
+        vi.mocked(mockDeleteUsersUseCase.execute).mockResolvedValue(true)
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        expect(mockReply.code).toHaveBeenCalledBefore(mockReply.send as any)
+      })
+    })
+
+    describe('integration', () => {
+      it('should complete full deletion workflow', async () => {
+        const userIds = [uuidv7(), uuidv7()]
+        mockRequest.body = { userIds }
+        Object.assign(mockRequest, { ip: '192.168.1.1' })
+        mockRequest.headers = { 'user-agent': 'Integration Test' }
+        vi.mocked(mockDeleteUsersUseCase.execute).mockResolvedValue(true)
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        // Verify DTO validation occurred (implicit by not throwing)
+        // Verify use case was called with correct data
+        expect(mockDeleteUsersUseCase.execute).toHaveBeenCalledWith(
+          expect.any(Array),
+          expect.objectContaining({
+            ipAddress: '192.168.1.1',
+            userAgent: 'Integration Test',
+          })
+        )
+        // Verify response was sent
+        expect(mockReply.code).toHaveBeenCalledWith(200)
+        expect(mockReply.send).toHaveBeenCalledWith({
+          success: true,
+          data: 'Users have been successfully deleted',
+        })
+      })
+
+      it('should handle end-to-end error scenario', async () => {
+        mockRequest.body = { userIds: ['invalid-uuid'] }
+
+        await controller.deleteUsers(mockRequest, mockReply)
+
+        // Should not call use case with invalid data
+        expect(mockDeleteUsersUseCase.execute).not.toHaveBeenCalled()
+        // Should return error response
+        expect(mockReply.code).toHaveBeenCalledWith(500)
+        expect(mockReply.send).toHaveBeenCalledWith(
+          expect.objectContaining({
+            success: false,
+            error: expect.stringContaining('Invalid UUIDv7 format'),
+          })
+        )
+      })
     })
   })
 })

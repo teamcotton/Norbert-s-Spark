@@ -42,6 +42,7 @@
     "@redocly/cli": "^2.14.3",
     "@stoplight/spectral-cli": "^6.15.0",
     "@vitest/coverage-v8": "^4.0.16",
+    "@vitest/eslint-plugin": "^1.6.6",
     "jsdom": "^27.4.0",
     "openapi-typescript": "^7.10.1",
     "redoc-cli": "^0.13.21",

@@ -71,8 +71,6 @@ This project follows API-first development:
 3. **Review** at `http://localhost:3000/docs`
 4. **Implement** following the spec
 
-See [API_FIRST_WORKFLOW.md](API_FIRST_WORKFLOW.md) for complete guide.
-
 #### HTTPS in Development
 
 To enable HTTPS in development:

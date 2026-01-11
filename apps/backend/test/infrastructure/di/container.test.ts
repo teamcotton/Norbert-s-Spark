@@ -236,7 +236,8 @@ describe('Container', () => {
 
       expect(UserController).toHaveBeenCalledWith(
         container.registerUserUseCase,
-        container.getAllUsersUseCase
+        container.getAllUsersUseCase,
+        container.deleteUsersUseCase
       )
     })
 
