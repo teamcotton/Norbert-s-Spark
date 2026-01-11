@@ -98,16 +98,14 @@ export class UserController {
         })
         return
       }
-
-      if (!result) {
-        reply.code(500).send({
-          success: false,
-          error: 'Failed to delete users',
-        })
-        return
-      }
     } catch (error) {
-      throw error
+      const err = error as Error
+      const statusCode = err instanceof BaseException ? err.statusCode : 500
+      const errorMessage = err?.message || 'An unexpected error occurred'
+      reply.code(statusCode).send({
+        success: false,
+        error: errorMessage,
+      })
     }
   }
   /**
