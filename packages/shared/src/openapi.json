@@ -181,7 +181,8 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "example": "01890c3a-6f2b-7c1a-b9e1-9b5a0d5f6e3a"
           }
         ],
         "responses": {
@@ -271,9 +272,9 @@
                       "format": "uuid"
                     },
                     "minItems": 1,
-                    "maxItems": 100,
+                    "maxItems": 10,
                     "description": "Array of user IDs to delete (1-100 items)",
-                    "example": ["123e4567-e89b-12d3-a456-426614174000"]
+                    "example": ["01890c3a-6f2b-7c1a-b9e1-9b5a0d5f6e3a"]
                   }
                 },
                 "required": ["userIds"]
@@ -645,7 +646,8 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "example": "01890c3a-6f2b-7c1a-b9e1-9b5a0d5f6e3a"
           }
         ],
         "responses": {
@@ -868,7 +870,7 @@
               "userId": {
                 "type": "string",
                 "format": "uuid",
-                "example": "550e8400-e29b-41d4-a716-446655440000",
+                "example": "01890c3a-6f2b-7c1a-b9e1-9b5a0d5f6e3a",
                 "description": "The authenticated user's unique identifier"
               },
               "email": {
@@ -983,7 +985,7 @@
               "userId": {
                 "type": "string",
                 "format": "uuid",
-                "example": "550e8400-e29b-41d4-a716-446655440000"
+                "example": "01890c3a-6f2b-7c1a-b9e1-9b5a0d5f6e3a"
               },
               "access_token": {
                 "type": "string",
@@ -1020,7 +1022,7 @@
             "items": {
               "type": "string",
               "format": "uuid",
-              "example": "019b659a-2ad2-7fd8-9f32-35624caef900"
+              "example": "01890c3a-6f2b-7c1a-b9e1-9b5a0d5f6e3a"
             }
           }
         }
@@ -1033,7 +1035,7 @@
           "id": {
             "type": "string",
             "format": "uuid",
-            "example": "019b659a-2ad2-7fd8-9f32-35624caef900"
+            "example": "01890c3a-6f2b-7c1a-b9e1-9b5a0d5f6e3a"
           },
           "messages": {
             "type": "array",
@@ -1087,7 +1089,7 @@
           "id": {
             "type": "string",
             "format": "uuid",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "example": "01890c3a-6f2b-7c1a-b9e1-9b5a0d5f6e3a"
           },
           "email": {
             "type": "string",
