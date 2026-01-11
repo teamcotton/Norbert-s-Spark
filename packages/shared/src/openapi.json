@@ -54,33 +54,6 @@
     }
   ],
   "paths": {
-    "/": {
-      "get": {
-        "summary": "API root endpoint",
-        "description": "Returns basic API information",
-        "operationId": "getRoot",
-        "tags": ["health"],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "example": "Norbert's Spark API"
-                    }
-                  },
-                  "required": ["message"]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/health": {
       "get": {
         "summary": "Health check",
