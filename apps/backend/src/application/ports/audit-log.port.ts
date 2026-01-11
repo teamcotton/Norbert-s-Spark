@@ -28,7 +28,7 @@ export interface AuditLogPort {
 export interface CreateAuditLogDTO {
   userId: string | null
   entityType: EntityType
-  entityId: string
+  entityId: string | null
   action: AuditAction
   changes?: AuditChanges
   ipAddress?: string

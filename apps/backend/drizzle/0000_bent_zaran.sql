@@ -19,7 +19,7 @@ CREATE TABLE "audit_log" (
 	"id" uuid PRIMARY KEY DEFAULT uuidv7() NOT NULL,
 	"user_id" uuid,
 	"entity_type" varchar(50) NOT NULL,
-	"entity_id" uuid NOT NULL,
+	"entity_id" uuid,
 	"action" varchar(50) NOT NULL,
 	"changes" jsonb,
 	"ip_address" "inet",

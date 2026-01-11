@@ -6,7 +6,7 @@ export class AuditLog {
     public readonly id: string,
     public readonly userId: string | null,
     public readonly entityType: EntityType,
-    public readonly entityId: string,
+    public readonly entityId: string | null,
     public readonly action: AuditAction,
     public readonly changes: AuditChanges | null,
     public readonly ipAddress: string | null,

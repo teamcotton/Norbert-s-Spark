@@ -150,7 +150,7 @@ export class LoginUserUseCase {
       await this.auditLog.log({
         userId: null,
         entityType: EntityType.USER,
-        entityId: 'unknown',
+        entityId: null,
         action: AuditAction.LOGIN_FAILED,
         changes: { reason: 'user_not_found' },
         ipAddress: auditContext.ipAddress,
@@ -175,9 +175,9 @@ export class LoginUserUseCase {
     if (!isPasswordValid) {
       // Log failed login attempt with user ID
       await this.auditLog.log({
-        userId: null,
+        userId: user.id,
         entityType: EntityType.USER,
-        entityId: 'unknown',
+        entityId: user.id,
         action: AuditAction.LOGIN_FAILED,
         changes: { reason: 'invalid_password' },
         ipAddress: auditContext.ipAddress,
