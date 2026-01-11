@@ -1,5 +1,17 @@
 'use client'
-import { Alert, Box, Button, Container, TextField, Typography } from '@mui/material'
+import {
+  Alert,
+  Box,
+  Button,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  TextField,
+  Typography,
+} from '@mui/material'
 import {
   DataGrid,
   type GridColDef,
@@ -143,60 +155,36 @@ export function AdminPage({
         </Box>
       )}
 
-      {showConfirmDialog && (
-        <Box
-          sx={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            bgcolor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999,
-          }}
-          onClick={onCancelDelete}
-        >
-          <Box
-            sx={{
-              bgcolor: 'background.paper',
-              p: 4,
-              borderRadius: 2,
-              maxWidth: 500,
-              boxShadow: 24,
-            }}
-            onClick={(e) => e.stopPropagation()}
+      <Dialog
+        open={showConfirmDialog}
+        onClose={onCancelDelete}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle id="delete-dialog-title">Confirm Delete</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            Are you sure you want to delete{' '}
+            {selectedUserIds.ids.size > 1 ? 'these users' : 'this user'}? All activity from{' '}
+            {selectedUserIds.ids.size > 1 ? 'these users' : 'this user'} will also be deleted.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="outlined" onClick={onCancelDelete} data-testid="cancel-delete-button">
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={onConfirmDelete}
+            data-testid="confirm-delete-button"
           >
-            <Typography variant="h6" gutterBottom>
-              Confirm Delete
-            </Typography>
-            <Typography variant="body1" sx={{ mb: 3 }}>
-              Are you sure you want to delete{' '}
-              {selectedUserIds.ids.size > 1 ? 'these users' : 'this user'}? All activity from{' '}
-              {selectedUserIds.ids.size > 1 ? 'these users' : 'this user'} will also be deleted.
-            </Typography>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-              <Button
-                variant="outlined"
-                onClick={onCancelDelete}
-                data-testid="cancel-delete-button"
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="contained"
-                color="error"
-                onClick={onConfirmDelete}
-                data-testid="confirm-delete-button"
-              >
-                Delete
-              </Button>
-            </Box>
-          </Box>
-        </Box>
-      )}
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {currentUserRole === 'moderator' && (
         <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: 'block' }}>
