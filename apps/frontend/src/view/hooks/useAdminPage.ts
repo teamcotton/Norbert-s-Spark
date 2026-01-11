@@ -11,11 +11,15 @@ interface UseAdminPageReturn {
   handleSearchChange: (query: string) => void
   handleSelectionChange: (ids: GridRowSelectionModel) => void
   handleDeleteUsers: () => void
+  handleDeleteClick: () => void
+  handleConfirmDelete: () => void
+  handleCancelDelete: () => void
   loading: boolean
   paginationModel: GridPaginationModel
   rowCount: number
   searchQuery: string
   selectedUserIds: GridRowSelectionModel
+  showConfirmDialog: boolean
   users: readonly User[]
 }
 
@@ -34,6 +38,7 @@ export function useAdminPage(): UseAdminPageReturn {
     type: 'include',
     ids: new Set(),
   })
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
   // TODO: Replace with actual user role from authentication
   const currentUserRole = 'admin' as 'admin' | 'moderator' | 'user'
@@ -56,6 +61,19 @@ export function useAdminPage(): UseAdminPageReturn {
     setSelectedUserIds(ids)
   }
 
+  const handleDeleteClick = () => {
+    setShowConfirmDialog(true)
+  }
+
+  const handleConfirmDelete = () => {
+    setShowConfirmDialog(false)
+    handleDeleteUsers()
+  }
+
+  const handleCancelDelete = () => {
+    setShowConfirmDialog(false)
+  }
+
   const handleDeleteUsers = () => {
     // TODO: Implement delete users functionality
     console.log('Delete users:', selectedUserIds)
@@ -68,11 +86,15 @@ export function useAdminPage(): UseAdminPageReturn {
     handleSearchChange,
     handleSelectionChange,
     handleDeleteUsers,
+    handleDeleteClick,
+    handleConfirmDelete,
+    handleCancelDelete,
     loading: isLoading,
     paginationModel,
     rowCount: total,
     searchQuery,
     selectedUserIds,
+    showConfirmDialog,
     users,
   }
 }
