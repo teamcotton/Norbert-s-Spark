@@ -56,7 +56,9 @@ test.describe('Admin Page - Delete Users', () => {
 
     // Verify the confirmation dialog appears
     await expect(page.getByText('Confirm Delete')).toBeVisible()
-    await expect(page.getByText(/are you sure you want to delete these users/i)).toBeVisible()
+    await expect(
+      page.getByText(/are you sure you want to delete this user\? all activity from this user/i)
+    ).toBeVisible()
 
     // Step 5: Click the cancel button
     const cancelButton = page.getByTestId('cancel-delete-button')
