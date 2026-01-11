@@ -253,7 +253,7 @@
       },
       "delete": {
         "summary": "Delete users",
-        "description": "Deletes multiple user accounts by their IDs",
+        "description": "Deletes multiple user accounts by their IDs. Requires authentication with admin role.",
         "operationId": "deleteUsers",
         "tags": ["users"],
         "security": [{ "bearerAuth": [] }],
