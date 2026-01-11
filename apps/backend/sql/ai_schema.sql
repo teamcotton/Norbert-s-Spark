@@ -145,7 +145,7 @@ CREATE TABLE audit_log (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     user_id UUID REFERENCES users(user_id) ON DELETE SET NULL,
     entity_type VARCHAR(50) NOT NULL,
-    entity_id UUID NOT NULL,
+    entity_id UUID,
     action VARCHAR(50) NOT NULL,
     changes JSONB,
     ip_address INET,

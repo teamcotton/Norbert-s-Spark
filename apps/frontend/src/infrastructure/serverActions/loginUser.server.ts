@@ -31,6 +31,7 @@ export async function loginUserAction(credentials: LoginDTO): Promise<LoginRespo
         password: credentials.password,
       },
       timeoutMs: 10000,
+      redirectOn401: false, // Don't redirect on 401 during login - handle error in UI
     })
 
     // Ensure the result includes a numeric HTTP-like status for downstream UI code

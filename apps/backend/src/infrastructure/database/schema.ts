@@ -266,7 +266,7 @@ export const auditLog = pgTable(
       onDelete: 'set null',
     }),
     entityType: varchar('entity_type', { length: 50 }).notNull(),
-    entityId: uuid('entity_id').notNull(),
+    entityId: uuid('entity_id'),
     action: varchar('action', { length: 50 }).notNull(),
     changes: jsonb('changes'),
     ipAddress: inet('ip_address'),

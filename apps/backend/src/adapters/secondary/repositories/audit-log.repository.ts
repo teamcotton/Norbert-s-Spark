@@ -18,7 +18,7 @@ export class AuditLogRepository implements AuditLogPort {
       await db.insert(auditLog).values({
         userId: redactedEntry.userId ?? null,
         entityType: redactedEntry.entityType,
-        entityId: redactedEntry.entityId,
+        entityId: redactedEntry.entityId ?? null,
         action: redactedEntry.action,
         changes: redactedEntry.changes ?? null,
         ipAddress: redactedEntry.ipAddress ?? null,
