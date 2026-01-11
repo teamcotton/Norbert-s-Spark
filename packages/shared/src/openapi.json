@@ -250,6 +250,78 @@
             }
           }
         }
+      },
+      "delete": {
+        "summary": "Delete users",
+        "description": "Deletes multiple user accounts by their IDs",
+        "operationId": "deleteUsers",
+        "tags": ["users"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "description": "Array of user IDs to delete",
+                    "example": ["123e4567-e89b-12d3-a456-426614174000"]
+                  }
+                },
+                "required": ["userIds"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Users successfully deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Users deleted successfully"
+                    }
+                  },
+                  "required": ["success", "message"]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid authentication token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/auth/login": {
