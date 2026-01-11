@@ -8,7 +8,7 @@ The aim of Norbert's Spark is to avoid tight coupling between any one technology
 
 The other difference between Norbert's Spark and other AI-SDK starter kits is that the backend is where the busines logic resides, with the frontend being a thin client. This is in contrast to many AI-SDK starter kits where the frontend contains most of the business logic and directly calls the AI provider APIs. In Norbert's Spark, the frontend calls the backend API, which in turn calls the AI provider APIs. This architecture enhances security, maintainability, and scalability.
 
-In this repo is a frontend the uses Next.js 16 with React 19 and Material UI. The purpose of this frontend is to provide a user interface for interacting with the AI tools CRM. In the frontend, users can manage their AI tools, view analytics, and configure settings.
+In this repo is a frontend that uses Next.js 16 with React 19 and Material UI. The purpose of this frontend is to provide a user interface for interacting with the AI tools CRM. In the frontend, users can manage their AI tools, view analytics, and configure settings.
 
 In the packages/shared is the OpenAPI spec: packages/shared/src/openapi.json. This is used in the frontend but it is intended that the user accesses the OpenAPI spec to build out their own frontend UI.
 
