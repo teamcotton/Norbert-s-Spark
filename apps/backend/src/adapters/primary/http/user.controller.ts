@@ -77,7 +77,6 @@ export class UserController {
 
   async deleteUsers(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
-      // Extract audit context from request
       // Convert HTTP request to DTO
       const dto = DeleteUsersDto.validate(request.body)
 
