@@ -10,7 +10,7 @@ The other difference between Norbert's Spark and other AI-SDK starter kits is th
 
 In this repo is a frontend the uses Next.js 16 with React 19 and Material UI. The purpose of this frontend is to provide a user interface for interacting with the AI tools CRM. In the frontend, users can manage their AI tools, view analytics, and configure settings.
 
-In the packages/shared is the OpenAPI spec: packages/shared/src/openapi.json. This is used in the frontend but it is intended tha the user accesses the OpenAPI spec to build out their own frontend UI.
+In the packages/shared is the OpenAPI spec: packages/shared/src/openapi.json. This is used in the frontend but it is intended that the user accesses the OpenAPI spec to build out their own frontend UI.
 
 ## Table of Contents
 
