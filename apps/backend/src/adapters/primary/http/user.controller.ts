@@ -62,6 +62,25 @@ export class UserController {
       },
       this.getUser.bind(this)
     )
+    app.delete(
+      '/users',
+      {
+        preHandler: [authMiddleware, requireRole(['admin'])],
+      },
+      this.deleteUsers.bind(this)
+    )
+  }
+
+  async deleteUsers(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+    try {
+      // Placeholder for delete users logic
+      reply.code(200).send({
+        success: true,
+        data: 'Delete users endpoint is not yet implemented.',
+      })
+    } catch (error) {
+      throw error
+    }
   }
   /**
    * Handles GET /users endpoint to retrieve all users with pagination

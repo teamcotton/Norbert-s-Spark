@@ -1,4 +1,4 @@
-import { eq, count } from 'drizzle-orm'
+import { eq, count, inArray } from 'drizzle-orm'
 import { db } from '../../../infrastructure/database/index.js'
 import { user } from '../../../infrastructure/database/schema.js'
 import type { DBUserSelect } from '../../../infrastructure/database/schema.js'
@@ -531,6 +531,16 @@ export class PostgresUserRepository implements UserRepositoryPort {
     }
   }
 
+  async deleteUsers(userIds: UserIdType[]): Promise<void> {
+    try {
+      if (userIds.length === 0) {
+        return
+      }
+      await db.delete(user).where(inArray(user.userId, userIds))
+    } catch (error) {
+      throw new DatabaseException('Failed to delete users', { userIds, error })
+    }
+  }
   /**
    * Transforms a database record into a User domain entity
    *

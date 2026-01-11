@@ -11,6 +11,7 @@ import { SaveChatUseCase } from '../../application/use-cases/save-chat.use-case.
 import { GetChatsByUserIdUseCase } from '../../application/use-cases/get-chats-by-userid.use-case.js'
 import { GetChatContentByChatIdUseCase } from '../../application/use-cases/get-chat-content-by-chat-id.use-case.js'
 import { RegisterUserWithProviderUseCase } from '../../application/use-cases/register-user-with-provider.use-case.js'
+import { DeleteUsersUseCase } from '../../application/use-cases/delete-users.use-case.js'
 
 // Adapters
 import { PostgresUserRepository } from '../../adapters/secondary/repositories/user.repository.js'
@@ -77,12 +78,12 @@ export class Container {
   public readonly getAllUsersUseCase: GetAllUsersUseCase
   public readonly loginUserUseCase: LoginUserUseCase
   public readonly getChatUseCase: GetChatUseCase
-  //  private readonly createChatUseCase: CreateChatUseCase
   private readonly appendChatUseCase: AppendedChatUseCase
   private readonly saveChatUseCase: SaveChatUseCase
   private readonly getChatsByUserIdUseCase: GetChatsByUserIdUseCase
   private readonly getChatContentByChatIdUseCase: GetChatContentByChatIdUseCase
   private readonly registerUserWithProviderUseCase: RegisterUserWithProviderUseCase
+  private readonly deleteUsersUseCase: DeleteUsersUseCase
 
   // Controllers
   public readonly userController: UserController
@@ -197,6 +198,11 @@ cd apps/backend/certs && mkcert -key-file key.pem -cert-file cert.pem \\
       this.emailService,
       this.logger,
       this.tokenGenerator,
+      this.auditLog
+    )
+    this.deleteUsersUseCase = new DeleteUsersUseCase(
+      this.userRepository,
+      this.logger,
       this.auditLog
     )
 
