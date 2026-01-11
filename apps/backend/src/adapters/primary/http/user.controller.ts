@@ -75,6 +75,77 @@ export class UserController {
     )
   }
 
+  /**
+   * Handles DELETE /users endpoint to delete multiple users in a batch operation.
+   *
+   * This endpoint performs batch user deletion with the following workflow:
+   * 1. Validates the request body to ensure all user IDs are valid UUIDv7 format
+   * 2. Extracts audit context (IP address and user agent) from the request
+   * 3. Converts user IDs to the appropriate domain type
+   * 4. Executes the deletion through the use case
+   * 5. Returns success response with confirmation message
+   *
+   * **Authentication**: Required (JWT token)
+   * **Authorization**: Admin role only
+   *
+   * @param request - Fastify request object containing user IDs in the body
+   * @param request.body - Request body with user IDs
+   * @param request.body.userIds - Array of user IDs (UUIDv7 strings) to delete
+   * @param request.ip - Client IP address for audit logging
+   * @param request.headers['user-agent'] - Client user agent for audit logging
+   * @param reply - Fastify reply object for sending the response
+   *
+   * @returns Promise<void> - Resolves when the response has been sent
+   *
+   * @throws {TypeException} Returns 500 if request body validation fails
+   * @throws {TypeException} Returns 500 if userIds field is missing or invalid
+   * @throws {TypeException} Returns 500 if any user ID is not a valid UUIDv7
+   * @throws {DatabaseException} Returns 500 if database deletion operation fails
+   * @throws {BaseException} Returns exception's statusCode for custom exceptions
+   * @throws {Error} Returns 500 for any unexpected errors
+   *
+   * @example
+   * ```typescript
+   * // Request body
+   * {
+   *   "userIds": [
+   *     "019b8589-7670-725e-b51b-2fcb23f9c593",
+   *     "019b8589-7670-725e-b51b-2fcb23f9c594"
+   *   ]
+   * }
+   *
+   * // Success response (200)
+   * {
+   *   "success": true,
+   *   "data": "Users have been successfully deleted"
+   * }
+   *
+   * // Error response (500)
+   * {
+   *   "success": false,
+   *   "error": "Invalid UUIDv7 format for userId: not-a-uuid"
+   * }
+   *
+   * // Error response (401) - Unauthorized
+   * {
+   *   "success": false,
+   *   "error": "Unauthorized"
+   * }
+   *
+   * // Error response (403) - Forbidden
+   * {
+   *   "success": false,
+   *   "error": "Forbidden: Insufficient permissions"
+   * }
+   * ```
+   *
+   * @remarks
+   * - Empty array is valid and will result in no deletions
+   * - Duplicate user IDs in the array are allowed
+   * - All deletions are performed in a single database transaction
+   * - Audit log is created after successful deletion
+   * - If audit logging fails, deletion is still considered successful
+   */
   async deleteUsers(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       // Convert HTTP request to DTO
