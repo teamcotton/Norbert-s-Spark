@@ -1,12 +1,20 @@
 'use client'
 
+import type { UIDataTypes, UIMessagePart, UITools } from 'ai'
 import { use } from 'react'
 
 import { createLogger } from '@/infrastructure/logging/logger.js'
 import { AIChatView } from '@/view/client-components/AIChatView.js'
 import { useAIChat } from '@/view/hooks/useAIChat.js'
+import { useFetchChat } from '@/view/hooks/useFetchChat.js'
 
 const logger = createLogger({ prefix: 'AIChatPage' })
+
+interface MessageType {
+  id: string
+  parts: UIMessagePart<UIDataTypes, UITools>[]
+  role: string
+}
 
 /**
  * AI Chat page following DDD architecture.
@@ -17,6 +25,13 @@ export default function AIChatPage({ params }: { params: Promise<{ id: string }>
   const { id } = use(params)
 
   logger.info('Rendering AIChatPage with ID:', id)
+
+  // Fetch the chat data from the backend
+  const { data: chatData, isError: isFetchError, isLoading: isFetchingChat } = useFetchChat(id)
+
+  logger.info('isLoading', isFetchingChat)
+  logger.info('isFetchError', isFetchError)
+  logger.info('Chat data:', chatData?.messages)
 
   const {
     chats,
@@ -37,7 +52,9 @@ export default function AIChatPage({ params }: { params: Promise<{ id: string }>
     messagesEndRef,
     mobileOpen,
     selectedFile,
-  } = useAIChat({ id })
+  } = useAIChat({ id, initialMessages: chatData?.messages })
+
+  logger.info('Rendering AIChatPage with messages:', messages)
 
   return (
     <AIChatView
