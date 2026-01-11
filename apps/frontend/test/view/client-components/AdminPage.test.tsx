@@ -573,6 +573,525 @@ describe('AdminPage', () => {
     })
   })
 
+  describe('Delete Button - Visibility and State', () => {
+    it('should show delete button for admin role', () => {
+      render(<AdminPage {...defaultProps} currentUserRole="admin" />)
+
+      const deleteButton = screen.getByTestId('delete-users-button')
+      expect(deleteButton).toBeInTheDocument()
+    })
+
+    it('should not show delete button for moderator role', () => {
+      render(<AdminPage {...defaultProps} currentUserRole="moderator" />)
+
+      const deleteButton = screen.queryByTestId('delete-users-button')
+      expect(deleteButton).not.toBeInTheDocument()
+    })
+
+    it('should not show delete button for user role', () => {
+      render(<AdminPage {...defaultProps} currentUserRole="user" />)
+
+      const deleteButton = screen.queryByTestId('delete-users-button')
+      expect(deleteButton).not.toBeInTheDocument()
+    })
+
+    it('should disable delete button when no users are selected', () => {
+      const props = {
+        ...defaultProps,
+        selectedUserIds: { type: 'include', ids: new Set() } as GridRowSelectionModel,
+      }
+      render(<AdminPage {...props} />)
+
+      const deleteButton = screen.getByTestId('delete-users-button')
+      expect(deleteButton).toBeDisabled()
+    })
+
+    it('should enable delete button when one user is selected', () => {
+      const props = {
+        ...defaultProps,
+        selectedUserIds: { type: 'include', ids: new Set(['1']) } as GridRowSelectionModel,
+      }
+      render(<AdminPage {...props} />)
+
+      const deleteButton = screen.getByTestId('delete-users-button')
+      expect(deleteButton).not.toBeDisabled()
+    })
+
+    it('should enable delete button when multiple users are selected', () => {
+      const props = {
+        ...defaultProps,
+        selectedUserIds: {
+          type: 'include',
+          ids: new Set(['1', '2', '3']),
+        } as GridRowSelectionModel,
+      }
+      render(<AdminPage {...props} />)
+
+      const deleteButton = screen.getByTestId('delete-users-button')
+      expect(deleteButton).not.toBeDisabled()
+    })
+
+    it('should display correct count in delete button text (0 users)', () => {
+      const props = {
+        ...defaultProps,
+        selectedUserIds: { type: 'include', ids: new Set() } as GridRowSelectionModel,
+      }
+      render(<AdminPage {...props} />)
+
+      const deleteButton = screen.getByTestId('delete-users-button')
+      expect(deleteButton).toHaveTextContent('Delete Users (0)')
+    })
+
+    it('should display correct count in delete button text (1 user)', () => {
+      const props = {
+        ...defaultProps,
+        selectedUserIds: { type: 'include', ids: new Set(['1']) } as GridRowSelectionModel,
+      }
+      render(<AdminPage {...props} />)
+
+      const deleteButton = screen.getByTestId('delete-users-button')
+      expect(deleteButton).toHaveTextContent('Delete Users (1)')
+    })
+
+    it('should display correct count in delete button text (3 users)', () => {
+      const props = {
+        ...defaultProps,
+        selectedUserIds: {
+          type: 'include',
+          ids: new Set(['1', '2', '3']),
+        } as GridRowSelectionModel,
+      }
+      render(<AdminPage {...props} />)
+
+      const deleteButton = screen.getByTestId('delete-users-button')
+      expect(deleteButton).toHaveTextContent('Delete Users (3)')
+    })
+
+    it('should update button text when selection changes', () => {
+      const { rerender } = render(
+        <AdminPage
+          {...defaultProps}
+          selectedUserIds={{ type: 'include', ids: new Set(['1']) } as GridRowSelectionModel}
+        />
+      )
+
+      let deleteButton = screen.getByTestId('delete-users-button')
+      expect(deleteButton).toHaveTextContent('Delete Users (1)')
+
+      rerender(
+        <AdminPage
+          {...defaultProps}
+          selectedUserIds={{ type: 'include', ids: new Set(['1', '2']) } as GridRowSelectionModel}
+        />
+      )
+
+      deleteButton = screen.getByTestId('delete-users-button')
+      expect(deleteButton).toHaveTextContent('Delete Users (2)')
+    })
+  })
+
+  describe('Delete Button - Click Behavior', () => {
+    it('should show confirmation dialog when delete button is clicked', () => {
+      const props = {
+        ...defaultProps,
+        selectedUserIds: { type: 'include', ids: new Set(['1']) } as GridRowSelectionModel,
+      }
+      render(<AdminPage {...props} />)
+
+      const deleteButton = screen.getByTestId('delete-users-button')
+      fireEvent.click(deleteButton)
+
+      expect(screen.getByText('Confirm Delete')).toBeInTheDocument()
+    })
+
+    it('should not show confirmation dialog initially', () => {
+      render(<AdminPage {...defaultProps} />)
+
+      expect(screen.queryByText('Confirm Delete')).not.toBeInTheDocument()
+    })
+
+    it('should not call onDeleteUsers immediately when delete button is clicked', () => {
+      const props = {
+        ...defaultProps,
+        selectedUserIds: { type: 'include', ids: new Set(['1']) } as GridRowSelectionModel,
+      }
+      render(<AdminPage {...props} />)
+
+      const deleteButton = screen.getByTestId('delete-users-button')
+      fireEvent.click(deleteButton)
+
+      expect(mockOnDeleteUsers).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('Confirmation Dialog - Rendering', () => {
+    it('should display confirmation dialog title', () => {
+      const props = {
+        ...defaultProps,
+        selectedUserIds: { type: 'include', ids: new Set(['1']) } as GridRowSelectionModel,
+      }
+      render(<AdminPage {...props} />)
+
+      const deleteButton = screen.getByTestId('delete-users-button')
+      fireEvent.click(deleteButton)
+
+      expect(screen.getByText('Confirm Delete')).toBeInTheDocument()
+    })
+
+    it('should display confirmation dialog message', () => {
+      const props = {
+        ...defaultProps,
+        selectedUserIds: { type: 'include', ids: new Set(['1']) } as GridRowSelectionModel,
+      }
+      render(<AdminPage {...props} />)
+
+      const deleteButton = screen.getByTestId('delete-users-button')
+      fireEvent.click(deleteButton)
+
+      expect(
+        screen.getByText(
+          /are you sure you want to delete these users\? all activity from this user will also be deleted\./i
+        )
+      ).toBeInTheDocument()
+    })
+
+    it('should display cancel button in dialog', () => {
+      const props = {
+        ...defaultProps,
+        selectedUserIds: { type: 'include', ids: new Set(['1']) } as GridRowSelectionModel,
+      }
+      render(<AdminPage {...props} />)
+
+      const deleteButton = screen.getByTestId('delete-users-button')
+      fireEvent.click(deleteButton)
+
+      const cancelButton = screen.getByTestId('cancel-delete-button')
+      expect(cancelButton).toBeInTheDocument()
+      expect(cancelButton).toHaveTextContent('Cancel')
+    })
+
+    it('should display confirm delete button in dialog', () => {
+      const props = {
+        ...defaultProps,
+        selectedUserIds: { type: 'include', ids: new Set(['1']) } as GridRowSelectionModel,
+      }
+      render(<AdminPage {...props} />)
+
+      const deleteButton = screen.getByTestId('delete-users-button')
+      fireEvent.click(deleteButton)
+
+      const confirmButton = screen.getByTestId('confirm-delete-button')
+      expect(confirmButton).toBeInTheDocument()
+      expect(confirmButton).toHaveTextContent('Delete')
+    })
+
+    it('should render dialog with proper z-index for overlay', () => {
+      const props = {
+        ...defaultProps,
+        selectedUserIds: { type: 'include', ids: new Set(['1']) } as GridRowSelectionModel,
+      }
+      render(<AdminPage {...props} />)
+
+      const deleteButton = screen.getByTestId('delete-users-button')
+      fireEvent.click(deleteButton)
+
+      // The backdrop should be rendered
+      const backdrop = screen.getByText('Confirm Delete').closest('div')
+        ?.parentElement?.parentElement
+      expect(backdrop).toBeInTheDocument()
+    })
+  })
+
+  describe('Confirmation Dialog - Cancel Behavior', () => {
+    it('should close dialog when cancel button is clicked', () => {
+      const props = {
+        ...defaultProps,
+        selectedUserIds: { type: 'include', ids: new Set(['1']) } as GridRowSelectionModel,
+      }
+      render(<AdminPage {...props} />)
+
+      const deleteButton = screen.getByTestId('delete-users-button')
+      fireEvent.click(deleteButton)
+
+      expect(screen.getByText('Confirm Delete')).toBeInTheDocument()
+
+      const cancelButton = screen.getByTestId('cancel-delete-button')
+      fireEvent.click(cancelButton)
+
+      expect(screen.queryByText('Confirm Delete')).not.toBeInTheDocument()
+    })
+
+    it('should not call onDeleteUsers when cancel is clicked', () => {
+      const props = {
+        ...defaultProps,
+        selectedUserIds: { type: 'include', ids: new Set(['1']) } as GridRowSelectionModel,
+      }
+      render(<AdminPage {...props} />)
+
+      const deleteButton = screen.getByTestId('delete-users-button')
+      fireEvent.click(deleteButton)
+
+      const cancelButton = screen.getByTestId('cancel-delete-button')
+      fireEvent.click(cancelButton)
+
+      expect(mockOnDeleteUsers).not.toHaveBeenCalled()
+    })
+
+    it('should render dialog overlay when opened', () => {
+      const props = {
+        ...defaultProps,
+        selectedUserIds: { type: 'include', ids: new Set(['1']) } as GridRowSelectionModel,
+      }
+      render(<AdminPage {...props} />)
+
+      // Dialog should not be visible initially
+      expect(screen.queryByText('Confirm Delete')).not.toBeInTheDocument()
+
+      const deleteButton = screen.getByTestId('delete-users-button')
+      fireEvent.click(deleteButton)
+
+      // Dialog should be visible after clicking delete button
+      expect(screen.getByText('Confirm Delete')).toBeInTheDocument()
+      expect(screen.getByText(/are you sure you want to delete these users/i)).toBeInTheDocument()
+    })
+
+    it('should not close dialog when clicking inside dialog content', () => {
+      const props = {
+        ...defaultProps,
+        selectedUserIds: { type: 'include', ids: new Set(['1']) } as GridRowSelectionModel,
+      }
+      render(<AdminPage {...props} />)
+
+      const deleteButton = screen.getByTestId('delete-users-button')
+      fireEvent.click(deleteButton)
+
+      expect(screen.getByText('Confirm Delete')).toBeInTheDocument()
+
+      // Click inside the dialog content
+      const dialogContent = screen.getByText('Confirm Delete').closest('div')
+      if (dialogContent) {
+        fireEvent.click(dialogContent)
+      }
+
+      // Dialog should still be visible
+      expect(screen.getByText('Confirm Delete')).toBeInTheDocument()
+    })
+  })
+
+  describe('Confirmation Dialog - Confirm Behavior', () => {
+    it('should close dialog when confirm button is clicked', () => {
+      const props = {
+        ...defaultProps,
+        selectedUserIds: { type: 'include', ids: new Set(['1']) } as GridRowSelectionModel,
+      }
+      render(<AdminPage {...props} />)
+
+      const deleteButton = screen.getByTestId('delete-users-button')
+      fireEvent.click(deleteButton)
+
+      expect(screen.getByText('Confirm Delete')).toBeInTheDocument()
+
+      const confirmButton = screen.getByTestId('confirm-delete-button')
+      fireEvent.click(confirmButton)
+
+      expect(screen.queryByText('Confirm Delete')).not.toBeInTheDocument()
+    })
+
+    it('should call onDeleteUsers when confirm button is clicked', () => {
+      const props = {
+        ...defaultProps,
+        selectedUserIds: { type: 'include', ids: new Set(['1']) } as GridRowSelectionModel,
+      }
+      render(<AdminPage {...props} />)
+
+      const deleteButton = screen.getByTestId('delete-users-button')
+      fireEvent.click(deleteButton)
+
+      const confirmButton = screen.getByTestId('confirm-delete-button')
+      fireEvent.click(confirmButton)
+
+      expect(mockOnDeleteUsers).toHaveBeenCalledTimes(1)
+    })
+
+    it('should call onDeleteUsers only once per confirmation', () => {
+      const props = {
+        ...defaultProps,
+        selectedUserIds: { type: 'include', ids: new Set(['1']) } as GridRowSelectionModel,
+      }
+      render(<AdminPage {...props} />)
+
+      const deleteButton = screen.getByTestId('delete-users-button')
+      fireEvent.click(deleteButton)
+
+      const confirmButton = screen.getByTestId('confirm-delete-button')
+      fireEvent.click(confirmButton)
+
+      // Try clicking again (dialog should be closed now)
+      expect(screen.queryByTestId('confirm-delete-button')).not.toBeInTheDocument()
+      expect(mockOnDeleteUsers).toHaveBeenCalledTimes(1)
+    })
+
+    it('should call onDeleteUsers for each confirmed delete action', () => {
+      const props = {
+        ...defaultProps,
+        selectedUserIds: { type: 'include', ids: new Set(['1']) } as GridRowSelectionModel,
+      }
+      const { rerender } = render(<AdminPage {...props} />)
+
+      // First delete
+      let deleteButton = screen.getByTestId('delete-users-button')
+      fireEvent.click(deleteButton)
+      let confirmButton = screen.getByTestId('confirm-delete-button')
+      fireEvent.click(confirmButton)
+
+      expect(mockOnDeleteUsers).toHaveBeenCalledTimes(1)
+
+      // Rerender to simulate state update
+      rerender(<AdminPage {...props} />)
+
+      // Second delete
+      deleteButton = screen.getByTestId('delete-users-button')
+      fireEvent.click(deleteButton)
+      confirmButton = screen.getByTestId('confirm-delete-button')
+      fireEvent.click(confirmButton)
+
+      expect(mockOnDeleteUsers).toHaveBeenCalledTimes(2)
+    })
+  })
+
+  describe('Delete Flow - Integration', () => {
+    it('should handle complete delete flow: click delete -> cancel', () => {
+      const props = {
+        ...defaultProps,
+        selectedUserIds: { type: 'include', ids: new Set(['1', '2']) } as GridRowSelectionModel,
+      }
+      render(<AdminPage {...props} />)
+
+      // Initial state
+      expect(screen.queryByText('Confirm Delete')).not.toBeInTheDocument()
+
+      // Click delete button
+      const deleteButton = screen.getByTestId('delete-users-button')
+      expect(deleteButton).toHaveTextContent('Delete Users (2)')
+      fireEvent.click(deleteButton)
+
+      // Dialog appears
+      expect(screen.getByText('Confirm Delete')).toBeInTheDocument()
+
+      // Cancel
+      const cancelButton = screen.getByTestId('cancel-delete-button')
+      fireEvent.click(cancelButton)
+
+      // Dialog closes, no deletion
+      expect(screen.queryByText('Confirm Delete')).not.toBeInTheDocument()
+      expect(mockOnDeleteUsers).not.toHaveBeenCalled()
+    })
+
+    it('should handle complete delete flow: click delete -> confirm', () => {
+      const props = {
+        ...defaultProps,
+        selectedUserIds: {
+          type: 'include',
+          ids: new Set(['1', '2', '3']),
+        } as GridRowSelectionModel,
+      }
+      render(<AdminPage {...props} />)
+
+      // Initial state
+      expect(screen.queryByText('Confirm Delete')).not.toBeInTheDocument()
+
+      // Click delete button
+      const deleteButton = screen.getByTestId('delete-users-button')
+      expect(deleteButton).toHaveTextContent('Delete Users (3)')
+      fireEvent.click(deleteButton)
+
+      // Dialog appears
+      expect(screen.getByText('Confirm Delete')).toBeInTheDocument()
+
+      // Confirm
+      const confirmButton = screen.getByTestId('confirm-delete-button')
+      fireEvent.click(confirmButton)
+
+      // Dialog closes, deletion triggered
+      expect(screen.queryByText('Confirm Delete')).not.toBeInTheDocument()
+      expect(mockOnDeleteUsers).toHaveBeenCalledTimes(1)
+    })
+
+    it('should handle multiple delete attempts with different outcomes', () => {
+      const props = {
+        ...defaultProps,
+        selectedUserIds: { type: 'include', ids: new Set(['1']) } as GridRowSelectionModel,
+      }
+      const { rerender } = render(<AdminPage {...props} />)
+
+      // First attempt - cancel
+      let deleteButton = screen.getByTestId('delete-users-button')
+      fireEvent.click(deleteButton)
+      let cancelButton = screen.getByTestId('cancel-delete-button')
+      fireEvent.click(cancelButton)
+      expect(mockOnDeleteUsers).not.toHaveBeenCalled()
+
+      // Rerender
+      rerender(<AdminPage {...props} />)
+
+      // Second attempt - confirm
+      deleteButton = screen.getByTestId('delete-users-button')
+      fireEvent.click(deleteButton)
+      const confirmButton = screen.getByTestId('confirm-delete-button')
+      fireEvent.click(confirmButton)
+      expect(mockOnDeleteUsers).toHaveBeenCalledTimes(1)
+
+      // Rerender
+      rerender(<AdminPage {...props} />)
+
+      // Third attempt - cancel
+      deleteButton = screen.getByTestId('delete-users-button')
+      fireEvent.click(deleteButton)
+      cancelButton = screen.getByTestId('cancel-delete-button')
+      fireEvent.click(cancelButton)
+      expect(mockOnDeleteUsers).toHaveBeenCalledTimes(1)
+    })
+
+    it('should allow delete button to be clicked again after canceling', () => {
+      const props = {
+        ...defaultProps,
+        selectedUserIds: { type: 'include', ids: new Set(['1']) } as GridRowSelectionModel,
+      }
+      render(<AdminPage {...props} />)
+
+      // First attempt - cancel
+      const deleteButton = screen.getByTestId('delete-users-button')
+      fireEvent.click(deleteButton)
+      expect(screen.getByText('Confirm Delete')).toBeInTheDocument()
+
+      const cancelButton = screen.getByTestId('cancel-delete-button')
+      fireEvent.click(cancelButton)
+      expect(screen.queryByText('Confirm Delete')).not.toBeInTheDocument()
+
+      // Second attempt - should work
+      fireEvent.click(deleteButton)
+      expect(screen.getByText('Confirm Delete')).toBeInTheDocument()
+    })
+
+    it('should maintain other UI state while dialog is open', () => {
+      const props = {
+        ...defaultProps,
+        searchQuery: 'admin',
+        selectedUserIds: { type: 'include', ids: new Set(['1']) } as GridRowSelectionModel,
+      }
+      render(<AdminPage {...props} />)
+
+      // Open dialog
+      const deleteButton = screen.getByTestId('delete-users-button')
+      fireEvent.click(deleteButton)
+
+      // Check that other UI elements are still present
+      expect(screen.getByLabelText(/search users/i)).toBeInTheDocument()
+      expect(screen.getByText('Admin User')).toBeInTheDocument()
+      expect(screen.getByText('Confirm Delete')).toBeInTheDocument()
+    })
+  })
+
   describe('Client-Side Filtering Logic', () => {
     it('should filter based on exact name match', () => {
       const props = { ...defaultProps, searchQuery: 'Admin User' }
