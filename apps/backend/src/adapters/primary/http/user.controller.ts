@@ -92,7 +92,6 @@ export class UserController {
    * @param request.body - Request body with user IDs
    * @param request.body.userIds - Array of user IDs (UUIDv7 strings) to delete
    * @param request.ip - Client IP address for audit logging
-   * @param request.headers['user-agent'] - Client user agent for audit logging
    * @param reply - Fastify reply object for sending the response
    *
    * @returns Promise<void> - Resolves when the response has been sent
